@@ -43,12 +43,6 @@ public:
   //
   // This is the function that the priority queue will call to order all its elements.  
   bool operator()(QueueNode a, QueueNode b) {
-    if((b.pathCost+b.heuristicCost)==(a.pathCost+a.heuristicCost)) {
-      // need to look at which was added first 
-    }
-    if((b.pathCost+b.heuristicCost)>(a.pathCost+a.heuristicCost)) {
-      return false; //  b has higher cost, so a has higher priority
-    }
     return true;
   }
 

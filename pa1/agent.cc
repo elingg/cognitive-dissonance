@@ -99,9 +99,6 @@ void Agent::bestFirst() {
   solution.clear();
 
   // ADD YOUR SEARCH HERE
-  PriorityQueue pq; 
-  path.push_back(this->start);
-  pq.push(QueueNode(0,0,path));
 
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
