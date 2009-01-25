@@ -1,5 +1,8 @@
 #include "agent.hh"
-
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <set>
 
 /////////
 //Agent//
@@ -18,6 +21,8 @@ void Agent::init(RobotConfig c, int numPoints) {
   this->cs = c;
   this->solution.clear();
   this->points=cs.getPoints(numPoints);
+  this->points.push_back(this->goal);
+  this->points.push_back(this->start); // note start node's index is size-1
 }
 
 // Accessors
@@ -83,22 +88,128 @@ std::vector<Point> Agent::getPoints() { return points; }
 // connecting p1 and p2 in free space.  Use this to construct your
 // roadmap.
 
-
 // Best First Search
 // -----------------
 // The best first seach checks the node on the fringe that is the 
 // closest to the goal.  It is ok if this node is farther from the 
 // goal than the current point.
 
+void printPath(std::list<Point>& path) {
+  for(std::list<Point>::iterator it=path.begin(); it!=path.end(); ++it) {
+    it->print(); std::cerr << std::endl;
+  }
+}
+
+void printNode(QueueNode& n) {
+  std::cerr << "Point: " << n.pointIndex << ", cost: " << n.heuristicCost << ", order: " << n.orderNumber << endl;
+  std::cerr << "Path: "; printPath(n.path); std::cerr << std::endl;  
+}
 
 void Agent::bestFirst() {
+  BestFirstAlgo algo;
+  genericAlgo(algo); 
+}
+
+void Agent::genericAlgo(Algo& algo) {
   int nodesChecked=0;
   bool pathFound=false;
   std::list<Point> path;
 
   solution.clear();
-
+  
   // ADD YOUR SEARCH HERE
+  
+  // std::cerr << "Start: "; this->start.print(); std::cerr << std::endl;
+  // std::cerr << "Goal: "; this->goal.print(); std::cerr << std::endl;
+  // for(size_t i=0; i<this->points.size(); ++i) {
+    // std::cerr << "[" << i << "]: ";
+    // this->points[i].print();
+    // std::cerr << std::endl;
+  // }  
+  // create road map...
+  std::map<size_t, std::set<size_t> > roadMap;
+  for(size_t i=0; i<this->points.size(); ++i) {
+    roadMap[i] = std::set<size_t>();
+  }
+  //  std::cerr << "Neighbors:\n";
+  for(size_t i=0; i<this->points.size(); ++i) {
+    // std::cerr << "[" << i << "]: [";
+    std::set<size_t>& neighbors = roadMap[i];
+    for(size_t j=0; j<this->points.size(); ++j) {
+      if(i==j) continue; 
+      // skip if already neighbor, distance computation may take time... 
+      if(neighbors.find(j)==neighbors.end()) {  // if not neighbor, check and add....
+        if(this->cs.checkLine(this->points[i],this->points[j])) { // check
+          neighbors.insert(j); // add
+          roadMap[j].insert(i); // mutual neighbors, so update.
+        }
+      }
+    }
+    // for(std::set<size_t>::const_iterator nit=neighbors.begin();
+    //    nit!=neighbors.end(); ++nit) {
+      //std::cerr << *nit << " (" << this->points[*nit].distanceTo(this->goal) << "), ";
+    // }
+    // std::cerr << "]" << std::endl; 
+  }
+  std::set<size_t> expandedNodes;
+       
+  // add initial start node...
+  // (note convention: all paths include the point as well, so end of path is the point)
+  PriorityQueue pq; 
+  path.push_back(this->start);
+  int order=0;
+  // note we added the start node to the vector of points in init and so the index of it is the end
+  // of the vector...
+  QueueNode startNode(algo.getPathCost(),
+           algo.getHeuristicCost(*this,this->start),
+           path,this->points.size()-1,order++);
+  //std::cerr << "Adding start node:\n";
+  //printNode(startNode);
+  pq.push(startNode);
+  // .. added initial start node.  
+  
+  while(!pq.empty()) {
+    QueueNode currNode = pq.top();
+    pq.pop();
+    if(expandedNodes.find(currNode.pointIndex)!=expandedNodes.end()) {
+      continue;
+    }
+    nodesChecked++;
+    size_t pointIndex = currNode.pointIndex;
+    Point currPoint = currNode.path.back(); 
+    // basic sanity check...
+    if(this->points[pointIndex]!=currPoint) {
+      // std::cerr << "Last point in path and point-index don't match\n";
+      exit(-1);
+    }
+    expandedNodes.insert(currNode.pointIndex);
+    // std::cerr << "Expanding [" << pointIndex << "]: "; currPoint.print(); std::cerr << ", cost: " << currNode.heuristicCost << std::endl;
+    if(currPoint == this->goal) {
+      // std::cerr << "Found goal: "; currPoint.print(); std::cerr << std::endl;
+      pathFound = true;
+      path = currNode.path;
+      break;
+    }
+    // else go through neighbors...
+    std::set<size_t>& neighbors = roadMap[pointIndex];
+    for(std::set<size_t>::iterator nit=neighbors.begin();
+        nit!=neighbors.end(); ++nit) {
+      // if point not already in path to currPoint...
+      Point& pt = this->points[*nit];
+      // std::cerr << "\tExamining: " << *nit << std::endl;
+      if(std::find(currNode.path.begin(),currNode.path.end(),pt)!=
+          currNode.path.end()) {
+        // std::cerr << "\t\tPoint already in path, skipping\n";
+        continue;
+      }
+      std::list<Point> npath = currNode.path;
+      npath.push_back(pt); 
+      QueueNode newNode(0,pt.distanceTo(this->goal),npath,*nit,order++);
+      // std::cerr << "\tAdding node: \n";
+      //printNode(newNode);
+      pq.push(newNode);
+    }
+  }
 
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
