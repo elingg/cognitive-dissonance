@@ -161,7 +161,7 @@ void Agent::genericAlgo(Algo& algo) {
   // note we added the start node to the vector of points in init and so the index of it is the end
   // of the vector...
   QueueNode startNode(algo.getPathCost(),
-           algo.getHeuristicCost(*this,this->start),
+           algo.getHeuristicCost(path,*this,this->start),
            path,this->points.size()-1,order++);
   //std::cerr << "Adding start node:\n";
   //printNode(startNode);
@@ -204,7 +204,8 @@ void Agent::genericAlgo(Algo& algo) {
       }
       std::list<Point> npath = currNode.path;
       npath.push_back(pt); 
-      QueueNode newNode(0,pt.distanceTo(this->goal),npath,*nit,order++);
+      //QueueNode newNode(0,pt.distanceTo(this->goal),npath,*nit,order++);
+       QueueNode newNode(0, algo.getHeuristicCost(npath,*this,pt), npath, *nit, order++);
       // std::cerr << "\tAdding node: \n";
       //printNode(newNode);
       pq.push(newNode);
@@ -236,6 +237,8 @@ void Agent::uniformCost() {
   solution.clear();
 
   // ADD YOUR SEARCH HERE
+   UniformCostAlgo algo;
+  genericAlgo(algo);
 
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
@@ -263,6 +266,9 @@ void Agent::aStar() {
   solution.clear();
 
   // ADD YOUR SEARCH HERE
+  AStarAlgo algo;
+  genericAlgo(algo);
+
 
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
@@ -285,10 +291,15 @@ void Agent::aStarInadmissible() {
   int nodesChecked=0;
   bool pathFound=false;
   std::list<Point> path;
+  AStarInadmissibleAlgo algo;
+  genericAlgo(algo);
+
+
 
   solution.clear();
 
   // ADD YOUR SEARCH HERE
+
 
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
