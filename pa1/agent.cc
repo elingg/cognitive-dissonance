@@ -3,7 +3,7 @@
 #include <iostream>
 #include <map>
 #include <set>
-
+#include <time.h>
 /////////
 //Agent//
 /////////
@@ -88,12 +88,6 @@ std::vector<Point> Agent::getPoints() { return points; }
 // connecting p1 and p2 in free space.  Use this to construct your
 // roadmap.
 
-// Best First Search
-// -----------------
-// The best first seach checks the node on the fringe that is the 
-// closest to the goal.  It is ok if this node is farther from the 
-// goal than the current point.
-
 void printPath(std::list<Point>& path) {
   for(std::list<Point>::iterator it=path.begin(); it!=path.end(); ++it) {
     it->print(); std::cerr << std::endl;
@@ -105,19 +99,13 @@ void printNode(QueueNode& n) {
   std::cerr << "Path: "; printPath(n.path); std::cerr << std::endl;  
 }
 
-void Agent::bestFirst() {
-  BestFirstAlgo algo;
-  genericAlgo(algo); 
-}
-
 void Agent::genericAlgo(Algo& algo) {
+  time_t startTime = time(NULL);
   int nodesChecked=0;
   bool pathFound=false;
   std::list<Point> path;
 
   solution.clear();
-  
-  // ADD YOUR SEARCH HERE
   
   // std::cerr << "Start: "; this->start.print(); std::cerr << std::endl;
   // std::cerr << "Goal: "; this->goal.print(); std::cerr << std::endl;
@@ -212,15 +200,27 @@ void Agent::genericAlgo(Algo& algo) {
     }
   }
 
+  time_t endTime = time(NULL);
+  //std::cerr << "Time elapsed: " << difftime(endTime, startTime) << std::endl;
+
   if (pathFound) {
     printf("Found path after checking %d nodes\n",nodesChecked);
     solution=path;
     printResults();
-  }
-  else {
+  } else {
     printf("NO PATH FOUND. Checked %d nodes.\n",nodesChecked);
     solution.clear();
   }
+}
+
+// Best First Search
+// -----------------
+// The best first seach checks the node on the fringe that is the 
+// closest to the goal.  It is ok if this node is farther from the 
+// goal than the current point.
+void Agent::bestFirst() {
+  BestFirstAlgo algo;
+  genericAlgo(algo); 
 }
 
 // Uniform Cost Search
@@ -230,25 +230,8 @@ void Agent::genericAlgo(Algo& algo) {
 // see how far this node is from its goal.
 
 void Agent::uniformCost() {
-  int nodesChecked=0;
-  bool pathFound=false;
-  std::list<Point> path;
-
-  solution.clear();
-
-  // ADD YOUR SEARCH HERE
-   UniformCostAlgo algo;
+  UniformCostAlgo algo;
   genericAlgo(algo);
-
-  if (pathFound) {
-    printf("Found path after checking %d nodes\n",nodesChecked);
-    solution=path;
-    printResults();
-  }
-  else {
-    printf("NO PATH FOUND. Checked %d nodes.\n",nodesChecked);
-    solution.clear();
-  }
 }
 
 // A-star
@@ -259,26 +242,8 @@ void Agent::uniformCost() {
 // Euclidean distance from the current node to the goal node.
 
 void Agent::aStar() {
-  int nodesChecked=0;
-  bool pathFound=false;
-  std::list<Point> path;
-
-  solution.clear();
-
-  // ADD YOUR SEARCH HERE
   AStarAlgo algo;
   genericAlgo(algo);
-
-
-  if (pathFound) {
-    printf("Found path after checking %d nodes\n",nodesChecked);
-    solution=path;
-    printResults();
-  }
-  else {
-    printf("NO PATH FOUND. Checked %d nodes.\n",nodesChecked);
-    solution.clear();
-  }
 }
 
 // A-star with an inadmissible heuristic
@@ -288,30 +253,9 @@ void Agent::aStar() {
 // to the goal, it uses "100*h".  
 
 void Agent::aStarInadmissible() {
-  int nodesChecked=0;
-  bool pathFound=false;
-  std::list<Point> path;
   AStarInadmissibleAlgo algo;
   genericAlgo(algo);
-
-
-
-  solution.clear();
-
-  // ADD YOUR SEARCH HERE
-
-
-  if (pathFound) {
-    printf("Found path after checking %d nodes\n",nodesChecked);
-    solution=path;
-    printResults();
-  }
-  else {
-    printf("NO PATH FOUND. Checked %d nodes.\n",nodesChecked);
-    solution.clear();
-  }
 }
-
 
 // DO NOT CHANGE THE CODE BENEATH HERE
 
