@@ -9,6 +9,8 @@
 #include "robotconfig.hh"
 #include "priorityqueue.hh"
 
+#include <iostream>
+
 
 using namespace std;
 
@@ -72,16 +74,85 @@ class Algo {
 public: 
   virtual ~Algo() {}; 
   virtual float getPathCost() = 0; 
-  virtual float getHeuristicCost(Agent& agent, Point& p) = 0;   
+  virtual float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) = 0;   
 }; 
  
 class BestFirstAlgo : public Algo { 
 public: 
   float getPathCost() { return 0; } 
-  float getHeuristicCost(Agent& agent, Point& p) { 
+  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) { 
           return p.distanceTo(agent.getGoal()); 
   } 
 }; 
+
+class UniformCostAlgo : public Algo {
+public:
+  float getPathCost() { return 0; }
+  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+
+
+      Point prev = *(path.begin()); 
+      list<Point>::iterator iter;
+      float distance= 0;
+ 
+       for(iter=path.begin(); iter!=path.end(); iter++)
+       {
+           
+	  distance += (*iter).distanceTo(prev);
+          prev = *iter;
+       }
+        
+	return distance;
+ }
+
+};
+
+class AStarAlgo : public Algo {
+public:
+  float getPathCost() { return 0; }
+  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+
+
+      Point prev = *(path.begin());
+      list<Point>::iterator iter;
+      float distance= 0;
+
+       for(iter=path.begin(); iter!=path.end(); iter++)
+       {
+
+          distance += (*iter).distanceTo(prev);
+          prev = *iter;
+       }
+
+	distance += p.distanceTo(agent.getGoal());
+        return distance;
+ }
+
+};
+
+
+class AStarInadmissibleAlgo : public Algo {
+public:
+  float getPathCost() { return 0; }
+  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+
+
+      Point prev = *(path.begin());
+      list<Point>::iterator iter;
+      float distance= 0;
+
+       for(iter=path.begin(); iter!=path.end(); iter++)
+       {
+
+          distance += (*iter).distanceTo(prev);
+          prev = *iter;
+       }
+
+        distance += (100 * p.distanceTo(agent.getGoal()));
+        return distance;
+ }
+
+};
 
 
 #endif //AGENT_HH
