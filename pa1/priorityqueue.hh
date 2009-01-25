@@ -18,8 +18,10 @@ using namespace std;
 class QueueNode {
 public:
   // Constructors and destructors
-  QueueNode(float pathCost, float heuristicCost, std::list<Point> path) : 
-    pathCost(pathCost), heuristicCost(heuristicCost), path(path) {};
+  QueueNode(float pathCost, float heuristicCost, std::list<Point> path, 
+            size_t pointIndex, int orderNumber) : 
+    pathCost(pathCost), heuristicCost(heuristicCost), path(path), 
+    pointIndex(pointIndex), orderNumber(orderNumber) {};
   QueueNode() {};
   ~QueueNode() {};
   
@@ -31,8 +33,15 @@ public:
 
   // A list of all points visited from the start node to the current node
   std::list<Point> path;
+   
+  // this is the index of the last point (index corresponding to an external point structure, but 
+  // crucial for efficiency)
+  size_t pointIndex;
 
-  // ******CHANGE THIS OPERATOR*******
+  // order-number (order in which it was inserted) for this node...
+  int orderNumber;
+
+   // ******CHANGE THIS OPERATOR*******
   // This should return true if "b" has a higher priority  than "a"
   // Ie, if we want "b" to be popped off the priority queue before "a", return true.
   // In the case of a tie, the priority queue should behave in a first-in
@@ -43,6 +52,18 @@ public:
   //
   // This is the function that the priority queue will call to order all its elements.  
   bool operator()(QueueNode a, QueueNode b) {
+    if((b.pathCost+b.heuristicCost)==(a.pathCost+a.heuristicCost)) {
+      // need to look at which was added first 
+      if(b.orderNumber>a.orderNumber) { // a was added first..
+        // std::cerr << "Breaking ties for nodes a: " << a.pointIndex << " (" << a.orderNumber << ")  and " << b.pointIndex << " (" << b.orderNumber<<")\n";
+        return false; // a gets popped out 
+      } 
+      // we assume b was added first...
+      return true;
+    }
+    if((b.pathCost+b.heuristicCost)>(a.pathCost+a.heuristicCost)) {
+      return false; //  b has higher cost, so a has higher priority
+    }
     return true;
   }
 

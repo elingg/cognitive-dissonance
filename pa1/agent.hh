@@ -19,6 +19,7 @@ using namespace std;
 // This is the class that performs all the search for the robotic arm.
 // You may add functions and variables as you wish as long as you keep
 // the ones that are currently listed.
+class Algo;
 
 class Agent {
 public: 
@@ -53,7 +54,10 @@ public:
   void aStar();
   void aStarInadmissible();
 
+  Point getGoal() { return goal; }
 private:
+
+  void genericAlgo(Algo& algo);
   
   // Private variables for the configuration space, the robot start position, 
   // the goal position, and the randomly generated points from the 
@@ -63,6 +67,22 @@ private:
   Point goal;
   std::vector<Point> points;
 };
+
+class Algo { 
+public: 
+  virtual ~Algo() {}; 
+  virtual float getPathCost() = 0; 
+  virtual float getHeuristicCost(Agent& agent, Point& p) = 0;   
+}; 
+ 
+class BestFirstAlgo : public Algo { 
+public: 
+  float getPathCost() { return 0; } 
+  float getHeuristicCost(Agent& agent, Point& p) { 
+          return p.distanceTo(agent.getGoal()); 
+  } 
+}; 
+
 
 #endif //AGENT_HH
 
