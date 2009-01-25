@@ -74,13 +74,13 @@ class Algo {
 public: 
   virtual ~Algo() {}; 
   virtual float getPathCost() = 0; 
-  virtual float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) = 0;   
+  virtual float getHeuristicCost(std::list<Point>& path, Agent& agent, Point& p) = 0;   
 }; 
  
 class BestFirstAlgo : public Algo { 
 public: 
   float getPathCost() { return 0; } 
-  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) { 
+  float getHeuristicCost(std::list<Point>& path, Agent& agent, Point& p) { 
           return p.distanceTo(agent.getGoal()); 
   } 
 }; 
@@ -88,7 +88,7 @@ public:
 class UniformCostAlgo : public Algo {
 public:
   float getPathCost() { return 0; }
-  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+  float getHeuristicCost(std::list<Point>& path, Agent& agent, Point& p) {
 
 
       Point prev = *(path.begin()); 
@@ -110,7 +110,7 @@ public:
 class AStarAlgo : public Algo {
 public:
   float getPathCost() { return 0; }
-  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+  float getHeuristicCost(std::list<Point>& path, Agent& agent, Point& p) {
 
 
       Point prev = *(path.begin());
@@ -134,7 +134,7 @@ public:
 class AStarInadmissibleAlgo : public Algo {
 public:
   float getPathCost() { return 0; }
-  float getHeuristicCost(std::list<Point> path, Agent& agent, Point& p) {
+  float getHeuristicCost(std::list<Point>& path, Agent& agent, Point& p) {
 
 
       Point prev = *(path.begin());
