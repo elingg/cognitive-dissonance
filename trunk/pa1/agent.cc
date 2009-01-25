@@ -3,7 +3,8 @@
 #include <iostream>
 #include <map>
 #include <set>
-#include <time.h>
+#include <ctime>
+//#include <time.h>
 /////////
 //Agent//
 /////////
@@ -100,7 +101,7 @@ void printNode(QueueNode& n) {
 }
 
 void Agent::genericAlgo(Algo& algo) {
-  time_t startTime = time(NULL);
+  //clock_t startTime = static_cast<double>(clock() * 1000 / CLOCKS_PER_SEC);
   int nodesChecked=0;
   bool pathFound=false;
   std::list<Point> path;
@@ -200,7 +201,7 @@ void Agent::genericAlgo(Algo& algo) {
     }
   }
 
-  time_t endTime = time(NULL);
+  //clock_t endTime = static_cast<double>(clock() * 1000 / CLOCKS_PER_SEC);
   //std::cerr << "Time elapsed: " << difftime(endTime, startTime) << std::endl;
 
   if (pathFound) {
