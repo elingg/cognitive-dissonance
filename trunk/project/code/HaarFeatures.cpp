@@ -197,7 +197,6 @@ HaarFeatures::~HaarFeatures() {}
 
 void HaarFeatures::getFeatureValues(vector<double>& feature_values,
                                     const IplImage* img) const {
-				    cout << features.size();
   for(vector<HaarFeature>::size_type i = 0; i < features.size(); i++) {
     
     double feature_value = computeFeatureValue(img, features[i]);
