@@ -19,6 +19,7 @@
 #include "highgui.h"
 
 #include "classifier.h"
+#include "HaarFeatures.h"
 
 using namespace std;
 
@@ -116,6 +117,7 @@ bool CClassifier::train(TTrainingFileList& fileList)
 
     // example code for loading and resizing image files--
     // you may find this useful for the milestone    
+    HaarFeatures haar;
     IplImage *image, *smallImage;
 
     cout << "Processing images..." << endl;
@@ -142,7 +144,8 @@ bool CClassifier::train(TTrainingFileList& fileList)
 	    cvResize(image, smallImage);
 
 	    // CS221 TO DO: extract features from image here
-
+            vector<double> values;
+            haar.getFeatureValues(values,image);
 	    // free memory
 	    cvReleaseImage(&image);
 	}
