@@ -1,6 +1,7 @@
 #include "DecisionTree.h"
 
-void DecisionTree::trainTree(const vector<TrainingExample*>& examples) {
+void DecisionTree::trainTree(const vector<TrainingExample*>& examples,
+ const vector<string>& feature_names) {
   // TODO
 }
 

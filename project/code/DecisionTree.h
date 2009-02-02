@@ -2,6 +2,7 @@
 
 #pragma once
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -36,7 +37,8 @@ public:
   DecisionTree() {}
   ~DecisionTree() {}
 
-  void trainTree(const vector<TrainingExample*>& examples);
+  void trainTree(const vector<TrainingExample*>& examples,
+                 const vector<string>& feature_names);
   bool predictClassLabel(const Example& example) const;
 private:
 
