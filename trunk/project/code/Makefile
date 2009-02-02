@@ -51,6 +51,11 @@ train: train.o $(OBJ)
 evaluate: evaluate.o $(OBJ)
 	$(CC) $(CCFLAGS) $(LDFLAGS) $(OBJ) evaluate.o -o $@ $(LIBS) 
 
+unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.cpp
+	$(CC) $(CCFLAGS) -c TestDecisionTree.cpp -o TestDecisionTree.o
+	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
+	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o -o unittests
+
 # define compilation rule for .o files
 %.o : %.cpp
 	$(CC) $(CCFLAGS) -c $< -o $@

@@ -36,7 +36,7 @@ public:
   DecisionTree() {}
   ~DecisionTree() {}
 
-  void trainTree(const vector<TrainingExample>& examples) const;
+  void trainTree(const vector<TrainingExample*>& examples);
   bool predictClassLabel(const Example& example) const;
 private:
 
