@@ -17,6 +17,8 @@ StudentAdmissionExample::StudentAdmissionExample(double gpa,
 
 bool TestDecisionTree::test() {
   DecisionTree dt;
+
+  // These tests are based on Exercise 4, Problem 5...
   vector<TrainingExample*> egs;
   // 1, 2, 3...
   egs.push_back(new StudentAdmissionExample(4.0,10,1,1,true));
@@ -37,8 +39,14 @@ bool TestDecisionTree::test() {
   egs.push_back(new StudentAdmissionExample(3.5,10,0,0,false));
   egs.push_back(new StudentAdmissionExample(3.5,30,1,0,false));
   egs.push_back(new StudentAdmissionExample(3.5,30,0,1,false));
+
+  vector<string> feature_names; 
+  feature_names.push_back("gpa");
+  feature_names.push_back("univ_tier");
+  feature_names.push_back("published");
+  feature_names.push_back("recommendation");
   
-  dt.trainTree(egs);
+  dt.trainTree(egs, feature_names);
   
   int wrong = 0;
   for(size_t i=0; i<egs.size(); ++i) {
