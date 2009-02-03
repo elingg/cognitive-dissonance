@@ -43,7 +43,7 @@ size_t chooseFeature(const vector<TrainingExample*>& examples,
   size_t positives = countPositiveClassLabels(examples);
   double ptot = (double)(positives)/(double)(examples.size());
   double mtot = examples.size()*H(ptot);
-  // cerr << "Positive: " << positives << ", ptot: " << ptot << ", mtot: " << mtot << endl;
+  // cerr << "Positive: " << positives << ", ptot: " << ptot << ", mtot: " << mtot <<", number of used indeces: " << used_feature_indeces.size() <<  endl;
   double max_gain = -DBL_MAX;
   size_t chosen_feature = -1; 
   // for each feature in feature_names...
@@ -163,7 +163,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     return T;
   }
   set<size_t> now_used_feature_indeces = used_feature_indeces;
-  now_used_feature_indeces.erase(chosen_feature_index);
+  now_used_feature_indeces.insert(chosen_feature_index);
   cerr << "Chosen feature ["<< chosen_feature_index<< "]: " << m_features[chosen_feature_index] << endl;
   // make this the root of the tree
   Node* T = new Node(this, chosen_feature_index);
