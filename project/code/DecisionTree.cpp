@@ -194,7 +194,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     cerr << "encountered leaf: no positive examples in class 'above'\n";
   } else {
     cerr << "Splitting right on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << above_examples.size() << " positive examples\n";
+    cerr << "\" using " << above_examples.size() << " 'above' examples\n";
     right_child = recursiveTrainTree(above_examples, 
                                      now_used_feature_indeces);
   }
@@ -219,7 +219,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     cerr << "encountered leaf: no negative examples in class 'below'\n";
   } else {
     cerr << "Splitting left on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << below_examples.size() << " negative examples\n";
+    cerr << "\" using " << below_examples.size() << " 'below' examples\n";
     left_child = recursiveTrainTree(below_examples,
                                     now_used_feature_indeces);
   }
