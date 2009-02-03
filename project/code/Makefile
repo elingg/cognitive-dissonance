@@ -51,7 +51,7 @@ train: train.o $(OBJ)
 evaluate: evaluate.o $(OBJ)
 	$(CC) $(CCFLAGS) $(LDFLAGS) $(OBJ) evaluate.o -o $@ $(LIBS) 
 
-unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.cpp
+unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.cpp $(OBJ)
 	$(CC) $(CCFLAGS) -c TestDecisionTree.cpp -o TestDecisionTree.o
 	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
 	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o -o unittests
@@ -68,5 +68,5 @@ unittestshaar: TestHaarFeatures.h TestHaarFeatures.cpp HaarFeatures.h HaarFeatur
 # clean
 .PHONY : clean
 clean:
-	rm -f *.o $(PROGS) core
+	rm -f *.o $(PROGS) core unittests
 
