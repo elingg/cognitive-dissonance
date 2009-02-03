@@ -44,7 +44,7 @@ void printImageDetails(const IplImage* img) {
  * Precondition: image should be 64x64
  */
 double computeFeatureValue(const IplImage* img, HaarFeature f) {
-
+  //printFeature(f);
   //Image should be 64x64 (because the Haar features are based on 64x64 images)
   assert(img->width == 64);
   assert(img->height == 64);
@@ -75,31 +75,31 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
   if(f.type == "H") {
     for(int i = 0; i < f.w; i++) {
       for(int j = 0; j < (f.h / 2); j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);  
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	value += s.val[0];
       }
     }
 
     for(int i = 0; i < f.w; i++) {
       for(int j = f.h / 2; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	value -= s.val[0];
       }
     }
-
+    //cerr << "z is : " << z << "Value is: " << value << endl;
   }
 
   //Vertical - adaptation of horizontal
   if(f.type == "V") {
     for(int i = 0; i < f.w / 2; i++) {
       for(int j = 0; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);  
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
         value += s.val[0];
       }
     }
     for(int i = f.w / 2; i < f.w; i++) {
       for(int j = 0; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
         value -= s.val[0];
       }
     }
@@ -117,7 +117,7 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     double black = 0.0;
     for(int i = 0; i < f.w / 2; i++) {
       for(int j = 0; j < f.h / 2; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
       }
     }
@@ -129,7 +129,7 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     double black = 0.0;
     for(int i = f.w / 2; i < f.w; i++) {
       for(int j = 0; j < f.h / 2; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
       }
     }
@@ -141,7 +141,7 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     double black = 0.0;
     for(int i = 0; i < f.w / 2; i++) {
       for(int j = f.h / 2; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
       }
     }
@@ -153,10 +153,12 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     double black = 0.0;
     for(int i = f.w / 2; i < f.w; i++) {
       for(int j = f.h / 2; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
+        //cerr << "[" << f.y + j << "," << f.x + i << "," << s.val[0] << "]";
       }
     }
+    //cerr << "z is: " << z << " black is: " << black << endl;
     value = z - 2 * black;
   }
 
@@ -165,13 +167,13 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     double black = 0.0;
     for(int i = 0; i < f.w / 2; i++) {
       for(int j = f.h / 2; j < f.h; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
       }
     }
     for(int i = f.w / 2; i < f.w; i++) {
       for(int j = 0; j < f.h / 2; j++) {
-        CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+        CvScalar s = cvGet2D(img, f.y + j, f.x + i);  
 	black += s.val[0];
       }
     }
@@ -180,8 +182,11 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
   }
 
   if(z != 0) {
+    //cerr << "abs(value): " << abs(value) << endl;
+    //cerr << "z: " << z << endl;
     return abs(value) / z; 
   } else {
+    //cerr << "Image was black." << endl;
     return 0;
   }
 }

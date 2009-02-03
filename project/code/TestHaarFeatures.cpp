@@ -10,8 +10,13 @@ using namespace std;
 
 string whiteImageFile("./testimages/white.jpg");
 string blackImageFile("./testimages/black.jpg");
-string haarVImageFile("./testimages/haar-v.jpg");
 string haarHImageFile("./testimages/haar-h.jpg");
+string haarVImageFile("./testimages/haar-v.jpg");
+string haarDImageFile("./testimages/haar-d.jpg");
+string haarTLImageFile("./testimages/haar-tl.jpg");
+string haarTRImageFile("./testimages/haar-tr.jpg");
+string haarBLImageFile("./testimages/haar-bl.jpg");
+string haarBRImageFile("./testimages/haar-br.jpg");
 
 int main(int argc, char** argv) {
   TestHaarFeatures::test();
@@ -90,13 +95,13 @@ void printFeatures(vector<double> values) {
 
 }
 
-bool testHaarVImage() {
-  vector<double> values = getFeatureValues(haarVImageFile);
-  if(values[50] != 1) {
-    cerr << "Problem with haar-v image" << endl;
+bool testHaar(string filename, int index) {
+  vector<double> values = getFeatureValues(filename);
+  if(values[index] != 1) {
+    cerr << "Problem with " << filename << endl;
+    printFeatures(values);
     return false;
   }
-  //printFeatures(values);
   return true;
 }
 
@@ -111,9 +116,20 @@ bool testVectorSize() {
 
 
 bool TestHaarFeatures::test() {
+
   testWhiteImage();
   testBlackImage();
-  testHaarVImage();
+  testHaar(haarHImageFile, 50);
+  testHaar(haarVImageFile, 51);
+  testHaar(haarDImageFile, 52);
+  testHaar(haarTLImageFile, 53);
+  testHaar(haarTRImageFile, 54);
+  testHaar(haarBLImageFile, 55);
+
+  //For BR, there seems to be some kind of floating point issue.
+  //If you print out the abs(value) and z values, they are both equal
+  testHaar(haarBRImageFile, 56);
   testVectorSize();
+
   return true;
 }

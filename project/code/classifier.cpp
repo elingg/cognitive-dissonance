@@ -145,7 +145,7 @@ bool CClassifier::train(TTrainingFileList& fileList)
 
 	    // CS221 TO DO: extract features from image here
             vector<double> values;
-            haar.getFeatureValues(values,image);
+            haar.getFeatureValues(values,smallImage);
 	    // free memory
 	    cvReleaseImage(&image);
 	}
