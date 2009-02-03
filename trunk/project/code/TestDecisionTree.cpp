@@ -16,8 +16,17 @@ StudentAdmissionExample::StudentAdmissionExample(double gpa,
 }
 
 bool TestDecisionTree::test() {
-  DecisionTree dt;
+  vector<string> feature_names; 
+  feature_names.push_back("gpa");
+  feature_names.push_back("univ_tier");
+  feature_names.push_back("published");
+  feature_names.push_back("recommendation");
 
+  cerr << "Creating DecisionTree:\n";
+
+  DecisionTree dt(feature_names);
+
+  cerr << "Creating TrainingExamples:\n";
   // These tests are based on Exercise 4, Problem 5...
   vector<TrainingExample*> egs;
   // 1, 2, 3...
@@ -40,14 +49,11 @@ bool TestDecisionTree::test() {
   egs.push_back(new StudentAdmissionExample(3.5,30,1,0,false));
   egs.push_back(new StudentAdmissionExample(3.5,30,0,1,false));
 
-  vector<string> feature_names; 
-  feature_names.push_back("gpa");
-  feature_names.push_back("univ_tier");
-  feature_names.push_back("published");
-  feature_names.push_back("recommendation");
+ 
+  cerr << "Training tree:\n";
+  dt.trainTree(egs);
   
-  dt.trainTree(egs, feature_names);
-  
+  cerr << "Predicting labels:\n";
   int wrong = 0;
   for(size_t i=0; i<egs.size(); ++i) {
     if(dt.predictClassLabel(*egs[i])!=egs[i]->getClassLabel()) {

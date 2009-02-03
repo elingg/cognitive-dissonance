@@ -20,7 +20,7 @@ public:
            double recommendation, // normal (0), good (1)
            bool classlabel); // N(negative)(0), P(positive)(1)
 
-  int    getNumberOfFeatures() const { 
+  size_t getNumberOfFeatures() const { 
             return m_featureValues.size(); 
           }
   bool   getClassLabel() const { 
