@@ -41,15 +41,25 @@ public:
   void trainTree(const vector<TrainingExample*>& examples);
   bool predictClassLabel(const Example& example) const;
   double getFeatureThreshold(size_t feature_index) const;
+  string getFeatureName(size_t feature_index) const; 
+  void printTree() const; 
 
   class Node {
   public:
     Node(const DecisionTree* tree, size_t feature_index); // internal node
     Node(const DecisionTree* tree, double probability); // leaf node
     ~Node();
+    
     void setRightChild(Node* right_child);
     void setLeftChild(Node* left_child);
+    const Node* getRightChild() const;
+    const Node* getLeftChild() const;
+
+    void printTree() const;
+
     bool predictClassLabel(const Example& example) const;
+    bool isLeaf() const;
+    double getLeafProbability() const; // only sane if isLeaf() is true.
   private:
     size_t m_feature_index;
     Node *m_left, *m_right;
