@@ -2,6 +2,7 @@
 #include "math.h"
 #include <cfloat>
 #include <iostream>
+#include "assert.h"
 
 double H(double p) {
   return -p*(log10(p)/log10(2)) - (1-p)*(log10(1-p)/log10(2));
