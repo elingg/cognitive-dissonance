@@ -56,6 +56,11 @@ unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.c
 	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
 	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o -o unittests
 
+unittestshaar: TestHaarFeatures.h TestHaarFeatures.cpp HaarFeatures.h HaarFeatures.cpp $(OBJ)
+	$(CC) $(CCFLAGS) -c TestHaarFeatures.cpp -o TestHaarFeatures.o
+	$(CC) $(CCFLAGS) -c HaarFeatures.cpp -o HaarFeatures.o 
+	$(CC) $(CCFLAGS) $(LDFLAGS) TestHaarFeatures.o HaarFeatures.o -o unittestshaar $(LIBS)
+
 # define compilation rule for .o files
 %.o : %.cpp
 	$(CC) $(CCFLAGS) -c $< -o $@

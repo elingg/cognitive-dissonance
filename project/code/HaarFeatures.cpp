@@ -30,10 +30,20 @@ void printFeature(HaarFeature f) {
 }
 
 /**
+ * For debugging purposes - prints out image details
+ */
+void printImageDetails(const IplImage* img) {
+  cout << "width: " << img->width;
+  cout << "height: " << img->height;
+}
+
+/**
  * Compute feature value based on image and Haar feature
  * Precondition: image should be 64x64
  */
 double computeFeatureValue(const IplImage* img, HaarFeature f) {
+  //printFeature(f);
+ 
   //TODO: Check image size to make sure it's 64x64
   
   //TODO: Use integral images for faster processing
@@ -51,11 +61,12 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
 
   double z = 0.0;  //normalizing constant
   for(int i = 0; i < f.w; i++) {
-    for(int j = 0; j <= f.h; j++) {
+    for(int j = 0; j < f.h; j++) {
       CvScalar s = cvGet2D(img, f.x + i, f.y + j);
       z += s.val[0];
     }
   }
+  //cerr << "z is " << z << endl;
 
   //Horizontal - calculation from pg. 9 of problem handout
   if(f.type == "H") {
@@ -161,6 +172,7 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
 	black += s.val[0];
       }
     }
+    //cerr << "D black is: " << black;
     value = z - 2 * black;
   }
 
@@ -197,6 +209,7 @@ HaarFeatures::~HaarFeatures() {}
 
 void HaarFeatures::getFeatureValues(vector<double>& feature_values,
                                     const IplImage* img) const {
+  //printImageDetails(img);
   for(vector<HaarFeature>::size_type i = 0; i < features.size(); i++) {
     
     double feature_value = computeFeatureValue(img, features[i]);
