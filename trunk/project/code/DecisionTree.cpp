@@ -95,6 +95,18 @@ DecisionTree::Node::~Node() {
   }
 }
 
+double DecisionTree::Node::getLeafProbability() const {
+  return m_probability;
+}
+
+bool DecisionTree::Node::isLeaf() const { 
+  if(m_left==0) { 
+    assert(m_right==0);
+    return true;
+  }
+  return false;
+}
+
 void DecisionTree::Node::setRightChild(Node* right_child) { 
   if(m_right) {
     delete m_right;
@@ -262,9 +274,48 @@ void DecisionTree::trainTree
   cerr << "Recursive train tree:\n";
   set<size_t> empty_used_features;
   m_root = recursiveTrainTree(examples,empty_used_features);
+  printTree();
 }
 
 bool DecisionTree::predictClassLabel(const Example& example) const {
   return m_root->predictClassLabel(example); 
 }
 
+const DecisionTree::Node* DecisionTree::Node::getLeftChild() const {
+  return m_left;
+}
+
+const DecisionTree::Node* DecisionTree::Node::getRightChild() const {
+  return m_right;
+}
+
+string DecisionTree::getFeatureName(size_t feature_index) const {
+  return m_features[feature_index];
+}
+
+void DecisionTree::Node::printTree() const {
+  cerr << "[";
+  if(isLeaf()) {
+    cerr << "LEAF: "<< m_probability<<" ";
+  } else {
+    cerr << m_tree->getFeatureName(m_feature_index);
+  }
+  if(!isLeaf()) {
+    cerr << "-> L: ";
+    getLeftChild()->printTree();
+    cerr << " ";
+  }
+  if(!isLeaf()) {
+    cerr << "-> R: ";
+    getRightChild()->printTree();
+    cerr << " ";
+  }
+  cerr << "]";
+}
+
+void DecisionTree::printTree() const {
+  cerr << endl;
+  m_root->printTree();
+  cerr << endl;
+}
+  
