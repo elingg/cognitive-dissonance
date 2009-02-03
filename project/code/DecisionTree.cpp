@@ -5,6 +5,10 @@
 #include "assert.h"
 
 double H(double p) {
+  if(p==0.0 || p==1.0) { 
+    return 0.0;
+  } 
+
   return -p*(log10(p)/log10(2)) - (1-p)*(log10(1-p)/log10(2));
 }
 
