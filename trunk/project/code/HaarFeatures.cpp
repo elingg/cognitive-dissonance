@@ -9,6 +9,8 @@
 #include "cxcore.h"
 #include "highgui.h"
 
+//TODO: Use C++ classes properly
+
 //Represents a single line in the haarfeatures.txt
 struct HaarFeature {
   int x;        //x position
@@ -176,33 +178,40 @@ double computeFeatureValue(const IplImage* img, HaarFeature f) {
     value = z - 2 * black;
   }
 
-  return abs(value) / z; 
+  if(z != 0) {
+    return abs(value) / z; 
+  } else {
+    return 0;
+  }
 }
 
 /**
  * Reads in the feature list and saves it
  */
 HaarFeatures::HaarFeatures() {
-  cerr << "Start: building haar features list" << endl;
-  ifstream input;
-  //TODO: Externalize this filename
-  input.open("haarfeatures.txt");
-  if(!input) {
-    cerr << "Error: unable to open haarfeatures.txt" << endl;
+  //TODO: This check shouldn't be necessary (I don't understand why I need it)
+  if(features.size() == 0) {
+    cerr << "Start: building haar features list" << endl;
+    ifstream input;
+    //TODO: Externalize this filename
+    input.open("haarfeatures.txt");
+    if(!input) {
+      cerr << "Error: unable to open haarfeatures.txt" << endl;
+    }
+    int x, y, w, h;
+    string type;
+    while(input >> x >> y >> w >> h >> type) {
+      HaarFeature feature;
+      feature.x = x;
+      feature.y = y;
+      feature.h = h;
+      feature.w = w;
+      feature.type = type;
+      features.push_back(feature);
+    }
+    input.close();
+    cerr << "End: finished building haar features list" << endl;
   }
-  int x, y, w, h;
-  string type;
-  while(input >> x >> y >> w >> h >> type) {
-    HaarFeature feature;
-    feature.x = x;
-    feature.y = y;
-    feature.h = h;
-    feature.w = w;
-    feature.type = type;
-    features.push_back(feature);
-  }
-  input.close();
-  cerr << "End: finished building haar features list" << endl;
 }
 
 HaarFeatures::~HaarFeatures() {}
@@ -215,6 +224,6 @@ void HaarFeatures::getFeatureValues(vector<double>& feature_values,
     double feature_value = computeFeatureValue(img, features[i]);
     feature_values.push_back(feature_value);
     //printFeature(features[i]);
-    //cerr << "Feature value: " << feature_value << endl;
+    //cerr << "Feature value [" << i << "]: " << feature_value << endl;
   }
 }
