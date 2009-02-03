@@ -54,14 +54,14 @@ bool TestDecisionTree::test() {
   dt.trainTree(egs);
   
   cerr << "Predicting labels:\n";
-  int wrong = 0;
+  int correct = egs.size();
   for(size_t i=0; i<egs.size(); ++i) {
     if(dt.predictClassLabel(*egs[i])!=egs[i]->getClassLabel()) {
       cerr << "No: " << i+1 << " predicted incorrectly\n";
-      wrong++;
+      correct--;
     }
   }
-  cerr << "Accuracy: " << (double)(wrong)*100/(double)(egs.size()) << "%\n";
+  cerr << "Accuracy: " << (double)(correct)*100/(double)(egs.size()) << "%\n";
   for(size_t i=0; i<egs.size(); ++i) {
     delete egs[i];
   }
