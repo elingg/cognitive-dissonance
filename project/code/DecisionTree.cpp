@@ -19,15 +19,15 @@ size_t countPositiveClassLabels(const vector<TrainingExample*>& examples) {
 }
 
 void splitExamplesByThreshold(
- vector<TrainingExample*>& positive_examples,
- vector<TrainingExample*>& negative_examples,
+ vector<TrainingExample*>& above_examples,
+ vector<TrainingExample*>& below_examples,
  const vector<TrainingExample*>& examples,
  size_t feature_index, double threshold) {
   for(size_t iex=0; iex<examples.size(); ++iex) {
     if(examples[iex]->getFeatureDoubleValue(feature_index)>threshold) {
-      positive_examples.push_back(examples[iex]);
+      above_examples.push_back(examples[iex]);
     } else {
-      negative_examples.push_back(examples[iex]);
+      below_examples.push_back(examples[iex]);
     }
   }
 }
@@ -49,20 +49,20 @@ size_t chooseFeature(const vector<TrainingExample*>& examples,
       cerr << "Feature " << ifeat << " used, skipping\n";
       continue;
     }
-    vector<TrainingExample*> positive_examples;
-    vector<TrainingExample*> negative_examples;
-    splitExamplesByThreshold(positive_examples,
-                             negative_examples,
+    vector<TrainingExample*> above_examples;
+    vector<TrainingExample*> below_examples;
+    splitExamplesByThreshold(above_examples,
+                             below_examples,
                              examples,
                              ifeat,
                              feature_thresholds[ifeat]);
     // get number of examples with positive class labels...
-    double pplus = countPositiveClassLabels(positive_examples)/
-                          (double)(positive_examples.size());
-    double mplus = positive_examples.size()*H(pplus);
-    double pminus = countPositiveClassLabels(negative_examples)/
-                          (double)(negative_examples.size());
-    double mminus = negative_examples.size()*H(pminus);
+    double pplus = countPositiveClassLabels(above_examples)/
+                          (double)(above_examples.size());
+    double mplus = above_examples.size()*H(pplus);
+    double pminus = countPositiveClassLabels(below_examples)/
+                          (double)(below_examples.size());
+    double mminus = below_examples.size()*H(pminus);
     double gain = mtot - (mplus + mminus);
     if(gain>max_gain) {
       max_gain = gain; 
@@ -144,7 +144,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     double pl = (double)(countPositiveClassLabels(examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
-    cerr << "encountered leaf\n";
+    cerr << "encountered leaf: features used up.\n";
     return T;
   }
  
@@ -155,7 +155,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     double pl = (double)(countPositiveClassLabels(examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
-    cerr << "encountered leaf\n";
+    cerr << "encountered leaf: invalid chosen_feature_index, all examples one or the other.\n";
     return T;
   }
   set<size_t> now_used_feature_indeces = used_feature_indeces;
@@ -164,59 +164,59 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   // make this the root of the tree
   Node* T = new Node(this, chosen_feature_index);
   // instead of for loop over values v of feature, we just have two...
-  vector<TrainingExample*> positive_examples;
-  vector<TrainingExample*> negative_examples;
-  splitExamplesByThreshold(positive_examples,
-                           negative_examples,
+  vector<TrainingExample*> above_examples;
+  vector<TrainingExample*> below_examples;
+  splitExamplesByThreshold(above_examples,
+                           below_examples,
                            examples,
                            chosen_feature_index,
                            m_feature_thresholds[chosen_feature_index]);
   Node* right_child=0;
-  size_t count_positive_class_labels_for_positive_examples = 
-                 countPositiveClassLabels(positive_examples);
-  if(positive_examples.size()==0) { // stop criteria 2... (use parents examples)...
-    double pl = (double)(count_positive_class_labels_for_positive_examples)/
+  size_t count_positive_class_labels_for_above_examples = 
+                 countPositiveClassLabels(above_examples);
+  if(above_examples.size()==0) { // stop criteria 2... (use parents examples)...
+    double pl = (double)(count_positive_class_labels_for_above_examples)/
                  (double)(examples.size());
     right_child = new Node(this,pl); // leaf
-    cerr << "encountered leaf\n";
-  } else if(count_positive_class_labels_for_positive_examples
-                  ==positive_examples.size()) {
+    cerr << "encountered leaf: no above examples\n";
+  } else if(count_positive_class_labels_for_above_examples
+                  ==above_examples.size()) {
     // stop criteria 1... (use probability 1)...
     right_child = new Node(this, 1.0); // leaf
-    cerr << "encountered leaf\n";
-  } else if(count_positive_class_labels_for_positive_examples==0) {
+    cerr << "encountered leaf: no negative examples in class 'above'\n";
+  } else if(count_positive_class_labels_for_above_examples==0) {
     // stop criteria 1... (use probability 0)...
     right_child = new Node(this, 0.0); // leaf
-    cerr << "encountered leaf\n";
+    cerr << "encountered leaf: no positive examples in class 'above'\n";
   } else {
     cerr << "Splitting right on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << positive_examples.size() << " positive examples\n";
-    right_child = recursiveTrainTree(positive_examples, 
+    cerr << "\" using " << above_examples.size() << " positive examples\n";
+    right_child = recursiveTrainTree(above_examples, 
                                      now_used_feature_indeces);
   }
   T->setRightChild(right_child);
  
   Node* left_child=0; 
-  size_t count_positive_class_labels_for_negative_examples = 
-                 countPositiveClassLabels(negative_examples);
-  if(negative_examples.size()==0) { // stop criteria 2... (use parents examples)...
-    double pl = (double)(count_positive_class_labels_for_negative_examples)/
+  size_t count_positive_class_labels_for_below_examples = 
+                 countPositiveClassLabels(below_examples);
+  if(below_examples.size()==0) { // stop criteria 2... (use parents examples)...
+    double pl = (double)(count_positive_class_labels_for_below_examples)/
                  (double)(examples.size());
     left_child = new Node(this,pl); // leaf
-    cerr << "encountered leaf\n";
-  } else if(count_positive_class_labels_for_negative_examples
-                  ==negative_examples.size()) {
+    cerr << "encountered leaf: no examples in class 'below'\n";
+  } else if(count_positive_class_labels_for_below_examples
+                  ==below_examples.size()) {
     // stop criteria 1... (use probability 1)...
     left_child = new Node(this, 1.0); // leaf
-    cerr << "encountered leaf\n";
-  } else if(count_positive_class_labels_for_negative_examples==0) {
+    cerr << "encountered leaf: no positive examples in class 'below'\n";
+  } else if(count_positive_class_labels_for_below_examples==0) {
     // stop criteria 1... (use probability 0)...
     left_child = new Node(this, 0.0); // leaf
-    cerr << "encountered leaf\n";
+    cerr << "encountered leaf: no negative examples in class 'below'\n";
   } else {
     cerr << "Splitting left on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << negative_examples.size() << " negative examples\n";
-    left_child = recursiveTrainTree(negative_examples,
+    cerr << "\" using " << below_examples.size() << " negative examples\n";
+    left_child = recursiveTrainTree(below_examples,
                                     now_used_feature_indeces);
   }
   T->setLeftChild(left_child);
