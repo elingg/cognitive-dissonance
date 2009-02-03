@@ -44,9 +44,10 @@ void printImageDetails(const IplImage* img) {
  * Precondition: image should be 64x64
  */
 double computeFeatureValue(const IplImage* img, HaarFeature f) {
-  //printFeature(f);
- 
-  //TODO: Check image size to make sure it's 64x64
+
+  //Image should be 64x64 (because the Haar features are based on 64x64 images)
+  assert(img->width == 64);
+  assert(img->height == 64);
   
   //TODO: Use integral images for faster processing
   /*
