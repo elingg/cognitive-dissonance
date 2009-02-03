@@ -3,6 +3,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <set>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ public:
   Example() {}
   virtual ~Example() {}
 
-  virtual int getNumberOfFeatures() const = 0;
+  virtual size_t getNumberOfFeatures() const = 0;
 
   // features could be any type, so if adding int/string features
   // provide other functions, for now just double... 
@@ -34,13 +35,33 @@ public:
 // classes for Examples (which could also be TrainingExamples)...
 class DecisionTree {
 public:
-  DecisionTree() {}
+  DecisionTree(const vector<string>& feature_names):m_features(feature_names) {}
   ~DecisionTree() {}
 
-  void trainTree(const vector<TrainingExample*>& examples,
-                 const vector<string>& feature_names);
+  void trainTree(const vector<TrainingExample*>& examples);
   bool predictClassLabel(const Example& example) const;
-private:
+  double getFeatureThreshold(size_t feature_index) const;
 
+  class Node {
+  public:
+    Node(const DecisionTree* tree, size_t feature_index); // internal node
+    Node(const DecisionTree* tree, double probability); // leaf node
+    ~Node();
+    void setRightChild(Node* right_child);
+    void setLeftChild(Node* left_child);
+    bool predictClassLabel(const Example& example) const;
+  private:
+    size_t m_feature_index;
+    Node *m_left, *m_right;
+    Node* m_parent;
+    double m_probability; // if leaf node (m_left=m_right=0)
+    const DecisionTree* m_tree;
+  };
+private:
+  Node* recursiveTrainTree(const vector<TrainingExample*>& examples,
+                           const set<size_t>& used_feature_indeces);
+  vector<double> m_feature_thresholds;
+  vector<string> m_features;
+  Node* m_root;
 };
 
