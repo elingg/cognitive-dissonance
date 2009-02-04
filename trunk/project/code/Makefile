@@ -54,7 +54,8 @@ evaluate: evaluate.o $(OBJ)
 unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.cpp $(OBJ)
 	$(CC) $(CCFLAGS) -c TestDecisionTree.cpp -o TestDecisionTree.o
 	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
-	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o -o unittests
+	$(CC) $(CCFLAGS) -c ImagesExample.cpp -o ImagesExample.o
+	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o ImagesExample.o -o unittests
 
 unittestshaar: TestHaarFeatures.h TestHaarFeatures.cpp HaarFeatures.h HaarFeatures.cpp $(OBJ)
 	$(CC) $(CCFLAGS) -c TestHaarFeatures.cpp -o TestHaarFeatures.o
