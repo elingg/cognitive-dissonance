@@ -22,11 +22,10 @@ bool TestImages::test() {
   vector<string> feature_names;
 
   string temp;
-  for(int i=0; i<57; i++)
-  {
+  for(int i=0; i<57; i++) {
      std::string s;
      std::stringstream out;
-     out << i;
+     // out << i;
      s = out.str();
      temp = "h"+ s;
      feature_names.push_back(temp);
@@ -41,24 +40,16 @@ bool TestImages::test() {
 
   // Here is a set of test cases currently not being used
   vector<TrainingExample*> egs;
+  vector<double> hfeaturestest;
 
-
-   vector<double> hfeaturestest;
-
-   for(int i=0; i<57; i++)
-   {
-        hfeaturestest.push_back(0);
-   }
+  for(int i=0; i<57; i++) {
+    hfeaturestest.push_back(0);
+  }
 
   // These tests are based on haar features...
-
   egs.push_back(new ImagesExample(hfeaturestest, true));
-
   egs.push_back(new ImagesExample(hfeaturestest, true));
-
-
-
-
+  
   cerr << "Training tree:\n";
   dt.trainTree(egs);
 
@@ -145,6 +136,8 @@ bool TestDecisionTree::test() {
   DecisionTree dtest;
   dtest.loadState("dttree.save");
   dtest.printTree();
-
+  DecisionTree dtest2;
+  assert(dtest2.loadState("blah.save")==false); // make sure if no file retrns false
+ 
   return true; // all passed
 }

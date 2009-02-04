@@ -7,7 +7,7 @@ using namespace std;
 class ImagesExample : public TrainingExample {
 public:
   ImagesExample(
-          vector<double> hfeatures,
+           const vector<double>& hfeatures,
            bool classlabel);
 
   size_t getNumberOfFeatures() const {
