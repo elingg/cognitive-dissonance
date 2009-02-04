@@ -64,43 +64,56 @@ bool CClassifier::saveState(const char *filename)
     
     // CS221 TO DO: replace this with your own configuration code
     decisionTree.saveState(filename); 
+    cerr << "Finished saving state";
     return true;
 }
 
 // run
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
-bool CClassifier::run(const IplImage *oframe, CObjectList *objects)
-{
-    IplImage *frame = const_cast<IplImage*>(oframe);
-    assert((frame != NULL) && (objects != NULL));
+bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
     
-    // CS221 TO DO: replace this with your own code
+    assert((frame != NULL) && (objects != NULL));
+
+    //Convert to gray scale (from OpenCV lecture notes)
+    IplImage *gray = cvCreateImage(
+      cvGetSize(frame),
+      IPL_DEPTH_8U,
+      1);
+    cvCvtColor(frame, gray, CV_BGR2GRAY);
+
+    //Use a sliding window,
     int const MIN_LENGTH_SIZE = 64;
     int const MAX_LENGTH_SIZE = 104;
     for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
-      for(int x = 0; x < frame->width; x = x + 8) {
-        for(int y = 0; y < frame->height; y = y + 8) {
-	  //Clip the frame
+      for(int x = 0; x < gray->width - length; x = x + 8) {
+        for(int y = 0; y < gray->height - length; y = y + 8) {
+          cerr << "New window: " << x << " " << y << " " << length << endl;
+          //Clip the frame to a square
 	  CvRect region = cvRect(x, y, length, length);
 	  IplImage *clippedImage = cvCreateImage(
 	    cvSize(region.width, region.height),
-	    frame->depth, frame->nChannels);
-	  cvSetImageROI(frame, region);
-	  cvCopyImage(frame, clippedImage);
-	  cvResetImageROI(frame);
+	    gray->depth, gray->nChannels);
+	  cvSetImageROI(gray, region);
+	  cvCopyImage(gray, clippedImage);
+	  cvResetImageROI(gray);
 
+          //Resize to 64 x 64
           IplImage *smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
-          // resize to 64 x 64
-	  cvResize(frame, smallImage);
+	  cvResize(gray, smallImage);
 
+          //Get Haar feature values
           vector<double> values;
           HaarFeatures haar;
           haar.getFeatureValues(values,smallImage);
-          CObject obj;
-	
+
+          //Check for image
           ImagesExample imagesExample(values, true); 
-	  if(decisionTree.predictClassLabel(imagesExample)) {
+          bool isFound = decisionTree.predictClassLabel(imagesExample);
+
+          //Create bounding box
+	  if(isFound) {
+            CObject obj;
             obj.rect = cvRect(0, 0, length, length);
 	    obj.rect.x = x;
 	    obj.rect.y = y;
@@ -108,12 +121,15 @@ bool CClassifier::run(const IplImage *oframe, CObjectList *objects)
 	    objects->push_back(obj);
 	  }
 	  
+	  //Release images
 	  cvReleaseImage(&clippedImage);
 	  cvReleaseImage(&smallImage);
 	}
       }
     }
 
+    cvReleaseImage(&gray);
+    cout << "Number of results found: " << objects->size() << endl;
     // Example code which returns up to 10 random objects, each object
     // having a width and height equal to half the frame size.
     /*
@@ -139,19 +155,18 @@ bool CClassifier::run(const IplImage *oframe, CObjectList *objects)
 // training file list.
 bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
- vector<string> feature_names;
+    vector<string> feature_names;
 
-   string temp;
-     for(int i=0; i<57; i++)
-       {
-            std::string s;
-	         std::stringstream out;
-		      out << i;
-		           s = out.str();
-			        temp = "h"+ s;
-				     feature_names.push_back(temp);
-				       }
-	decisionTree.initialize(feature_names);
+    string temp;
+    for(int i=0; i<57; i++) {
+      std::string s;
+      std::stringstream out;
+      out << i;
+      s = out.str();
+      temp = "h"+ s;
+      feature_names.push_back(temp);
+    }
+    decisionTree.initialize(feature_names);
 
     // example code to show you number of samples for each object class
     cout << "Classes:" << endl;
@@ -205,6 +220,8 @@ bool CClassifier::train(TTrainingFileList& fileList) {
   	      trainingSet.push_back(new ImagesExample(values, true));
 	    } if(fileList.files[i].label == "other") {
               trainingSet.push_back(new ImagesExample(values, false));
+	    } else {
+              assert("Encountered bad label while training");
 	    }
 	    // free memory
 	    cvReleaseImage(&image);
