@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include "ImagesExample.h"
+#include "assert.h"
 
 int main(int argc, char** argv) {
   TestDecisionTree::test();
@@ -117,6 +118,7 @@ bool TestDecisionTree::test() {
  
   cerr << "Training tree:\n";
   dt.trainTree(egs);
+  return true;
   
   cerr << "Predicting labels:\n";
   int correct = egs.size();
