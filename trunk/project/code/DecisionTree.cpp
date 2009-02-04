@@ -341,7 +341,6 @@ bool DecisionTree::Node::saveState(ofstream& ofs) const {
     ofs << "right "; 
     m_right->saveState(ofs);
   }
-  ofs << endl;
   return true;
 }
 
