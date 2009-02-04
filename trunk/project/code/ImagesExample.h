@@ -3,7 +3,6 @@
 using namespace std;
 
 
-#include 
 class ImagesExample : public TrainingExample {
 public:
   ImagesExample(
