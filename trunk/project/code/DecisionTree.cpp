@@ -27,6 +27,12 @@ void splitExamplesByThreshold(
  vector<TrainingExample*>& below_examples,
  const vector<TrainingExample*>& examples,
  size_t feature_index, double threshold) {
+  //double new_threshold=0.0;
+  //for(size_t iex=0; iex<examples.size(); ++iex) {
+  //  new_threshold+=examples[iex]->getFeatureDoubleValue(feature_index);
+  //}
+  //new_threshold /= examples.size();
+  //threshold = new_threshold;
   for(size_t iex=0; iex<examples.size(); ++iex) {
     if(examples[iex]->getFeatureDoubleValue(feature_index)>threshold) {
       above_examples.push_back(examples[iex]);
