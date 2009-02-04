@@ -35,7 +35,8 @@ public:
 // classes for Examples (which could also be TrainingExamples)...
 class DecisionTree {
 public:
-  DecisionTree(const vector<string>& feature_names):m_features(feature_names) {}
+  DecisionTree(const vector<string>& feature_names)
+     :m_features(feature_names),m_root(0) {}
   ~DecisionTree() {}
 
   void trainTree(const vector<TrainingExample*>& examples);
