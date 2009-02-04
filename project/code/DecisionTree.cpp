@@ -300,6 +300,39 @@ string DecisionTree::getFeatureName(size_t feature_index) const {
   return m_features[feature_index];
 }
 
+bool DecisionTree::Node::loadState(ifstream& ifs) {
+  ifs >> m_feature_index;
+  ifs >> m_probability;
+  bool has_left, has_right;
+  ifs >> has_left;
+  if(has_left) {
+    m_left = new Node(m_tree);
+    m_left->loadState(ifs);
+    m_left->m_parent = this;
+  }
+  ifs >> has_right;
+  if(has_right) {
+    m_right = new Node(m_tree);
+    m_right->loadState(ifs);
+    m_right->m_parent = this;
+  }
+  return true;
+}
+ 
+bool DecisionTree::Node::saveState(ofstream& ofs) const {
+  ofs << m_feature_index << " ";
+  ofs << m_probability << " ";
+  ofs << (m_left!=0) << " ";
+  if(m_left) {
+    m_left->saveState(ofs);
+  }
+  ofs << (m_right!=0) << " ";
+  if(m_right) {
+    m_right->saveState(ofs);
+  }
+  return true;
+}
+
 void DecisionTree::Node::printTree() const {
   cerr << "[";
   if(isLeaf()) {
@@ -326,18 +359,39 @@ void DecisionTree::printTree() const {
   cerr << endl;
 }
  
-bool DecisionTree::loadState(const char* filename) const {
+bool DecisionTree::loadState(const char* filename) {
+  cerr << "DecisionTree loadState\n";
   ifstream ifs(filename);
-  // TODO
-  return true;
+  size_t num_features;
+  ifs >> num_features;
+  // cerr << "num_features: ["<<num_features<< "]";
+  for(size_t i=0; i<num_features; ++i) {
+    double threshold;
+    ifs >> threshold;
+    m_feature_thresholds.push_back(threshold);
+    // cerr << "[" << threshold << "]";
+  }
+  for(size_t i=0; i<num_features; ++i) {
+    string feature_name;
+    ifs >> feature_name;
+    m_features.push_back(feature_name);
+    // cerr << "[" << feature_name << "]";
+  }
+  // cerr << "..done DecisionTree loadState\n";
+  m_root = new Node(this);
+  return m_root->loadState(ifs);
 }
 
 bool DecisionTree::saveState(const char* filename) const {
+  cerr << "DecisionTree saveState\n";
   ofstream ofs(filename);
-  ofs << m_feature_thresholds.size();
+  ofs << m_feature_thresholds.size() << " ";
   for(size_t i=0; i<m_feature_thresholds.size(); ++i) {
-    ofs << m_feature_thresholds[i];
+    ofs << m_feature_thresholds[i] << " ";
   }
-  return true;
+  for(size_t i=0; i<m_features.size(); ++i) {
+    ofs << m_features[i] << " ";
+  }
+  cerr << "..done DecisionTree saveState\n";
+  return m_root->saveState(ofs);
 }
- 
