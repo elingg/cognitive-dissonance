@@ -105,7 +105,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           //Get Haar feature values
           vector<double> values;
           HaarFeatures haar;
-          haar.getFeatureValues(values,gray);
+          haar.getFeatureValues(values,smallImage);
 
           //Check for image
           ImagesExample imagesExample(values, true); 
@@ -214,7 +214,7 @@ bool CClassifier::train(TTrainingFileList& fileList) {
 
 	    // CS221 TO DO: extract features from image here
             vector<double> values;
-            haar.getFeatureValues(values,image);
+            haar.getFeatureValues(values,smallImage);
 
 	    if(fileList.files[i].label == "mug") {
   	      trainingSet.push_back(new ImagesExample(values, true));
