@@ -1,6 +1,7 @@
 #include "TestDecisionTree.h"
 #include <iostream>
 #include <sstream>
+#include "ImagesExample.h"
 
 int main(int argc, char** argv) {
   TestDecisionTree::test();
@@ -14,15 +15,6 @@ StudentAdmissionExample::StudentAdmissionExample(double gpa,
   m_featureValues.push_back(univ_tier);
   m_featureValues.push_back(published);
   m_featureValues.push_back(recommendation);
-  m_classLabel = class_label;
-}
-
-ImagesExample::ImagesExample(vector<double> hfeatures, bool class_label)
-   {
-    for(int i=0; i<57; i++)
-    {
-        m_featureValues.push_back(hfeatures.at(i));
-    }
   m_classLabel = class_label;
 }
 
