@@ -20,7 +20,7 @@
 
 #include "classifier.h"
 #include "HaarFeatures.h"
-
+#include "DecisionTree.h"
 using namespace std;
 
 // CClassifier class ---------------------------------------------------------
@@ -50,7 +50,7 @@ CClassifier::~CClassifier()
 bool CClassifier::loadState(const char *filename)
 {
     assert(filename != NULL);
-    
+    decisionTree.loadState(filename);
     // CS221 TO DO: replace this with your own configuration code
     
     return true;
@@ -63,7 +63,7 @@ bool CClassifier::saveState(const char *filename)
     assert(filename != NULL);
     
     // CS221 TO DO: replace this with your own configuration code
-    
+    decisionTree.saveState(filename); 
     return true;
 }
 
@@ -75,9 +75,37 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects)
     assert((frame != NULL) && (objects != NULL));
     
     // CS221 TO DO: replace this with your own code
+    int const MIN_LENGTH_SIZE = 64;
+    int const MAX_LENGTH_SIZE = 104;
+    for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
+      for(int x = 0; x < frame->width; x = x + 8) {
+        for(int y = 0; y < frame->height; y = y + 8) {
+	   
+          IplImage *smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
+          // resize to 64 x 64
+	  cvResize(frame, smallImage);
+
+          vector<double> values;
+          HaarFeatures haar;
+          haar.getFeatureValues(values,smallImage);
+          CObject obj;
+	
+          ImagesExample imagesExample(values, true); 
+	  if(decisionTree.predictClassLabel(imagesExample)) {
+            obj.rect = cvRect(0, 0, length, length);
+	    obj.rect.x = x;
+	    obj.rect.y = y;
+	    obj.label = string("mug");
+	    objects->push_back(obj);
+	  }
+	  
+	}
+      }
+    }
 
     // Example code which returns up to 10 random objects, each object
     // having a width and height equal to half the frame size.
+    /*
     const char *labels[5] = {
 	"mug", "stapler", "keyboard", "clock", "scissors"
     }; 
@@ -90,6 +118,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects)
 	obj.label = string(labels[cvRandInt(&rng) % 5]);
 	objects->push_back(obj);        
     }
+    */
 
     return true;
 }
@@ -97,8 +126,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects)
 // train
 // Trains the classifier to recognize the objects given in the
 // training file list.
-bool CClassifier::train(TTrainingFileList& fileList)
-{
+bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
 
     // example code to show you number of samples for each object class
@@ -119,6 +147,8 @@ bool CClassifier::train(TTrainingFileList& fileList)
     // you may find this useful for the milestone    
     HaarFeatures haar;
     IplImage *image, *smallImage;
+    
+    vector<TrainingExample*> trainingSet;
 
     cout << "Processing images..." << endl;
     smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
@@ -146,6 +176,12 @@ bool CClassifier::train(TTrainingFileList& fileList)
 	    // CS221 TO DO: extract features from image here
             vector<double> values;
             haar.getFeatureValues(values,smallImage);
+
+	    if(fileList.files[i].label == "mug") {
+//  	      trainingSet.push_back(new ImagesExample(values, true));
+	    } if(fileList.files[i].label == "other") {
+//            trainingSet.push_back(new ImagesExample(values, false));
+	    }
 	    // free memory
 	    cvReleaseImage(&image);
 	}
@@ -156,6 +192,8 @@ bool CClassifier::train(TTrainingFileList& fileList)
     cout << endl;
 
     // CS221 TO DO: train you classifier here
+    cerr << "Training tree:" << endl;
+    decisionTree.trainTree(trainingSet);
 
     return true;
 }
