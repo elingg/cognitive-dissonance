@@ -27,9 +27,21 @@ bool TestDecisionTree::test() {
   DecisionTree dt(feature_names);
 
   cerr << "Creating TrainingExamples:\n";
-  // These tests are based on Exercise 4, Problem 5...
+
+
+  // Here is a set of test cases currently not being used
   vector<TrainingExample*> egs;
+
+//  egs.push_back(new StudentAdmissionExample(4.0,10,0,0, true));
+ // egs.push_back(new StudentAdmissionExample(4.0,10,0,0, false));
+ // egs.push_back(new StudentAdmissionExample(3.7,20,0,1, false));
+//  egs.push_back(new StudentAdmissionExample(3.7,30,1,1, true));
+
+
+
+  // These tests are based on Exercise 4, Problem 5...
   // 1, 2, 3...
+
   egs.push_back(new StudentAdmissionExample(4.0,10,1,1,true));
   egs.push_back(new StudentAdmissionExample(4.0,10,0,1,true));
   egs.push_back(new StudentAdmissionExample(4.0,20,0,0,true));
@@ -46,8 +58,8 @@ bool TestDecisionTree::test() {
  
   // 10, 11, 12... 
   egs.push_back(new StudentAdmissionExample(3.5,10,0,0,false));
-  egs.push_back(new StudentAdmissionExample(3.5,30,1,0,false));
-  egs.push_back(new StudentAdmissionExample(3.5,30,0,1,false));
+  //egs.push_back(new StudentAdmissionExample(3.5,30,1,0,false));
+  //egs.push_back(new StudentAdmissionExample(3.5,30,0,1,false));
 
  
   cerr << "Training tree:\n";
