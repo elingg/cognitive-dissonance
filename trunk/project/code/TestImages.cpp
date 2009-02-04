@@ -1,5 +1,6 @@
 #include "TestImages.h"
 #include <iostream>
+#include <sstream>
 
 int main(int argc, char** argv) {
   TestImages::test();
@@ -14,13 +15,20 @@ ImagesExample::ImagesExample(double hfeatures[], bool class_label)
   m_classLabel = class_label;
 }
 
+
+
 bool TestImages::test() {
   vector<string> feature_names; 
 
   string temp;
   for(int i=0; i<57; i++)
   {
-     temp = "h"+ i;
+     std::string s;
+     std::stringstream out;
+     out << i;
+     s = out.str();
+     temp = "h"+ s;
+     cout<<temp<<endl;
      feature_names.push_back(temp);
   }
 

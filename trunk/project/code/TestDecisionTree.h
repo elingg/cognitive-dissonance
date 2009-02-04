@@ -10,6 +10,32 @@ public:
   static bool test();
 };
 
+class TestImages {
+public:
+  static bool test();
+};
+
+class ImagesExample : public TrainingExample {
+public:
+  ImagesExample(
+          vector<double> hfeatures,
+           bool classlabel);
+
+  size_t getNumberOfFeatures() const {
+            return m_featureValues.size();
+          }
+  bool   getClassLabel() const {
+            return m_classLabel;
+          }
+  double getFeatureDoubleValue(int feature_index) const {
+            return m_featureValues[feature_index];
+          }
+private:
+  vector<double> m_featureValues;
+  bool m_classLabel;
+};
+
+
 // Corresponds to Problem 5 of Exercise Set 4. Using continuous
 // variables here rather than discrete ones for testing our decision tree...
 class StudentAdmissionExample : public TrainingExample {
