@@ -274,11 +274,11 @@ void DecisionTree::trainTree
   cerr << "Average thresholds:\n";
   for(size_t ifeat=0; ifeat<num_features; ifeat++) {
     feature_averages[ifeat]/=num_examples;
-    cerr << ifeat << ": " << feature_averages[ifeat] << endl;
+    cerr << ifeat << ": " << feature_averages[ifeat] << "\t";
   }
   m_feature_thresholds = feature_averages;
  
-  cerr << "Recursive train tree:\n";
+  cerr << "\nRecursive train tree:\n";
   set<size_t> empty_used_features;
   m_root = recursiveTrainTree(examples,empty_used_features);
   printTree();
@@ -301,17 +301,26 @@ string DecisionTree::getFeatureName(size_t feature_index) const {
 }
 
 bool DecisionTree::Node::loadState(ifstream& ifs) {
+  string dummy;
+  ifs >> dummy; assert(dummy=="feat_index");
   ifs >> m_feature_index;
+  ifs >> dummy; assert(dummy=="p");
   ifs >> m_probability;
   bool has_left, has_right;
   ifs >> has_left;
   if(has_left) {
+    string leftkey;
+    ifs >> leftkey; 
+    assert(leftkey=="left");
     m_left = new Node(m_tree);
     m_left->loadState(ifs);
     m_left->m_parent = this;
   }
   ifs >> has_right;
   if(has_right) {
+    string rightkey;
+    ifs >> rightkey; 
+    assert(rightkey=="right");
     m_right = new Node(m_tree);
     m_right->loadState(ifs);
     m_right->m_parent = this;
@@ -320,16 +329,19 @@ bool DecisionTree::Node::loadState(ifstream& ifs) {
 }
  
 bool DecisionTree::Node::saveState(ofstream& ofs) const {
-  ofs << m_feature_index << " ";
-  ofs << m_probability << " ";
+  ofs << "feat_index "<< m_feature_index << " ";
+  ofs << "p " << m_probability << " ";
   ofs << (m_left!=0) << " ";
   if(m_left) {
+    ofs << "left "; 
     m_left->saveState(ofs);
   }
   ofs << (m_right!=0) << " ";
   if(m_right) {
+    ofs << "right "; 
     m_right->saveState(ofs);
   }
+  ofs << endl;
   return true;
 }
 
@@ -362,6 +374,10 @@ void DecisionTree::printTree() const {
 bool DecisionTree::loadState(const char* filename) {
   cerr << "DecisionTree loadState\n";
   ifstream ifs(filename);
+  if(ifs.fail()) {
+    cerr << "Failed loading file : " << filename << endl;
+    return false;
+  }
   size_t num_features;
   ifs >> num_features;
   // cerr << "num_features: ["<<num_features<< "]";
@@ -385,6 +401,10 @@ bool DecisionTree::loadState(const char* filename) {
 bool DecisionTree::saveState(const char* filename) const {
   cerr << "DecisionTree saveState\n";
   ofstream ofs(filename);
+  if(ofs.fail()) {
+    cerr << "Failed loading file : " << filename << endl;
+    return false;
+  }
   ofs << m_feature_thresholds.size() << " ";
   for(size_t i=0; i<m_feature_thresholds.size(); ++i) {
     ofs << m_feature_thresholds[i] << " ";
