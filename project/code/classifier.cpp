@@ -70,8 +70,9 @@ bool CClassifier::saveState(const char *filename)
 // run
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
-bool CClassifier::run(const IplImage *frame, CObjectList *objects)
+bool CClassifier::run(const IplImage *oframe, CObjectList *objects)
 {
+    IplImage *frame = const_cast<IplImage*>(oframe);
     assert((frame != NULL) && (objects != NULL));
     
     // CS221 TO DO: replace this with your own code
@@ -80,7 +81,15 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects)
     for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
       for(int x = 0; x < frame->width; x = x + 8) {
         for(int y = 0; y < frame->height; y = y + 8) {
-	   
+	  //Clip the frame
+	  CvRect region = cvRect(x, y, length, length);
+	  IplImage *clippedImage = cvCreateImage(
+	    cvSize(region.width, region.height),
+	    frame->depth, frame->nChannels);
+	  cvSetImageROI(frame, region);
+	  cvCopyImage(frame, clippedImage);
+	  cvResetImageROI(frame);
+
           IplImage *smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
           // resize to 64 x 64
 	  cvResize(frame, smallImage);
@@ -99,6 +108,8 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects)
 	    objects->push_back(obj);
 	  }
 	  
+	  cvReleaseImage(&clippedImage);
+	  cvReleaseImage(&smallImage);
 	}
       }
     }
