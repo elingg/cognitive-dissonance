@@ -235,6 +235,15 @@ bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: train you classifier here
     cerr << "Training tree:" << endl;
     decisionTree.trainTree(trainingSet);
-
+    
+    cerr << "Testing tree on trained images: " << endl;
+    size_t correct = trainingSet.size();
+    for(size_t i=0; i< trainingSet.size(); ++i) {
+      bool predicted = decisionTree.predictClassLabel(*trainingSet[i]);
+      if(predicted!=trainingSet[i]->getClassLabel()) {
+        correct--;
+      }     
+    }
+    cerr << "Correctly predicted " << correct << " out of " << trainingSet.size()<< endl;
     return true;
 }
