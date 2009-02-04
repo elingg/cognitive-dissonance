@@ -139,6 +139,19 @@ bool CClassifier::run(const IplImage *oframe, CObjectList *objects)
 // training file list.
 bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
+ vector<string> feature_names;
+
+   string temp;
+     for(int i=0; i<57; i++)
+       {
+            std::string s;
+	         std::stringstream out;
+		      out << i;
+		           s = out.str();
+			        temp = "h"+ s;
+				     feature_names.push_back(temp);
+				       }
+	decisionTree.initialize(feature_names);
 
     // example code to show you number of samples for each object class
     cout << "Classes:" << endl;
