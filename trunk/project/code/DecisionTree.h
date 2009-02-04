@@ -46,11 +46,12 @@ public:
   double getFeatureThreshold(size_t feature_index) const;
   string getFeatureName(size_t feature_index) const; 
   void printTree() const; 
-  bool loadState(const char* filename) const;
+  bool loadState(const char* filename);
   bool saveState(const char* filename) const;
 
   class Node {
   public:
+    Node(const DecisionTree* tree):m_left(0),m_right(0),m_tree(tree) {}
     Node(const DecisionTree* tree, size_t feature_index); // internal node
     Node(const DecisionTree* tree, double probability); // leaf node
     ~Node();
@@ -61,6 +62,8 @@ public:
     const Node* getLeftChild() const;
 
     void printTree() const;
+    bool loadState(ifstream& ifs); 
+    bool saveState(ofstream& ofs) const;
 
     bool predictClassLabel(const Example& example) const;
     bool isLeaf() const;

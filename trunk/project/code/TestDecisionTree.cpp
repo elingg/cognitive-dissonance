@@ -147,5 +147,12 @@ bool TestDecisionTree::test() {
   for(size_t i=0; i<egs.size(); ++i) {
     delete egs[i];
   }
+
+  cerr << "Testing decision tree serialization..." << endl;
+  dt.saveState("dttree.save");
+  DecisionTree dtest;
+  dtest.loadState("dttree.save");
+  dtest.printTree();
+
   return true; // all passed
 }
