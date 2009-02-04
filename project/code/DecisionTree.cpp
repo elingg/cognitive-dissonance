@@ -394,7 +394,9 @@ bool DecisionTree::loadState(const char* filename) {
   }
   // cerr << "..done DecisionTree loadState\n";
   m_root = new Node(this);
-  return m_root->loadState(ifs);
+  bool ret_val = m_root->loadState(ifs);
+  ifs.close();
+  return ret_val;
 }
 
 bool DecisionTree::saveState(const char* filename) const {
@@ -412,5 +414,7 @@ bool DecisionTree::saveState(const char* filename) const {
     ofs << m_features[i] << " ";
   }
   cerr << "..done DecisionTree saveState\n";
-  return m_root->saveState(ofs);
+  bool ret_val = m_root->saveState(ofs);
+  ofs.close();
+  return ret_val;
 }
