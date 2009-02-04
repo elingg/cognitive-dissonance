@@ -56,11 +56,6 @@ unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.c
 	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
 	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o -o unittests
 
-unittests1: TestImages.h TestImages.cpp DecisionTree.h DecisionTree.cpp $(OBJ)
-	$(CC) $(CCFLAGS) -c TestImages.cpp -o TestImages.o
-	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
-	$(CC) $(CCFLAGS) $(LDFLAGS) TestImages.o DecisionTree.o -o unittests1
-
 unittestshaar: TestHaarFeatures.h TestHaarFeatures.cpp HaarFeatures.h HaarFeatures.cpp $(OBJ)
 	$(CC) $(CCFLAGS) -c TestHaarFeatures.cpp -o TestHaarFeatures.o
 	$(CC) $(CCFLAGS) -c HaarFeatures.cpp -o HaarFeatures.o 
