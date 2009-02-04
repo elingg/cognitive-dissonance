@@ -3,6 +3,7 @@
 #include <cfloat>
 #include <iostream>
 #include "assert.h"
+#include <fstream>
 
 double H(double p) {
   if(p==0.0 || p==1.0) { 
@@ -324,4 +325,19 @@ void DecisionTree::printTree() const {
   m_root->printTree();
   cerr << endl;
 }
-  
+ 
+bool DecisionTree::loadState(const char* filename) const {
+  ifstream ifs(filename);
+  // TODO
+  return true;
+}
+
+bool DecisionTree::saveState(const char* filename) const {
+  ofstream ofs(filename);
+  ofs << m_feature_thresholds.size();
+  for(size_t i=0; i<m_feature_thresholds.size(); ++i) {
+    ofs << m_feature_thresholds[i];
+  }
+  return true;
+}
+ 
