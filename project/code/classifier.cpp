@@ -189,9 +189,9 @@ bool CClassifier::train(TTrainingFileList& fileList) {
             haar.getFeatureValues(values,smallImage);
 
 	    if(fileList.files[i].label == "mug") {
-//  	      trainingSet.push_back(new ImagesExample(values, true));
+  	      trainingSet.push_back(new ImagesExample(values, true));
 	    } if(fileList.files[i].label == "other") {
-//            trainingSet.push_back(new ImagesExample(values, false));
+              trainingSet.push_back(new ImagesExample(values, false));
 	    }
 	    // free memory
 	    cvReleaseImage(&image);
