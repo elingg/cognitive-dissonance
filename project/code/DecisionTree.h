@@ -35,15 +35,19 @@ public:
 // classes for Examples (which could also be TrainingExamples)...
 class DecisionTree {
 public:
+  DecisionTree():m_root(0){}
   DecisionTree(const vector<string>& feature_names)
      :m_features(feature_names),m_root(0) {}
   ~DecisionTree() {}
 
+  void initialize(const vector<string>& fnames) { m_features = fnames; }
   void trainTree(const vector<TrainingExample*>& examples);
   bool predictClassLabel(const Example& example) const;
   double getFeatureThreshold(size_t feature_index) const;
   string getFeatureName(size_t feature_index) const; 
   void printTree() const; 
+  bool loadState(const char* filename) const;
+  bool saveState(const char* filename) const;
 
   class Node {
   public:
