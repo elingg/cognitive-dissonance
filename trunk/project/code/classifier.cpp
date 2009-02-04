@@ -98,9 +98,9 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 	  cvCopyImage(gray, clippedImage);
 	  cvResetImageROI(gray);
 
-          //Resize to 64 x 64
+          //Resize clipped image to 64 x 64
           IplImage *smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
-	  cvResize(gray, smallImage);
+	  cvResize(clippedImage, smallImage);
 
           //Get Haar feature values
           vector<double> values;
