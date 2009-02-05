@@ -9,6 +9,10 @@ size_t getMaxDepth() {
   return 17;
 }
 
+double getClassificationThreshold() {
+  return 0.5;
+}
+
 double H(double p) {
   if(p==0.0 || p==1.0) { 
     return 0.0;
@@ -138,7 +142,7 @@ bool DecisionTree::Node::predictClassLabel(const Example& example) const {
   if(m_right==0) { // leaf...
     assert(m_left==0);
     assert((m_probability>=0) && (m_probability<=1));
-    return (m_probability>0.5);
+    return (m_probability>getClassificationThreshold());
   }
   if(example.getFeatureDoubleValue(m_feature_index)>
      m_tree->getFeatureThreshold(m_feature_index)) { 
