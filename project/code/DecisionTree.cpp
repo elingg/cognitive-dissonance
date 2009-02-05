@@ -6,7 +6,7 @@
 #include <fstream>
 
 size_t getMaxDepth() {
-  return 17;
+  return 14;
 }
 
 double getClassificationThreshold() {
@@ -261,6 +261,7 @@ void DecisionTree::trainTree
 (const vector<TrainingExample*>& examples) {
   cerr << "Train tree:\n";
   cerr << "Tree max-depth used: " << getMaxDepth() << endl;
+  cerr << "Classification threshold used: " << getClassificationThreshold() << endl;
   if(m_root) {
     delete m_root;
     m_root = 0;
