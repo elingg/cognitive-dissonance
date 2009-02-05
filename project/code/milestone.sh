@@ -1,4 +1,4 @@
-#Milestone - shortcut for running train
+#Milestone - shortcut for running train.
 ./train -c config /afs/ir/class/cs221/vision/data/
 #Milestone - shortcut script for running test
 #This is copied from pg. 7 of the handout
