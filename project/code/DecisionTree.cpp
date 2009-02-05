@@ -5,6 +5,10 @@
 #include "assert.h"
 #include <fstream>
 
+size_t getMaxDepth() {
+  return 17;
+}
+
 double H(double p) {
   if(p==0.0 || p==1.0) { 
     return 0.0;
@@ -57,7 +61,7 @@ size_t chooseFeature(const vector<TrainingExample*>& examples,
   for(size_t ifeat=0;ifeat<feature_names.size(); ++ifeat) {
     if(used_feature_indeces.find(ifeat)!=used_feature_indeces.end()) {
       // index is used...
-      cerr << "Feature " << ifeat << " used, skipping\n";
+      // cerr << "Feature " << ifeat << " used, skipping\n";
       continue;
     }
     vector<TrainingExample*> above_examples;
@@ -162,12 +166,14 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
  const set<size_t>& used_feature_indeces) {
   // split on feature that gives greatest increase in the log likelihood..
   // (the feature that gives greatest reduction in entropy)..
-  if(used_feature_indeces.size()==m_features.size()) { // all used up
+  // if((used_feature_indeces.size()==m_features.size())) {
+  if((used_feature_indeces.size()==m_features.size()) || 
+     (used_feature_indeces.size()==getMaxDepth())) { // all used up
     // stop criteria 3...
     double pl = (double)(countPositiveClassLabels(examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
-    cerr << "encountered main leaf: features used up.\n";
+    // cerr << "encountered main leaf: features used up.\n";
     return T;
   }
  
@@ -178,12 +184,12 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     double pl = (double)(countPositiveClassLabels(examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
-    cerr << "encountered main leaf: invalid chosen_feature_index, all examples one or the other.\n";
+    // cerr << "encountered main leaf: invalid chosen_feature_index, all examples one or the other.\n";
     return T;
   }
   set<size_t> now_used_feature_indeces = used_feature_indeces;
   now_used_feature_indeces.insert(chosen_feature_index);
-  cerr << "Chosen feature ["<< chosen_feature_index<< "]: " << m_features[chosen_feature_index] << endl;
+  // cerr << "Chosen feature ["<< chosen_feature_index<< "]: " << m_features[chosen_feature_index] << endl;
   // make this the root of the tree
   Node* T = new Node(this, chosen_feature_index);
   // instead of for loop over values v of feature, we just have two...
@@ -201,19 +207,19 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     double pl = (double)(count_positive_class_labels_for_above_examples)/
                  (double)(examples.size());
     right_child = new Node(this,pl); // leaf
-    cerr << "encountered right leaf: no above examples\n";
+    // cerr << "encountered right leaf: no above examples\n";
   } else if(count_positive_class_labels_for_above_examples
                   ==above_examples.size()) {
     // stop criteria 1... (use probability 1)...
     right_child = new Node(this, 1.0); // leaf
-    cerr << "encountered right leaf: no negative examples in class 'above'\n";
+    // cerr << "encountered right leaf: no negative examples in class 'above'\n";
   } else if(count_positive_class_labels_for_above_examples==0) {
     // stop criteria 1... (use probability 0)...
     right_child = new Node(this, 0.0); // leaf
-    cerr << "encountered right leaf: no positive examples in class 'above'\n";
+    // cerr << "encountered right leaf: no positive examples in class 'above'\n";
   } else {
-    cerr << "Splitting right on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << above_examples.size() << " 'above' examples\n";
+    // cerr << "Splitting right on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
+    // cerr << "\" using " << above_examples.size() << " 'above' examples\n";
     right_child = recursiveTrainTree(above_examples, 
                                      now_used_feature_indeces);
   }
@@ -226,19 +232,19 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
     double pl = (double)(count_positive_class_labels_for_below_examples)/
                  (double)(examples.size());
     left_child = new Node(this,pl); // leaf
-    cerr << "encountered left leaf: no examples in class 'below'\n";
+    // cerr << "encountered left leaf: no examples in class 'below'\n";
   } else if(count_positive_class_labels_for_below_examples
                   ==below_examples.size()) {
     // stop criteria 1... (use probability 1)...
     left_child = new Node(this, 1.0); // leaf
-    cerr << "encountered left leaf: no positive examples in class 'below'\n";
+    // cerr << "encountered left leaf: no positive examples in class 'below'\n";
   } else if(count_positive_class_labels_for_below_examples==0) {
     // stop criteria 1... (use probability 0)...
     left_child = new Node(this, 0.0); // leaf
-    cerr << "encountered left leaf: no negative examples in class 'below'\n";
+    // cerr << "encountered left leaf: no negative examples in class 'below'\n";
   } else {
-    cerr << "Splitting left on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
-    cerr << "\" using " << below_examples.size() << " 'below' examples\n";
+    // cerr << "Splitting left on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
+    // cerr << "\" using " << below_examples.size() << " 'below' examples\n";
     left_child = recursiveTrainTree(below_examples,
                                     now_used_feature_indeces);
   }
@@ -250,6 +256,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
 void DecisionTree::trainTree
 (const vector<TrainingExample*>& examples) {
   cerr << "Train tree:\n";
+  cerr << "Tree max-depth used: " << getMaxDepth() << endl;
   if(m_root) {
     delete m_root;
     m_root = 0;
@@ -271,10 +278,10 @@ void DecisionTree::trainTree
       feature_averages[ifeat]+=fv; 
     }
   }
-  cerr << "Average thresholds:\n";
+  // cerr << "Average thresholds:\n";
   for(size_t ifeat=0; ifeat<num_features; ifeat++) {
     feature_averages[ifeat]/=num_examples;
-    cerr << ifeat << ": " << feature_averages[ifeat] << "\t";
+    // cerr << ifeat << ": " << feature_averages[ifeat] << "\t";
   }
   m_feature_thresholds = feature_averages;
  
@@ -345,27 +352,30 @@ bool DecisionTree::Node::saveState(ofstream& ofs) const {
 }
 
 void DecisionTree::Node::printTree() const {
-  cerr << "[";
+  // cerr << "[";
   if(isLeaf()) {
-    cerr << "LEAF: "<< m_probability<<" ";
+  //   cerr << "LEAF: "<< m_probability<<" ";
+     if(m_probability>0 && m_probability<1) 
+       cerr << m_probability << " ";
   } else {
-    cerr << m_tree->getFeatureName(m_feature_index);
+  //  cerr << m_tree->getFeatureName(m_feature_index);
   }
   if(!isLeaf()) {
-    cerr << "-> L: ";
+  //  cerr << "-> L: ";
     getLeftChild()->printTree();
-    cerr << " ";
+  //  cerr << " ";
   }
   if(!isLeaf()) {
-    cerr << "-> R: ";
+  //  cerr << "-> R: ";
     getRightChild()->printTree();
-    cerr << " ";
+  //  cerr << " ";
   }
-  cerr << "]";
+  // cerr << "]";
 }
 
 void DecisionTree::printTree() const {
   cerr << endl;
+  cerr << "Leaves with probabilities other than 0 or 1: " << endl;
   m_root->printTree();
   cerr << endl;
 }
