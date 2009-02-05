@@ -129,7 +129,8 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
     }
 
     cvReleaseImage(&gray);
-    cout << "Number of results found: " << objects->size() << endl;
+    // cout << "Number of results found: " << objects->size() << endl;
+    // cout << objects->size() << "\t";
     // Example code which returns up to 10 random objects, each object
     // having a width and height equal to half the frame size.
     /*
