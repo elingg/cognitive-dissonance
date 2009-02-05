@@ -48,7 +48,7 @@ double computeFeatureValueIntegral(const IplImage* iImage, HaarFeature f) {
   z += cvGetReal2D(iImage, f.y + f.h, f.x + f.w);
   z -= cvGetReal2D(iImage, f.y, f.x + f.w);
   z -= cvGetReal2D(iImage, f.y + f.h, f.x);
-  //cout << z << endl;
+  cout << z << endl;
  
   double value = 0.0;
   if(f.type == "H") {
@@ -132,24 +132,18 @@ double computeFeatureValueIntegral(const IplImage* iImage, HaarFeature f) {
 
 /**
  * Compute feature value based on image and Haar feature
- * Precondition: image should be 64x64
  */
-double computeFeatureValue(const IplImage* img, HaarFeature f) {
-  //printFeature(f);
-  //Image should be 64x64 (because the Haar features are based on 64x64 images)
-  assert(img->width == 64);
-  assert(img->height == 64);
- 
+double computeFeatureValueBrute(const IplImage* img, HaarFeature f) {
   double value = 0.0;
 
   double z = 0.0;  //normalizing constant
   for(int i = 0; i < f.w; i++) {
     for(int j = 0; j < f.h; j++) {
-      CvScalar s = cvGet2D(img, f.x + i, f.y + j);
+      CvScalar s = cvGet2D(img, f.y + j, f.x + i);
       z += s.val[0];
     }
   }
-  //cerr << "z is " << z << endl;
+  cout << "z is " << z << endl;
 
   //Horizontal - calculation from pg. 9 of problem handout
   if(f.type == "H") {
@@ -302,13 +296,20 @@ HaarFeatures::HaarFeatures() {
 
 HaarFeatures::~HaarFeatures() {}
 
+/**
+ * Returns Haar feature values
+ * Precondition: image should be 64x64
+ */
 void HaarFeatures::getFeatureValues(vector<double>& feature_values,
                                     const IplImage* img) const {
-  //printImageDetails(img);
-
+  //Image should be 64x64 (because the Haar features are based on 64x64 images)
+  assert(img->width == 64);
+  assert(img->height == 64);
+ 
+  cout << "integral" << endl;
   IplImage *iImage = cvCreateImage(cvSize(img->width + 1, img->height + 1),                                        IPL_DEPTH_32S, 1);
                                    cvIntegral(img, iImage);
-
+  
   for(vector<HaarFeature>::size_type i = 0; i < features.size(); i++) {
     double feature_value = computeFeatureValueIntegral(iImage, features[i]);
     feature_values.push_back(feature_value);
@@ -316,3 +317,23 @@ void HaarFeatures::getFeatureValues(vector<double>& feature_values,
     //cerr << "Feature value [" << i << "]: " << feature_value << endl;
   }
 }
+
+
+/**
+ * Returns Haar feature values, using brute force
+ * Precondition: image should be 64x64
+ * Do not use this in production.  This is for testing purposes.
+ */
+void HaarFeatures::getFeatureValuesBrute(vector<double>& feature_values,
+                                    const IplImage* img) const {
+  //Image should be 64x64 (because the Haar features are based on 64x64 images)
+  assert(img->width == 64);
+  assert(img->height == 64);
+  cout << "brute force" << endl;
+  for(vector<HaarFeature>::size_type i = 0; i < features.size(); i++) {
+    double feature_value = computeFeatureValueBrute(img, features[i]);
+    feature_values.push_back(feature_value);
+  }
+}
+
+
