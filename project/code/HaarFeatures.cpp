@@ -48,80 +48,77 @@ double computeFeatureValueIntegral(const IplImage* iImage, HaarFeature f) {
   z += cvGetReal2D(iImage, f.y + f.h, f.x + f.w);
   z -= cvGetReal2D(iImage, f.y, f.x + f.w);
   z -= cvGetReal2D(iImage, f.y + f.h, f.x);
-  cout << z << endl;
  
   double value = 0.0;
   if(f.type == "H") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, (f.y + f.h) / 2, f.x);
+    black = cvGetReal2D(iImage, f.y + f.h / 2, f.x);
     black += cvGetReal2D(iImage, f.y + f.h, f.x + f.w);
     black -= cvGetReal2D(iImage, f.y + f.h, f.x);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, f.x + f.w);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w);
     value = z - 2 * black;
   }
 
   if(f.type == "V") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, f.y, (f.x + f.w) / 2);
+    black = cvGetReal2D(iImage, f.y, f.x + f.w / 2);
     black += cvGetReal2D(iImage, f.y + f.h, f.x + f.w);
     black -= cvGetReal2D(iImage, f.y, f.x + f.w);
-    black -= cvGetReal2D(iImage, f.y + f.h, (f.x + f.w) / 2);
-    value = z - 2 * black; 
+    black -= cvGetReal2D(iImage, f.y + f.h, f.x + f.w / 2);
+    value = z - 2 * black;
   }
 
   if(f.type == "TL") {
     double black = 0.0;
     black = cvGetReal2D(iImage, f.y, f.x);
-    black += cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
-    black -= cvGetReal2D(iImage, f.y, (f.x + f.w) / 2);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, f.x);
+    black += cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
+    black -= cvGetReal2D(iImage, f.y, f.x + f.w / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x);
     value = z - 2 * black; 
   }
 
   if(f.type == "TR") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, f.y, (f.x + f.w) / 2);
-    black += cvGetReal2D(iImage, (f.y + f.h) / 2, f.x + f.w);
+    black = cvGetReal2D(iImage, f.y, f.x + f.w / 2);
+    black += cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w);
     black -= cvGetReal2D(iImage, f.y, f.x + f.w);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
     value = z - 2 * black; 
   }
 
   if(f.type == "BL") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, (f.y + f.h) / 2, f.x);
+    black = cvGetReal2D(iImage, f.y + f.h / 2, f.x);
     black += cvGetReal2D(iImage, f.y + f.h, (f.x + f.w) / 2);
     black -= cvGetReal2D(iImage, f.y + f.h, f.x);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
     value = z - 2 * black; 
   }
 
   if(f.type == "BR") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
+    black = cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
     black += cvGetReal2D(iImage, f.y + f.h, f.x + f.w);
-    black -= cvGetReal2D(iImage, f.y + f.h, (f.x + f.w) / 2);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, f.x + f.w);
+    black -= cvGetReal2D(iImage, f.y + f.h, f.x + f.w / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w);
     value = z - 2 * black; 
   }
 
   if(f.type == "D") {
     double black = 0.0;
-    black = cvGetReal2D(iImage, f.y, (f.x + f.w) / 2);
-    black += cvGetReal2D(iImage, (f.y + f.h) / 2, f.x + f.w);
+    black = cvGetReal2D(iImage, f.y, f.x + f.w / 2);
+    black += cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w);
     black -= cvGetReal2D(iImage, f.y, f.x + f.w);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
  
-    black += cvGetReal2D(iImage, (f.y + f.h) / 2, f.x);
-    black += cvGetReal2D(iImage, f.y + f.h, (f.x + f.w) / 2);
+    black += cvGetReal2D(iImage, f.y + f.h / 2, f.x);
+    black += cvGetReal2D(iImage, f.y + f.h, f.x + f.w / 2);
     black -= cvGetReal2D(iImage, f.y + f.h, f.x);
-    black -= cvGetReal2D(iImage, (f.y + f.h) / 2, (f.x + f.w) / 2);
+    black -= cvGetReal2D(iImage, f.y + f.h / 2, f.x + f.w / 2);
     value = z - 2 * black; 
   }
 
   if(z != 0) {
-    //cerr << "abs(value): " << abs(value) << endl;
-    //cerr << "z: " << z << endl;
     return abs(value) / z; 
   } else {
     //cerr << "Image was black." << endl;
@@ -143,7 +140,6 @@ double computeFeatureValueBrute(const IplImage* img, HaarFeature f) {
       z += s.val[0];
     }
   }
-  cout << "z is " << z << endl;
 
   //Horizontal - calculation from pg. 9 of problem handout
   if(f.type == "H") {
@@ -306,7 +302,6 @@ void HaarFeatures::getFeatureValues(vector<double>& feature_values,
   assert(img->width == 64);
   assert(img->height == 64);
  
-  cout << "integral" << endl;
   IplImage *iImage = cvCreateImage(cvSize(img->width + 1, img->height + 1),                                        IPL_DEPTH_32S, 1);
                                    cvIntegral(img, iImage);
   
@@ -329,7 +324,6 @@ void HaarFeatures::getFeatureValuesBrute(vector<double>& feature_values,
   //Image should be 64x64 (because the Haar features are based on 64x64 images)
   assert(img->width == 64);
   assert(img->height == 64);
-  cout << "brute force" << endl;
   for(vector<HaarFeature>::size_type i = 0; i < features.size(); i++) {
     double feature_value = computeFeatureValueBrute(img, features[i]);
     feature_values.push_back(feature_value);
