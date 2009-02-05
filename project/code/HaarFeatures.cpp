@@ -311,6 +311,8 @@ void HaarFeatures::getFeatureValues(vector<double>& feature_values,
     //printFeature(features[i]);
     //cerr << "Feature value [" << i << "]: " << feature_value << endl;
   }
+
+  cvReleaseImage(&iImage);
 }
 
 
