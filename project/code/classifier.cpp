@@ -88,7 +88,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
     for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
       for(int x = 0; x < gray->width - length; x = x + 8) {
         for(int y = 0; y < gray->height - length; y = y + 8) {
-          cerr << "New window: " << x << " " << y << " " << length << endl;
+//          cerr << "New window: " << x << " " << y << " " << length << endl;
           //Clip the frame to a square
 	  CvRect region = cvRect(x, y, length, length);
 	  IplImage *clippedImage = cvCreateImage(
