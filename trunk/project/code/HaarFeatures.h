@@ -13,6 +13,8 @@ public:
 
   void getFeatureValues(vector<double>& feature_values,
                         const IplImage* img) const;
+  void getFeatureValuesBrute(vector<double>& feature_values,
+                        const IplImage* img) const;
 
 private:
 

@@ -17,7 +17,7 @@ string haarTLImageFile("./testimages/haar-tl.jpg");
 string haarTRImageFile("./testimages/haar-tr.jpg");
 string haarBLImageFile("./testimages/haar-bl.jpg");
 string haarBRImageFile("./testimages/haar-br.jpg");
-
+string mugImageFile("/afs/ir/class/cs221/vision/data/mug/mug0001.jpg");
 int main(int argc, char** argv) {
   TestHaarFeatures::test();
 }
@@ -34,9 +34,6 @@ void displayImage() {
   cvDestroyWindow("Image1");
 }
 
-/**
- * Tests a simple white image
- */
 vector<double> getFeatureValues(string filename) {
   IplImage *image = cvLoadImage(filename.c_str(), 0);
 
@@ -51,6 +48,23 @@ vector<double> getFeatureValues(string filename) {
   haar.getFeatureValues(values, resizedImage);
   return values;
 }
+
+//TODO: Refactor this - this is a copy of getFeatureValues
+vector<double> getFeatureValuesBrute(string filename) {
+  IplImage *image = cvLoadImage(filename.c_str(), 0);
+
+  IplImage *resizedImage = cvCreateImage(
+    cvSize(64, 64),
+    image->depth,
+    image->nChannels);
+  cvResize(image, resizedImage);
+
+  vector<double> values;
+  HaarFeatures haar;
+  haar.getFeatureValuesBrute(values, resizedImage);
+  return values;
+}
+
 
 bool testBlackImage() {
   vector<double> values = getFeatureValues(blackImageFile);
@@ -114,6 +128,20 @@ bool testVectorSize() {
   return true;
 }
 
+bool testIntegralImage() {
+  vector<double> values = getFeatureValues(mugImageFile);
+  vector<double> valuesBrute = getFeatureValuesBrute(mugImageFile);
+  for(vector<double>::size_type i = 0; i < values.size(); i++) {
+    cout << "Feature: " << i << ": " << values[i] << " " << valuesBrute[i];
+    if(values[i] != valuesBrute[i]) {
+      cout << "No match";
+    }
+    cout << endl;
+  }
+  return true;
+}
+
+
 
 bool TestHaarFeatures::test() {
 
@@ -132,5 +160,6 @@ bool TestHaarFeatures::test() {
   testHaar(haarBRImageFile, 56);
   */
   testVectorSize();
+  testIntegralImage();
   return true;
 }
