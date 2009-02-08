@@ -6,11 +6,11 @@
 #include <fstream>
 
 size_t getMaxDepth() {
-  return 14;
+  return 9;
 }
 
 double getClassificationThreshold() {
-  return 0.5;
+  return 0.98;
 }
 
 double H(double p) {

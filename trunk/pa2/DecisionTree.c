@@ -287,6 +287,7 @@ void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel,
                                             (aboveTotals+belowTotals));
       float gain = allEgsEntropyTerm-aboveEgsEntropyTerm-belowEgsEntropyTerm; 
       if(gain>maxGain) {
+	gain = maxGain;
         chosenThreshold = threshold;
         chosenPixel = ipixel;
       }
