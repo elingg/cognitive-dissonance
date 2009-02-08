@@ -146,14 +146,12 @@ void RunBaggedDecisionTree(int argc, char** argv) {
       ) {
     cout << numClassifiers << endl;
     
-    // TODO: Use bagging to add a decision tree to each of
-    // classifiers[0..9], which corresponds to classifiers treating
-    // that digit as the positive class
-    
-    
-    
-    
-    
+    // Use bagging to add a decision tree to each of classifiers[0..9], which 
+    // corresponds to classifiers treating that digit as the positive class
+    for(int i = 0; i < 10; i++) {
+      AddDecisionTree(classifiers[i]);
+    }
+   
     trainingOut << numClassifiers << " " 
 		<< BaggedDecisionTreeAccuracy(classifiers, trainingSet) << endl;
     testOut << numClassifiers << " "
