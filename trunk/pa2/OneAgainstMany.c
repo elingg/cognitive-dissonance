@@ -1,6 +1,8 @@
 #include "OneAgainstMany.h"
-
+#include <iostream>
 #include <assert.h>
+
+using namespace std;
 
 // Each one of these functions returns the accuracy of the classifiers on the
 // given test set.  Implement the One-Against-Many functionality here.
@@ -31,7 +33,7 @@ float DecisionTreeAccuracy(DecisionTreeSet* classifiers,
         bestDigit = i;
       }
     }
-
+    //cerr << "Max confidence was: " << maxConfidence << endl;
     //Check if our choice was the correct one
     if((testSet->digits[digitIndex]->label) == bestDigit) {
       numCorrect++;
@@ -60,6 +62,8 @@ float BaggedDecisionTreeAccuracy(BaggedDecisionTree** classifiers,
     for(int i = 0; i < NUM_DIGITS; i++) {
       float confidence = PositiveConfidence(classifiers[i], 
                                             testSet->digits[digitIndex]);
+
+      //cerr << "Confidence for digit " << i << " is: " << confidence << endl;
       if(confidence > maxConfidence) {
         maxConfidence = confidence;
         bestDigit = i;

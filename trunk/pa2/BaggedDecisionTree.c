@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-
+#include <iostream>
+using namespace std;
 // Creates a new BaggedDecisionTree.
 BaggedDecisionTree* NewBaggedDecisionTree(DigitSet* trainingSet,
 					  int maxNumClassifiers,
@@ -112,6 +113,15 @@ void AddDecisionTree(BaggedDecisionTree* classifier) {
     int randomIndex = rand() % classifier->trainingSet->numDigits;
     classifier->exampleWeights[randomIndex] += 1;
   }
+  
+  //Debug weights
+  /*
+  cerr << "Weights: " << endl;
+  for(int i = 0; i < classifier->trainingSet->numDigits; i++) {
+    cerr << classifier->exampleWeights[i] <<  " ";
+  }
+  cerr << endl;
+  */
 
   //Add another bag at the end of the trees array
   classifier->weakClassifiers->trees[classifier->numClassifiers] = 
@@ -136,6 +146,7 @@ float PositiveConfidence(BaggedDecisionTree* classifier,
   int count = 0;
   for(int i = 0; i < classifier->numClassifiers; i++) {
     if(IsPositiveClass(classifier->weakClassifiers->trees[i], digit)) {
+//      cerr << "Found a positive class for number " << classifier->positiveLabel << endl;
       count++;
     }
   }
