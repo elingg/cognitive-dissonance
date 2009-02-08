@@ -80,12 +80,13 @@ void RunSingleTree(int argc, char** argv) {
     exampleWeights[digitNum] = 1;
   }
   
-  // TODO: Grow the decision trees for each digit as positive label.
+  // DONETODO: Grow the decision trees for each digit as positive label.
   //       classifiers->trees should be initialized after this.
-
-
-  
-  
+  for(int digitLabel=0; digitLabel<10; ++digitLabel) {
+    DecisionTree* grownTree = GrowDecisionTree(trainingSet, exampleWeights,
+                                             digitLabel, depth); 
+    classifiers->trees[digitLabel] = grownTree;  
+  }
   
   trainingOut << 0 << " "
 	      << DecisionTreeAccuracy(classifiers, trainingSet) << endl;
