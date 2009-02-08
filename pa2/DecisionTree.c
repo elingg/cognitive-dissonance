@@ -145,16 +145,16 @@ bool IsPositiveClass(DecisionTree* tree, Digit* digit) {
 // Return positiveCount / totalCount if we're at a leaf node, otherwise
 // recurse down the proper branch.  You can use the ComputeChildNum helper.
 float PositiveConfidence(DecisionTree* tree, Digit* digit) {
-  // TODO: Finish out the implementation of this recursive function.
-  assert(false); // remove
-
-
-
-
-  return 0;
+  // DONETODO: Finish out the implementation of this recursive function.
+  // assert(false); // remove
+  if(isLeaf) {
+    return positiveCount/totalCount;
+  }
+  int child = ComputeChildNum(threshold, digit->pixels[pixelNum]);
+  return PositiveConfidence(childTree, digit);
 }
 
-// TODO: This function is fully written out, but you might want to
+// DONETODO: This function is fully written out, but you might want to
 // understand how it works as this implements the core algorithm.
 // Learns a decision tree based on the given weights.
 // This function splits the training set and recursively calls itself.
@@ -193,7 +193,7 @@ DecisionTree* GrowDecisionTree(DigitSet* digitSet, float* exampleWeights,
 
     for(int childNum = 0; childNum < NUM_CHILDREN; childNum++) {
       tree->children[childNum] = 
-	GrowChild(tree,
+      GrowChild(tree,
 		  digitSet, exampleWeights,
 		  positiveLabel, depth, childNum);
     }
@@ -250,12 +250,29 @@ DecisionTree* GrowChild(DecisionTree* tree,
 // a threshold value.  This function should set the fields in tree.
 void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel, 
 			     DigitSet* digitSet, float* exampleWeights) {
-  // TODO
-
-
-
-
-
+  // TODO: NEED SOMEONE TO REVIEW THIS
+  // go through each pixel (feature) in example
+  int chosenPixel = -1;
+  float max_gain = -FLT_MAX;
+  for(int ipixel=0; ipixel<digitSet->numPixels; ipixel++) {
+    float positiveCount=0.0, totalCount=0.0;
+    // go through each given example
+    for(int iexample=0; iexample<digitSet->numDigits; iexample++) {
+      Digit* example = digitSet->digits[iexample]; 
+      float exampleWeight = exampleWeights[iexample];
+      float pixelValue = example->pixels[ipixel];
+      // add to positive count, total count
+      if(example->label==positiveLabel) {
+        positiveCount+=pixelValue*exampleWeight;
+      }
+      totalCount+=pixelValue*exampleWeight;
+    }
+    // measure entropy using positive and negative counts
+    float positiveExampleEntropy = Entropy(positiveCount/totalCount);
+    float negativeExampleEntropy = Entropy((totalCount-positiveCount)/totalCount);
+//    float gain =  
+  }
+  // pick the one with the max gain? 
 
 }
 
@@ -281,12 +298,15 @@ static float LogBaseTwo(float x) {
 // label positiveLabel.
 void InitializeProbabilities(DecisionTree* tree, DigitSet* digitSet, 
 			     float* exampleWeights, int positiveLabel) {
-  // TODO
-
-
-
-
-
+  // DONETODO
+  for(int iexample=0; iexample<numDigits; ++iexample) {
+    Digit* example = digits[iexample];
+    float weight = exampleWeights[iexample];
+    if(example->label==positiveLabel) {
+      tree->positiveCount+=weight; 
+    }
+    tree->totalCount+=weight;
+  }
 }
 
 // Creates a new decision tree set.  The trees will be initialized to NULL.

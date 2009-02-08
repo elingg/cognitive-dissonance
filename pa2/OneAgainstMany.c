@@ -38,7 +38,7 @@ float BaggedDecisionTreeAccuracy(BaggedDecisionTree** classifiers,
                                             testSet->digits[digitIndex]);
       if(confidence > maxConfidence) {
         maxConfidence = confidence;
-	bestDigit = i;
+        bestDigit = i;
       }
     }
 
