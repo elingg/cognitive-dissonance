@@ -152,12 +152,18 @@ void RunBaggedDecisionTree(int argc, char** argv) {
     for(int i = 0; i < 10; i++) {
       AddDecisionTree(classifiers[i]);
     }
-   
+
+    float trainAccuracy = BaggedDecisionTreeAccuracy(classifiers, trainingSet);
+    float testAccuracy = BaggedDecisionTreeAccuracy(classifiers, testSet);
+
     trainingOut << numClassifiers << " " 
-		<< BaggedDecisionTreeAccuracy(classifiers, trainingSet) << endl;
+		<< trainAccuracy << endl;
     testOut << numClassifiers << " "
-	    << BaggedDecisionTreeAccuracy(classifiers, testSet) << endl;
+	    << testAccuracy << endl;
     
+    cerr << "Training Accuracy: " << trainAccuracy << endl;
+    cerr << "Testing Accuracy: " << testAccuracy << endl;
+
     trainingOut.flush();
     testOut.flush();
     
