@@ -1,0 +1,17 @@
+The format of output files is basically as follows (copied 10 times over, 
+once for the ensemble for each digit):
+
+NUM_TREES
+TREE_SPECIFICATION*
+NUM_HYPOTHESES
+HYPOTHESES_WEIGHTS
+NUM_EXAMPLES
+EXAMPLE_WEIGHTS
+DIGIT_LABEL
+
+The tree specification shows the structure of the tree.  Internal nodes labeled I 
+indicate what pixelnumber and what threshold they split on.  Leaves labeled L
+indicate the count of positive examples out of total examples that reach that leaf.
+
+Note that singletree file for part 2 contains only TREE_SPECIFICATIONS, one for each 
+of the classifiers corresponding to the labels 0-9.

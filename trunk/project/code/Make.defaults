@@ -6,6 +6,8 @@
 ## ---------------------------------------------------------------------------
 
 # OpenCV library location
-OPENCV_INC_DIR=/afs/ir.stanford.edu/class/cs221/linux64/include/opencv
-OPENCV_LIB_DIR=/afs/ir.stanford.edu/class/cs221/linux64/lib
+#OPENCV_INC_DIR=/afs/ir.stanford.edu/class/cs221/linux64/include/opencv
+OPENCV_INC_DIR=/usr/local/include/opencv
+#OPENCV_LIB_DIR=/afs/ir.stanford.edu/class/cs221/linux64/lib
+OPENCV_LIB_DIR=/usr/local/lib
 
