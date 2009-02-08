@@ -251,30 +251,41 @@ DecisionTree* GrowChild(DecisionTree* tree,
 // a threshold value.  This function should set the fields in tree.
 void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel, 
 			     DigitSet* digitSet, float* exampleWeights) {
+  // DONETODO
   // TODO: NEED SOMEONE TO REVIEW THIS
   int chosenPixel = -1;
   float maxGain = -FLT_MAX;
   float chosenThreshold = -1;
   for(int ipixel=0; ipixel<digitSet->numPixels; ipixel++) {
     // go through each pixel (feature) in example
-    for(float threshold = 0.1; threshold<1; threshold+=0.1) {
+    for(float threshold = 0.1; threshold<1.0; threshold+=0.1) {
       // for each threshold we try..
-      float positiveCount=0.0, totalCount=0.0;
+      float abovePositives=0, aboveTotals=0; // above threshold counts
+      float belowPositives=0, belowTotals=0; // below threshold counts
       for(int iexample=0; iexample<digitSet->numDigits; iexample++) {
         // go through each given example
         Digit* example = digitSet->digits[iexample]; 
         float exampleWeight = exampleWeights[iexample];
         float pixelValue = example->pixels[ipixel];
-        // add to positive count, total count
-        if(example->label==positiveLabel) {
-          positiveCount+=pixelValue*exampleWeight;
+        if(pixelValue>threshold) {
+          if(example->label==positiveLabel) {
+            abovePositives+=exampleWeight;
+          }
+          aboveTotals+=exampleWeight;
+        } else {
+          if(example->label==positiveLabel) {
+            belowPositives+=exampleWeight;
+          }
+          belowTotals+=exampleWeight;
         }
-        totalCount+=pixelValue*exampleWeight;
       }
       // measure entropy using positive and negative counts
-      float positiveExampleEntropy = Entropy(positiveCount/totalCount);
-      float negativeExampleEntropy = Entropy((totalCount-positiveCount)/totalCount);
-      float gain = 0.0; // TODO
+      float aboveEgsEntropyTerm = aboveTotals*Entropy(abovePositives/aboveTotals);
+      float belowEgsEntropyTerm = belowTotals*Entropy(belowPositives/belowTotals);
+      float allEgsEntropyTerm = (aboveTotals+belowTotals)
+                                   *Entropy((abovePositives+belowPositives)/
+                                            (aboveTotals+belowTotals));
+      float gain = allEgsEntropyTerm-aboveEgsEntropyTerm-belowEgsEntropyTerm; 
       if(gain>maxGain) {
         chosenThreshold = threshold;
         chosenPixel = ipixel;
