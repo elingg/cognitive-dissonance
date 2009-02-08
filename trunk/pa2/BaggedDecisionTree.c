@@ -98,10 +98,27 @@ void WriteBaggedDecisionTree(BaggedDecisionTree* classifier, FILE* file) {
 void AddDecisionTree(BaggedDecisionTree* classifier) {
   assert(classifier->numClassifiers < classifier->weakClassifiers->numTrees);
 
-  // TODO: Use bagging to add a decision tree.
+  //Use bagging to add a decision tree.
 
+  //Clear the weights
+  //TODO: Double check if this is necessary
+  for(int i = 0; i < classifier->trainingSet->numDigits; i++) {
+    classifier->exampleWeights[i] = 0;
+  }
 
+  //Algorithm based on pg. 11 of Supervised Learning lecture.  Here, we
+  //adjust weights for the each training example randomly
+  for(int i = 0; i < classifier->trainingSet->numDigits; i++) {
+    int randomIndex = rand() % classifier->trainingSet->numDigits;
+    classifier->exampleWeights[randomIndex] += 1;
+  }
 
+  //Add another bag at the end of the trees array
+  classifier->weakClassifiers->trees[classifier->numClassifiers] = 
+    GrowDecisionTree(classifier->trainingSet,
+                     classifier->exampleWeights,
+                     classifier->positiveLabel,
+                     classifier->treeDepth);
 
   // Increment the count of classifiers
   (classifier->numClassifiers)++;
@@ -115,12 +132,12 @@ void AddDecisionTree(BaggedDecisionTree* classifier) {
 // classify the digit into the positive class.
 float PositiveConfidence(BaggedDecisionTree* classifier,
 			 Digit* digit) {
-  // TODO: Compute BaggedDecisionTree's output.
-  assert(false); // remove
-
-
-
-
-
-  return 0;
+  //Compute BaggedDecisionTree's output.
+  int count = 0;
+  for(int i = 0; i < classifier->numClassifiers; i++) {
+    if(IsPositiveClass(classifier->weakClassifiers->trees[i], digit)) {
+      count++;
+    }
+  }
+  return (float) count / (float) classifier->numClassifiers;
 }
