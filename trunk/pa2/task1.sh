@@ -5,7 +5,7 @@ DIR=/afs/ir/class/cs221/data/digits
 
 datasize="1k"
 startdepth=4
-stopdepth=14
+stopdepth=4
 stepdepth=2
 
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
@@ -15,18 +15,21 @@ do
   echo $cmd
   $cmd
 done
-echo "Accuracies for 1k:"
-echo "On train data:"
+
+LOGFILE=tmp.log
+rm -rf $LOGFILE
+echo -e "\nAccuracies for 1k:" >> $LOGFILE
+echo "On train data:" >>  $LOGFILE
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
 do
-  echo "Depth: $depth"
-  cat results.singletree.training.d$depth.txt
+  echo "Depth: $depth" >> $LOGFILE
+  cat results.singletree.training.d$depth.txt >> $LOGFILE
 done
-echo "On test data:"
+echo "On test data:" >> $LOGFILE
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
 do
-  echo "Depth: $depth"
-  cat results.singletree.test.d$depth.txt
+  echo "Depth: $depth" >> $LOGFILE
+  cat results.singletree.test.d$depth.txt >> $LOGFILE
 done
 
 datasize="10k"
@@ -37,16 +40,18 @@ do
   echo $cmd
   $cmd
 done
-echo "Accuracies for 10k:"
-echo "On train data:"
+echo -e "\nAccuracies for 10k:" >> $LOGFILE
+echo "On train data:" >> $LOGFILE
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
 do
-  echo "Depth: $depth"
-  cat results.singletree.training.d$depth.txt
+  echo "Depth: $depth" >> $LOGFILE
+  cat results.singletree.training.d$depth.txt >> $LOGFILE
 done
-echo "On test data:"
+echo "On test data:" >> $LOGFILE
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
 do
-  echo "Depth: $depth"
-  cat results.singletree.test.d$depth.txt
+  echo "Depth: $depth" >> $LOGFILE
+  cat results.singletree.test.d$depth.txt >> $LOGFILE
 done
+cat $LOGFILE
+echo "Accuracies also logged to $LOGFILE"
