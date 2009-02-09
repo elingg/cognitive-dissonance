@@ -5,7 +5,7 @@ DIR=/afs/ir/class/cs221/data/digits
 
 datasize="1k"
 startdepth=4
-stopdepth=4
+stopdepth=14
 stepdepth=2
 
 for ((depth=$startdepth; depth<=$stopdepth; depth=depth+$stepdepth))
