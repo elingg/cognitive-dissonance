@@ -252,7 +252,6 @@ DecisionTree* GrowChild(DecisionTree* tree,
 void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel, 
 			     DigitSet* digitSet, float* exampleWeights) {
   // DONETODO
-  // TODO: NEED SOMEONE TO REVIEW THIS
   int chosenPixel = -1;
   float maxGain = -FLT_MAX;
   float chosenThreshold = -1;
@@ -287,7 +286,7 @@ void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel,
                                             (aboveTotals+belowTotals));
       float gain = allEgsEntropyTerm-aboveEgsEntropyTerm-belowEgsEntropyTerm; 
       if(gain>maxGain) {
-	maxGain = gain;
+        maxGain = gain;
         chosenThreshold = threshold;
         chosenPixel = ipixel;
       }
