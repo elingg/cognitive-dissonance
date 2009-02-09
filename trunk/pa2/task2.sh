@@ -7,5 +7,5 @@ NUM_BAGS=100
 for depth in {3..14}
 do
   echo "Running depth: $depth"
-  ./digit bagging $DIR/training-1k-images.idx3 $DIR/training-1k-labels.idx1 $DIR/test-1k-images.idx3 $DIR/test-1k-labels.idx1 $depth $NUM_BAGS baggingDepth$depth.out
+  ./digit bagging $DIR/training-1k-images.idx3 $DIR/training-1k-labels.idx1 $DIR/test-1k-images.idx3 $DIR/test-1k-labels.idx1 $depth $NUM_BAGS bagD$depth.out
 done
