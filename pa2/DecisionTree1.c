@@ -153,7 +153,13 @@ float PositiveConfidence(DecisionTree* tree, Digit* digit) {
     return tree->positiveCount/tree->totalCount;
   }
 //  int child = ComputeChildNum(tree->threshold, digit->pixels[tree->pixelNum]);    
-   int child = ComputeChildNum(tree->threshold, tree->pixelNum);
+    float pixelValue=0;
+    for(int ipixel=0; ipixel<digit->numPixels; ipixel++) {
+        pixelValue+=digit->pixels[ipixel];
+   }
+        pixelValue/=digit->numPixels;
+
+   int child = ComputeChildNum(tree->threshold, pixelValue);
   return PositiveConfidence(tree->children[child], digit);
 }
 
@@ -216,7 +222,13 @@ DecisionTree* GrowChild(DecisionTree* tree,
   for(int digitNum = 0; digitNum < digitSet->numDigits; digitNum++) {
     
     //if(ComputeChildNum(tree->threshold, digitSet->digits[digitNum]->pixels[tree->pixelNum]) ==childNum) 
-    if(ComputeChildNum(tree->threshold, tree->pixelNum) == childNum)
+    float pixelValue;
+    for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++) {
+        pixelValue+=digitSet->digits[digitNum]->pixels[ipixel];
+   }
+        pixelValue/=digitSet->digits[digitNum]->numPixels;
+
+    if(ComputeChildNum(tree->threshold, pixelValue) == childNum)
     {
       
       count++;
@@ -229,10 +241,17 @@ DecisionTree* GrowChild(DecisionTree* tree,
   float* childExampleWeights = (float*) malloc(count * sizeof(float));
 
   int childIndex = 0;
+  float pixelValue=0;
   for(int digitNum = 0; digitNum < digitSet->numDigits; digitNum++) {
-    if(ComputeChildNum(tree->threshold, 
-		       digitSet->digits[digitNum]->pixels[tree->pixelNum]) ==
-       childNum) {
+
+      for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++) {
+        pixelValue+=digitSet->digits[digitNum]->pixels[ipixel];
+   }
+        pixelValue/=digitSet->digits[digitNum]->numPixels;
+
+//    if(ComputeChildNum(tree->threshold, digitSet->digits[digitNum]->pixels[tree->pixelNum]) ==childNum) {
+  if(ComputeChildNum(tree->threshold, pixelValue) ==childNum) {
+
       childDigitSet->digits[childIndex] = digitSet->digits[digitNum];
       childExampleWeights[childIndex] = exampleWeights[digitNum];
       childIndex++;
@@ -274,10 +293,10 @@ void ChoosePixelAndThreshold(DecisionTree* tree, int positiveLabel,
         float exampleWeight = exampleWeights[iexample];
          pixelValue = 0;
         //float pixelValue = example->pixels[ipixel];
-        for(int ipixel=0; ipixel<digitSet->numPixels; ipixel++) {
+        for(int ipixel=0; ipixel<example->numPixels; ipixel++) {
         pixelValue+=example->pixels[ipixel];
    }
-	pixelValue/=digitSet->numPixels;
+	pixelValue/=example->numPixels;
 
         if(pixelValue>threshold) {
           if(example->label==positiveLabel) {
