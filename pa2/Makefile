@@ -13,7 +13,7 @@ INCDIR =
 LIBDIR = 
 LIBS = 
 
-SRCS = main.c Digit.c DecisionTree.c OneAgainstMany.c BaggedDecisionTree.c
+SRCS = main.c Digit.c DecisionTree.c OneAgainstMany.c BaggedDecisionTree.c BoostedDecisionTree.c
 OBJS = $(SRCS:.c=.o)
 PROGS = digit
 
