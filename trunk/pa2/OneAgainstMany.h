@@ -5,6 +5,7 @@
 
 #include "DecisionTree.h"
 #include "BaggedDecisionTree.h"
+#include "BoostedDecisionTree.h"
 
 // Each one of these functions returns the accuracy of the classifiers on the
 // given test set.  Implement the One-Against-Many functionality here.
@@ -19,4 +20,9 @@ float DecisionTreeAccuracy(DecisionTreeSet* classifiers,
 float BaggedDecisionTreeAccuracy(BaggedDecisionTree** classifiers,
 				 DigitSet* testSet);
 
+float BoostedDecisionTreeAccuracy(BoostedDecisionTree** classifiers,
+				 DigitSet* testSet);
+
+int GetBoostedTreePrediction(BoostedDecisionTree** classifiers, 
+         Digit* digit);
 #endif
