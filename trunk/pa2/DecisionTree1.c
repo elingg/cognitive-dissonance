@@ -222,7 +222,7 @@ DecisionTree* GrowChild(DecisionTree* tree,
   for(int digitNum = 0; digitNum < digitSet->numDigits; digitNum++) {
     
     //if(ComputeChildNum(tree->threshold, digitSet->digits[digitNum]->pixels[tree->pixelNum]) ==childNum) 
-    float pixelValue;
+    float pixelValue=0;
     for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++) {
         pixelValue+=digitSet->digits[digitNum]->pixels[ipixel];
    }
@@ -230,7 +230,6 @@ DecisionTree* GrowChild(DecisionTree* tree,
 
     if(ComputeChildNum(tree->threshold, pixelValue) == childNum)
     {
-      
       count++;
     }
   }
@@ -244,7 +243,7 @@ DecisionTree* GrowChild(DecisionTree* tree,
   float pixelValue=0;
   for(int digitNum = 0; digitNum < digitSet->numDigits; digitNum++) {
 
-      for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++) {
+      for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++)    {
         pixelValue+=digitSet->digits[digitNum]->pixels[ipixel];
    }
         pixelValue/=digitSet->digits[digitNum]->numPixels;
@@ -265,6 +264,7 @@ DecisionTree* GrowChild(DecisionTree* tree,
   // Clean up our memory.
   FreeDigitSet(childDigitSet, false);
   free(childExampleWeights);
+
 
   return returnValue;
 }
