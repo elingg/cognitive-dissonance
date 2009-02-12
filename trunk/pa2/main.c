@@ -148,8 +148,8 @@ void RunBoostedDecisionTree(int argc, char** argv) {
   
   // Iterate over number of bags, or however much gives 100% accuracy
   bool peaked = false;
-  for(int numClassifiers = 0; (!peaked) && (numClassifiers < maxEnsembleSize); numClassifiers++
-      ) {
+  //for(int numClassifiers = 0; (!peaked) && (numClassifiers < maxEnsembleSize); numClassifiers++
+  for(int numClassifiers = 0; numClassifiers < maxEnsembleSize; numClassifiers++) {
     
     //cout << "Number of bags: " << numClassifiers << endl;
     // Use bagging to add a decision tree to each of classifiers[0..9], which 
@@ -201,24 +201,26 @@ void RunBoostedDecisionTree(int argc, char** argv) {
     }
     if(!peaked) {
       for(int i=0; i<10; i++) {
-        //if(numClassifiers==14 && i==0) { cerr << "New Weights: " <<endl; }
         for(int iex=0; iex<trainingSet->numDigits; iex++) {
           classifiers[i]->exampleWeights[iex] = newWeights[i][iex];
-          //if(numClassifiers==14 && i==0) { cerr << newWeights[i][iex] << " "; }
         }
-        //if(numClassifiers==14 && i==0) { cerr << "New Alphas: " <<endl; }
         for(int ic=0; ic< classifiers[i]->numClassifiers; ++ic) {
           (*(classifiers[i]->weakClassifiersAlpha))[ic] = newAlphas[i];
-          //if(numClassifiers==14 && i==0) { cerr << newAlphas[i] << " "; }
+        }
+      }
+    } else { // back to old way if we don't know what else to do...
+      for(int i=0; i<10; i++) {
+        for(int iex=0; iex<trainingSet->numDigits; iex++) {
+          classifiers[i]->exampleWeights[iex] = 1.0f/float(trainingSet->numDigits);
         }
       }
     }
-    if(peaked) {
+    if(numClassifiers==maxEnsembleSize-1) {
       float trainAccuracy = BoostedDecisionTreeAccuracy(classifiers, trainingSet);
       float testAccuracy = BoostedDecisionTreeAccuracy(classifiers, testSet);
 
       trainingOut << numClassifiers << " " 
-		   << trainAccuracy << endl;
+	     << trainAccuracy << endl;
       testOut << numClassifiers << " "
 	      << testAccuracy << endl;
     
