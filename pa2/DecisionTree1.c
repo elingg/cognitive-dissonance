@@ -240,8 +240,8 @@ DecisionTree* GrowChild(DecisionTree* tree,
   float* childExampleWeights = (float*) malloc(count * sizeof(float));
 
   int childIndex = 0;
-  float pixelValue=0;
   for(int digitNum = 0; digitNum < digitSet->numDigits; digitNum++) {
+  float pixelValue = 0;
 
       for(int ipixel=0; ipixel<digitSet->digits[digitNum]->numPixels; ipixel++)    {
         pixelValue+=digitSet->digits[digitNum]->pixels[ipixel];
