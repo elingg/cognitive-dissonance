@@ -1,5 +1,5 @@
 #include "BoostedDecisionTree.h"
-
+#include <vector>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -29,6 +29,7 @@ BoostedDecisionTree* NewBoostedDecisionTree(DigitSet* trainingSet,
 
   classifier->positiveLabel = positiveLabel;
   classifier->treeDepth = treeDepth;
+  classifier->weakClassifiersAlpha = new vector<float>();
   return classifier;
 }
 
@@ -65,9 +66,9 @@ BoostedDecisionTree* ReadBoostedDecisionTree(FILE* file) {
 
   fscanf(file, "%d\n", &classifier->positiveLabel);
   fscanf(file, "%d\n", &classifier->treeDepth);
-  classifier->weakClassifiersAlpha.resize(classifier->numClassifiers,1);
+  classifier->weakClassifiersAlpha->resize(classifier->numClassifiers,1);
   for(int ic=0; ic<classifier->numClassifiers; ic++) {
-    fscanf(file, "%f\n", &classifier->weakClassifiersAlpha[ic]);
+    fscanf(file, "%f\n", &((*(classifier->weakClassifiersAlpha))[ic]));
   }
 
   return classifier;
@@ -90,7 +91,7 @@ void WriteBoostedDecisionTree(BoostedDecisionTree* classifier, FILE* file) {
   fprintf(file, "%d\n", classifier->positiveLabel);
   fprintf(file, "%d\n", classifier->treeDepth);
   for(int ic=0; ic<classifier->numClassifiers; ic++) {
-    fprintf(file, "%f\n", classifier->weakClassifiersAlpha[ic]);
+    fprintf(file, "%f\n", (*(classifier->weakClassifiersAlpha))[ic]);
   }
 }
 
@@ -117,7 +118,7 @@ void AddDecisionTree(BoostedDecisionTree* classifier) {
 
   // Increment the count of classifiers
   (classifier->numClassifiers)++;
-  classifier->weakClassifiersAlpha.push_back(1);
+  classifier->weakClassifiersAlpha->push_back(1);
 }
 
 // Returns our confidence that the given digit is from the positiveLabel
@@ -132,12 +133,12 @@ float PositiveConfidence(BoostedDecisionTree* classifier,
   float count = 0;
   float sumalphas=0;
   for(int i=0; i<classifier->numClassifiers; i++) {
-    sumalphas += classifier->weakClassifiersAlpha[i];
+    sumalphas += (*(classifier->weakClassifiersAlpha))[i];
   }
   for(int i = 0; i < classifier->numClassifiers; i++) {
     if(IsPositiveClass(classifier->weakClassifiers->trees[i], digit)) {
-//      cerr << "Found a positive class for number " << classifier->positiveLabel << endl;
-      count+=(classifier->weakClassifiersAlpha[i]/sumalphas);
+      // cerr << "Found a positive class for number " << classifier->positiveLabel << endl;
+      count+=(*(classifier->weakClassifiersAlpha))[i]/sumalphas;
     }
   }
   // printf("count: %f\n", count);
