@@ -132,7 +132,6 @@ void RunBoostedDecisionTree(int argc, char** argv) {
     classifiers[positiveLabel] = 
       NewBoostedDecisionTree(trainingSet, maxEnsembleSize, positiveLabel, depth);
   }
-  
   // Tell each classifier to learn, track performance.
   stringstream trainingOutStream;
   trainingOutStream << "results.boostedt.training.d" << depth 
@@ -146,12 +145,13 @@ void RunBoostedDecisionTree(int argc, char** argv) {
   
   ofstream trainingOut(trainingOutFileName.c_str());
   ofstream testOut(testOutFileName.c_str());
-
-  // Iterate over number of bags
-  for(int numClassifiers = 0; numClassifiers < maxEnsembleSize; numClassifiers++
+  
+  // Iterate over number of bags, or however much gives 100% accuracy
+  bool peaked = false;
+  for(int numClassifiers = 0; (!peaked) && (numClassifiers < maxEnsembleSize); numClassifiers++
       ) {
-    cout << "Number of bags: " << numClassifiers << endl;
     
+    //cout << "Number of bags: " << numClassifiers << endl;
     // Use bagging to add a decision tree to each of classifiers[0..9], which 
     // corresponds to classifiers treating that digit as the positive class
     // this method creates and adds a DecisionTree to this, using the...
@@ -169,12 +169,15 @@ void RunBoostedDecisionTree(int argc, char** argv) {
           epsilonb+=classifiers[i]->exampleWeights[iex];
         } 
       }
+      if(epsilonb<1e-14) {
+        peaked = true;
+      }
       newWeights[i].resize(trainingSet->numDigits,0);
       float alphab = 0;
       if(epsilonb>0 && epsilonb<1.0) { 
         alphab = 0.5*LogBaseTwo((1-epsilonb)/(epsilonb));
       }
-      // printf("epsilon: %f, alpha: %f\n",epsilonb, alphab);
+      //if(i==0) cerr << "epsilon: " << epsilonb << ", " << alphab << endl;
       float weightsum = 0;
       for(int iex = 0; iex < trainingSet->numDigits; iex++) {
         if(GetBoostedTreePrediction(classifiers,trainingSet->digits[iex])!=trainingSet->digits[iex]->label) { 
@@ -186,33 +189,46 @@ void RunBoostedDecisionTree(int argc, char** argv) {
         }
         weightsum+=newWeights[i][iex];
       }
+      if(weightsum<1e-14) {
+        peaked = true;
+        continue;
+      }
       // printf("Weight sum: %f\n",weightsum);
       for(int iex = 0; iex < trainingSet->numDigits; iex++) {
         newWeights[i][iex]/=weightsum;
       }
       newAlphas[i] = alphab;
     }
-    for(int i=0; i<10; i++) {
-      for(int iex=0; iex<trainingSet->numDigits; iex++) {
-        classifiers[i]->exampleWeights[iex] = newWeights[i][iex];
-      }
-      for(int ic=0; ic< classifiers[i]->numClassifiers; ++ic) {
-        classifiers[i]->weakClassifiersAlpha[ic] = newAlphas[i];
+    if(!peaked) {
+      for(int i=0; i<10; i++) {
+        //if(numClassifiers==14 && i==0) { cerr << "New Weights: " <<endl; }
+        for(int iex=0; iex<trainingSet->numDigits; iex++) {
+          classifiers[i]->exampleWeights[iex] = newWeights[i][iex];
+          //if(numClassifiers==14 && i==0) { cerr << newWeights[i][iex] << " "; }
+        }
+        //if(numClassifiers==14 && i==0) { cerr << "New Alphas: " <<endl; }
+        for(int ic=0; ic< classifiers[i]->numClassifiers; ++ic) {
+          (*(classifiers[i]->weakClassifiersAlpha))[ic] = newAlphas[i];
+          //if(numClassifiers==14 && i==0) { cerr << newAlphas[i] << " "; }
+        }
       }
     }
-    float trainAccuracy = BoostedDecisionTreeAccuracy(classifiers, trainingSet);
-    float testAccuracy = BoostedDecisionTreeAccuracy(classifiers, testSet);
+    if(peaked) {
+      float trainAccuracy = BoostedDecisionTreeAccuracy(classifiers, trainingSet);
+      float testAccuracy = BoostedDecisionTreeAccuracy(classifiers, testSet);
 
-    trainingOut << numClassifiers << " " 
-		<< trainAccuracy << endl;
-    testOut << numClassifiers << " "
-	    << testAccuracy << endl;
+      trainingOut << numClassifiers << " " 
+		   << trainAccuracy << endl;
+      testOut << numClassifiers << " "
+	      << testAccuracy << endl;
     
-    cerr << "Training Accuracy: " << trainAccuracy << endl;
-    cerr << "Testing Accuracy: " << testAccuracy << endl;
-    cerr << "----" << endl;
-    trainingOut.flush();
-    testOut.flush();
+      cout << "Number of bags: " << numClassifiers+1 << endl;
+      cerr << "Training Accuracy: " << trainAccuracy << endl;
+      cerr << "Testing Accuracy: " << testAccuracy << endl;
+      cerr << "----" << endl;
+      trainingOut.flush();
+      testOut.flush();
+    }
     
   }
 

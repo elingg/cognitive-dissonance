@@ -21,7 +21,7 @@ typedef struct BoostedDecisionTree {
 
   int positiveLabel;                // Which digit label we consider the positive class.
   int treeDepth;                    // The depth we use when we grow trees.
-  vector<float> weakClassifiersAlpha;
+  vector<float>* weakClassifiersAlpha;
 } BoostedDecisionTree;
 
 // Creates a new BoostedDecisionTree.
