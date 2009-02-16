@@ -8,6 +8,7 @@
 
 // ------- CONSTANTS -------
 const static int EXPLORATION_RUNS = 1000000;
+//const static int EXPLORATION_RUNS = 100000;
 
 // ------- PROTOTYPES -----
 static void setStateToRandom(double state[STATE_SIZE]);
@@ -38,12 +39,44 @@ int main(int argc, char* argv[]) {
   // | 4.1 EXPLORATION
   // ----------------------------------------------------
   // First, explore to build up a model
-  for (int i = 0; i < EXPLORATION_RUNS; i++) {
 
+  double state0[STATE_SIZE];
+  double state1[STATE_SIZE];
+  double action[ACTION_SIZE];
+
+  for (int i = 0; i < EXPLORATION_RUNS; i++) {
     //
-    // TODO:  Put your exploration code here.
+    // TODODONE:  Put your exploration code here.
     //
+    if(i % 1000 == 0) {
+      std::cerr << "Exploration Iteration: " << i << "\n";
+    }
+    setStateToRandom(state0);
+    for(int steeri = 0; steeri < STEERING_COUNT; steeri++) {
+      for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
+        ActionIndex actionIndex = getActionIndex(steeri, wheelveli);
+        undiscretizeAction(actionIndex, action);
+	simulate(state0, action, state1); 
+        StateIndex state0Index = discretizeState(state0);
+	StateIndex state1Index = discretizeState(state1);
+	model.addCount(state0Index, actionIndex, state1Index);
+      }
+    }
   }
+
+  //Sanity check that the probabilities for the last state0 are non-zero
+  /*
+  for(int steeri = 0; steeri < STEERING_COUNT; steeri++) {
+    for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
+      ActionIndex actionIndex = getActionIndex(steeri, wheelveli);
+      StateIndex state0Index = discretizeState(state0);
+      StateIndex state1Index = discretizeState(state1);
+      double p = model.probability(state0Index, actionIndex, state1Index);
+      std::cerr << "Probability: " << p << "\n";
+    }
+  }
+  */
+
   std::cout << "Finished exploring.            " << std::endl;
 
 
