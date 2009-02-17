@@ -5,10 +5,11 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <float.h>
 
 // ------- CONSTANTS -------
-const static int EXPLORATION_RUNS = 1000000;
-//const static int EXPLORATION_RUNS = 100000;
+//const static int EXPLORATION_RUNS = 1000000;
+const static int EXPLORATION_RUNS = 100000;
 
 // ------- PROTOTYPES -----
 static void setStateToRandom(double state[STATE_SIZE]);
@@ -56,10 +57,10 @@ int main(int argc, char* argv[]) {
       for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
         ActionIndex actionIndex = getActionIndex(steeri, wheelveli);
         undiscretizeAction(actionIndex, action);
-	simulate(state0, action, state1); 
+        simulate(state0, action, state1); 
         StateIndex state0Index = discretizeState(state0);
-	StateIndex state1Index = discretizeState(state1);
-	model.addCount(state0Index, actionIndex, state1Index);
+        StateIndex state1Index = discretizeState(state1);
+        model.addCount(state0Index, actionIndex, state1Index);
       }
     }
   }
@@ -94,10 +95,37 @@ int main(int argc, char* argv[]) {
 
   // Do Value Iteration:
   //
-  // TODO:  Put your Value Iteration code here.
+  // TODODONE:  Put your Value Iteration code here.
   //
-
-
+  for(int iter=0; iter < 60; iter++) {
+    std::cout << "Value iteration: " << iter << std::endl;
+    for (StateIndex s = 0; s < DISCRETE_STATE_COUNT; s++) {
+      double exp_max_reward = -DBL_MAX;
+      // std::cout << "\tState: " << s << std::endl;
+      for(int steeri = 0; steeri < STEERING_COUNT; steeri++) {
+        // std::cout << "\t\tsteeri: " << steeri << " of " << STEERING_COUNT << std::endl;
+        for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
+          // std::cout << "\t\t\twheelveli: " << wheelveli << " of " << WHEEL_VEL_COUNT << std::endl;
+          ActionIndex a = getActionIndex(steeri, wheelveli);
+          double exp_reward = expectedValue(&model, s, a, prevValueFunction);
+          // std::cout << "\t\t\texp_reward: " << exp_reward << ", exp_max_reward: " << exp_max_reward << std::endl;
+          if(exp_max_reward<exp_reward) {
+            // std::cout << "\t\t\t\tState: " << s << ", updating " << exp_max_reward << " to " << exp_reward << " at steeri: " << steeri << " and wheelveli " << wheelveli << std::endl;
+            exp_max_reward = exp_reward;
+          }
+        }
+      }
+      // its ok to move gamma out because fixed over actions...
+      prevValueFunction[s] = valueFunction[s];
+      valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
+    }
+  }
+  double initstate[STATE_SIZE];
+  setStateToInitial(initstate);
+  StateIndex initstateindex = discretizeState(initstate);
+  std::cout << "Value function for initial state is: " << 
+       valueFunction[initstateindex] << std::endl; 
+  
   // ----------------------------------------------------
   // | 4.3 COMPUTE OPTIMAL POLICY
   // ----------------------------------------------------
