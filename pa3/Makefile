@@ -6,6 +6,9 @@ CFLAGS=-g -Wall
 LDFLAGS=-lm
 GRAPHICS_LIBS = -lX11 -lXi -lXmu -lGL -lGLU -lglut
 
+#LDFLAGS=-lm -L/usr/X11/lib -framework OpenGL -framework GLUT
+#GRAPHICS_LIBS = -lX11 -lXi -lXmu -lGL -lGLU 
+
 SRC = main.cpp carmodel.cpp carmodel.h \
 	transitionmodel.cpp transitionmodel.h \
 	reward.cpp reward.h
