@@ -8,8 +8,8 @@
 #include <float.h>
 
 // ------- CONSTANTS -------
-//const static int EXPLORATION_RUNS = 1000000;
-const static int EXPLORATION_RUNS = 100000;
+const static int EXPLORATION_RUNS = 1000000;
+//const static int EXPLORATION_RUNS = 100000;
 
 // ------- PROTOTYPES -----
 static void setStateToRandom(double state[STATE_SIZE]);
