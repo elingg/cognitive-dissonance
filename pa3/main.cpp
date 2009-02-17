@@ -103,14 +103,20 @@ int main(int argc, char* argv[]) {
       double exp_max_reward = -DBL_MAX;
       // std::cout << "\tState: " << s << std::endl;
       for(int steeri = 0; steeri < STEERING_COUNT; steeri++) {
-        // std::cout << "\t\tsteeri: " << steeri << " of " << STEERING_COUNT << std::endl;
+        // std::cout << "\t\tsteeri: " << steeri 
+        //    << " of " << STEERING_COUNT << std::endl;
         for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
-          // std::cout << "\t\t\twheelveli: " << wheelveli << " of " << WHEEL_VEL_COUNT << std::endl;
+          // std::cout << "\t\t\twheelveli: " 
+          //    << wheelveli << " of " << WHEEL_VEL_COUNT << std::endl;
           ActionIndex a = getActionIndex(steeri, wheelveli);
           double exp_reward = expectedValue(&model, s, a, prevValueFunction);
-          // std::cout << "\t\t\texp_reward: " << exp_reward << ", exp_max_reward: " << exp_max_reward << std::endl;
+          // std::cout << "\t\t\texp_reward: " 
+          //    << exp_reward << ", exp_max_reward: " << exp_max_reward << std::endl;
           if(exp_max_reward<exp_reward) {
-            // std::cout << "\t\t\t\tState: " << s << ", updating " << exp_max_reward << " to " << exp_reward << " at steeri: " << steeri << " and wheelveli " << wheelveli << std::endl;
+            // std::cout << "\t\t\t\tState: " << s 
+            // << ", updating " << exp_max_reward << " to " 
+            // << exp_reward << " at steeri: " << steeri << 
+            // " and wheelveli " << wheelveli << std::endl;
             exp_max_reward = exp_reward;
           }
         }
@@ -131,10 +137,33 @@ int main(int argc, char* argv[]) {
   // ----------------------------------------------------
 
   //
-  // TODO: Use your computed value function from above to compute the
+  // TODODONE: Use your computed value function from above to compute the
   // best action for every state.
   //
-
+  for (StateIndex s = 0; s < DISCRETE_STATE_COUNT; s++) {
+    ActionIndex best_action = 0; // not sure what to set as initial action
+    double best_value = -DBL_MAX;
+    // std::cout << "\tState: " << s << std::endl;
+    for(int steeri = 0; steeri < STEERING_COUNT; steeri++) {
+      // std::cout << "\t\tsteeri: " << steeri 
+      //    << " of " << STEERING_COUNT << std::endl;
+      for(int wheelveli = 0; wheelveli < WHEEL_VEL_COUNT; wheelveli++) {
+        // std::cout << "\t\t\twheelveli: " 
+        //    << wheelveli << " of " << WHEEL_VEL_COUNT << std::endl;
+        ActionIndex a = getActionIndex(steeri, wheelveli);
+        double exp_value = expectedValue(&model, s, a, valueFunction); 
+        if(best_value<exp_value) {
+          // std::cout << "Best action for state " << s  
+          //       << " changed from " << best_action << " to " 
+          //       << a << " at steeri: " << steeri
+          //       << " and wheelveli " << wheelveli << std::endl;
+          best_value = exp_value;
+          best_action = a;
+        }
+      }
+    }
+    piStar[s] = best_action;
+  }
 
   // Save your output policy.
   saveData(argv[1], valueFunction, piStar);
