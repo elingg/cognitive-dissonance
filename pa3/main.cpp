@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     //
     // TODODONE:  Put your exploration code here.
     //
-    if(i % 1000 == 0) {
+    if(i % 10000 == 0) {
       std::cerr << "Exploration Iteration: " << i << "\n";
     }
     setStateToRandom(state0);
@@ -85,7 +85,8 @@ int main(int argc, char* argv[]) {
   // | 4.2 SOLVE THE MDP
   // ----------------------------------------------------
   // Run value iteration to find the value of each state.
-  const static double GAMMA = 0.8;
+  const static double GAMMA = 0.8; // 0.03;
+  int MAX_ITER = (GAMMA==0.8)?60:10;
 
   double prevValueFunction[DISCRETE_STATE_COUNT];
   // Clear the value function
@@ -97,8 +98,11 @@ int main(int argc, char* argv[]) {
   //
   // TODODONE:  Put your Value Iteration code here.
   //
-  for(int iter=0; iter < 60; iter++) {
-    std::cout << "Value iteration: " << iter << std::endl;
+  double epsilon = 0.1;
+  int iter = 0;
+  while(true) {
+    double delta = 0;
+    iter++;
     for (StateIndex s = 0; s < DISCRETE_STATE_COUNT; s++) {
       double exp_max_reward = -DBL_MAX;
       // std::cout << "\tState: " << s << std::endl;
@@ -123,8 +127,16 @@ int main(int argc, char* argv[]) {
       }
       // its ok to move gamma out because fixed over actions...
       prevValueFunction[s] = valueFunction[s];
-      valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
+      // valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
+      valueFunction[s] = rewardRubber(s) + GAMMA*exp_max_reward;
+      if(fabs(prevValueFunction[s]-valueFunction[s])>delta) {
+        delta = fabs(prevValueFunction[s]-valueFunction[s]);
+      } 
     }
+    std::cout << "Value iteration: " << iter << ", delta: " << delta << std::endl;
+    if((delta < epsilon*(1-GAMMA)/GAMMA) && iter>=MAX_ITER) {
+      break;
+    } 
   }
   double initstate[STATE_SIZE];
   setStateToInitial(initstate);
