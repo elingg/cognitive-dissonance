@@ -15,6 +15,7 @@ double reward(StateIndex dstate) {
   }
   double vyReward = -state[STATE_VY]*state[STATE_VY]; // keeping horizontal speed low
   double headingReward = 0;//state[STATE_THETA]*state[STATE_THETA]; // facing opposite way
+  // double headingReward = state[STATE_THETA]*state[STATE_THETA]; // facing opposite way
 
   return 2*yReward + vxReward + 0.1*vyReward + 5*headingReward;
 }
