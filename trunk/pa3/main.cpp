@@ -127,8 +127,8 @@ int main(int argc, char* argv[]) {
       }
       // its ok to move gamma out because fixed over actions...
       prevValueFunction[s] = valueFunction[s];
-      // valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
-      valueFunction[s] = rewardRubber(s) + GAMMA*exp_max_reward;
+      valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
+      // valueFunction[s] = rewardRubber(s) + GAMMA*exp_max_reward;
       if(fabs(prevValueFunction[s]-valueFunction[s])>delta) {
         delta = fabs(prevValueFunction[s]-valueFunction[s]);
       } 
