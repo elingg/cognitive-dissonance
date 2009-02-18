@@ -5,7 +5,6 @@ Please add items that you think need to be done for the vision project to this p
 
 = Items to do =
 == Classifier tasks ==
-  * Introduce thresholding in existing decision tree (add unit test) (*Anand*)
   * Implement AdaBoost (add unit test) (*Anand*)
   * Multiclass ensemble of trees (add unit test) (*Anand*)
   * Test above with OpenCV's decision tree (add unit test) (*Anand*)
