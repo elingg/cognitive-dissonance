@@ -1,0 +1,31 @@
+#summary TODO list for vision project
+
+= Introduction =
+Please add items that you think need to be done for the vision project to this page. Items with owners can be marked with your name, so two people don't work on the same thing. Items finished can be marked finished as well.
+
+= Items to do =
+== Classifier tasks ==
+  * Introduce thresholding in existing decision tree (add unit test) (*Anand*)
+  * Implement AdaBoost (add unit test) (*Anand*)
+  * Multiclass ensemble of trees (add unit test) (*Anand*)
+  * Test above with OpenCV's decision tree (add unit test) (*Anand*)
+
+== Feature tasks ==
+  * Implement edge detection (sorbel filter) (add unit test)
+  * Implement line detection (hough filter) (add unit test)
+  * Implement corner detection (harris filter) (add unit test)
+  * Particle filters
+  * “Sharing visual features for multiclass and multiview object detection.”
+  * “Rapid ob ject detection using a boosted cascade of simple features”
+  * "A new biologically motivated framework for robust ob ject recognition”
+  * “Distinctive image features from scale-invariant keypoints”
+
+== Other tasks ==
+  * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this).
+
+== Infrastructure tasks ==
+  * Need a way to tune various feature weights so we get optimal performance. 
+    * A kind of infrastructure script that tunes for these parameters automatically by running various tests and getting F1 measures would be useful. 
+    * Something on the lines of what WEKA does.
+    * Its ok to expect features in a file if that makes it easier.
+  * Maybe think of a pipeline design, so its easy to add features (not sure).
