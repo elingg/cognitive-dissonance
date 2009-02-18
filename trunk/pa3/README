@@ -4,15 +4,15 @@ Anand Madhavan <manand@stanford.edu>
 Elizabeth Lingg, <elingg@stanford.edu>
 ----
 
-1.  V(s0)= [[ -32.258 ]]
+1.  V(s0)= [[ -46.2098 ]]
 
 2.  [[ The car successfully turns around and drives off in the opposite direction. Results saved in policy1.bin ]]
 
-3.  V(s0)= [[ -9.20973 ]]
+3.  V(s0)= [[ -9.21124 ]]
 
 4.  [[ Car stops, but does not turn around. 'reward' function gives a 0 reward for the direction car faces (so instead, changing it to add square of the 'theta' direction as suggested in the reward.cpp code causes the car to turn around even with GAMMA=0.03). Now the reason why the car stops with GAMMA=0.03 and not with GAMMA=0.8 is that with GAMMA=0.8, future rewards are valued a lot more and future states where velocities are in the opposite direction are given a squared weight and hence result in larger future rewards. With GAMMA=0.03 these larger future rewards are watered down, causing the car to come to a halt without turning in the other direction. ]]
     [[ Saved in policy2.bin ]]
 
-5.  [[ Car drives in such a way as to head more or less in the opposite direction. However, it breaks and 'skid' a lot, because of the encouragement (reward) given to moving sideways as well. ]]
+5.  [[ Car drives in such a way as to head more or less in the opposite direction. However, it breaks and 'skids' a lot, because of the encouragement (reward) given to moving sideways as well. ]]
     [[ Saved in policy3.bin ]]
 
