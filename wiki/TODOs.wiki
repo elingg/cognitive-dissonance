@@ -9,6 +9,7 @@ Please add items that you think need to be done for the vision project to this p
   * Implement AdaBoost (add unit test) (*Anand*)
   * Multiclass ensemble of trees (add unit test) (*Anand*)
   * Test above with OpenCV's decision tree (add unit test) (*Anand*)
+  * Also interface with an SVM classifier such as SVMLight
 
 == Feature tasks ==
   * Implement edge detection (sorbel filter) (add unit test)
@@ -19,9 +20,9 @@ Please add items that you think need to be done for the vision project to this p
   * “Rapid object detection using a boosted cascade of simple features”
   * "A new biologically motivated framework for robust object recognition”
   * “Distinctive image features from scale-invariant keypoints”
-  * 
+
 == Other tasks ==
-  * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this).
+  * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this says Ian).
 
 == Infrastructure tasks ==
   * Need a way to tune various feature weights so we get optimal performance. 
