@@ -16,10 +16,10 @@ Please add items that you think need to be done for the vision project to this p
   * Implement corner detection (harris filter) (add unit test)
   * Particle filters
   * “Sharing visual features for multiclass and multiview object detection.”
-  * “Rapid ob ject detection using a boosted cascade of simple features”
-  * "A new biologically motivated framework for robust ob ject recognition”
+  * “Rapid object detection using a boosted cascade of simple features”
+  * "A new biologically motivated framework for robust object recognition”
   * “Distinctive image features from scale-invariant keypoints”
-
+  * 
 == Other tasks ==
   * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this).
 
