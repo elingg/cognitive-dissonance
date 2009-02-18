@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   // | 4.2 SOLVE THE MDP
   // ----------------------------------------------------
   // Run value iteration to find the value of each state.
-  const static double GAMMA = 0.8; // 0.03;
+  const static double GAMMA = 0.8; // 0.8; 0.03;
   int MAX_ITER = (GAMMA==0.8)?60:10;
 
   double prevValueFunction[DISCRETE_STATE_COUNT];
@@ -127,8 +127,8 @@ int main(int argc, char* argv[]) {
       }
       // its ok to move gamma out because fixed over actions...
       prevValueFunction[s] = valueFunction[s];
-      valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
-      // valueFunction[s] = rewardRubber(s) + GAMMA*exp_max_reward;
+      // valueFunction[s] = reward(s) + GAMMA*exp_max_reward;
+      valueFunction[s] = rewardRubber(s) + GAMMA*exp_max_reward;
       if(fabs(prevValueFunction[s]-valueFunction[s])>delta) {
         delta = fabs(prevValueFunction[s]-valueFunction[s]);
       } 
