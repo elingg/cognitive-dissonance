@@ -22,6 +22,7 @@ Please add items that you think need to be done for the vision project to this p
 
 == Other tasks ==
   * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this says Ian).
+  * Use built in OpenCV samples folder such as blob detection (which works surprisingly well!)
 
 == Infrastructure tasks ==
   * Need a way to tune various feature weights so we get optimal performance. 
