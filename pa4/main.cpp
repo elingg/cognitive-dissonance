@@ -538,8 +538,21 @@ void UpdateLocationBeliefs(SensorModel *sm, ActionModel *am, RobotState *robotSt
   // about overwriting probabilities that you still need...
   // b. Make sure that when you're done, all the beliefs add up to 1.
   // c. Lastly, be sure to make use of the BeliefMap::IsCoordInMap function with the Action Model.
+  
+   MapCoord coord = bmap->GetMapCoordFromMeters(robotState->ptActual);
+   Cell* cell = bmap->GetCell(coord);
+   cell->buffer= cell->belief;
 
-
+   //Action model update
+   int n = am->GetNumNewLocations();
+   for(int i=0; i<n; i++)
+   {
+	cell->belief = cell->belief + (cell->buffer * am->GetProbNewLocGivenAction(i));
+   }
+   
+   //Sensor model update   
+   cell->belief = cell->belief *sm->GetPFromMapCoord(coord);
+   //TODO: normalize probabilities
 
 
   /** CS221 TASK 2: END EDIT CODE **/
