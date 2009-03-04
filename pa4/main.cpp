@@ -499,6 +499,9 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
     /** CS221 TASK 1: BEGIN EDIT CODE **/
     // robot knows exactly where it is starting (HINT: use the
     // RobotSimulation::GetInitialPosition() method)
+       MapCoord coord = rsim->GetInitialPosition();
+       Cell* cell = bmap->GetCell(coord);
+       cell->belief= 1;
     
 
     /** CS221 TASK 1: END EDIT CODE **/
