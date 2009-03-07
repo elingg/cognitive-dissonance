@@ -11,7 +11,7 @@ public:
   EdgeDetectionFeatures();
   ~EdgeDetectionFeatures();
 
-  void getFeatureValues(vector<cvHistogram>& feature_values,
+  void getFeatureValues(vector<CvHistogram>& feature_values,
                         const IplImage* img) const;
 
 private:
