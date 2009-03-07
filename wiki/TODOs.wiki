@@ -22,7 +22,8 @@ Please add items that you think need to be done for the vision project to this p
   * “Distinctive image features from scale-invariant keypoints”
 
 == Other tasks ==
-  * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this says Ian).
+  * Increased length of windows from 104 to 208 and doubled the F1 score. (DONE) (Anand)
+  * Implement removing of false positive frames (apparently lots of students got better F1 scores doing this says Ian), by coalescing the windows. Uses a threshold of 0.05 percent of overlap for coalescing, can be one parameter to tweak to see what improves F1-scores. (DONE) (Anand)
   * Use built in OpenCV samples folder such as blob detection (which works surprisingly well!)
 
 == Infrastructure tasks ==
