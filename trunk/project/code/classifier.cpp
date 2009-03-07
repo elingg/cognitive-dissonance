@@ -10,6 +10,7 @@
 *****************************************************************************/
 
 #include <cassert>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -68,6 +69,89 @@ bool CClassifier::saveState(const char *filename)
     return true;
 }
 
+void printCObject(const CObject& obj) {
+   cout << "[label:"<<obj.label << 
+             ", x:" << obj.rect.x <<
+             ", y:"<<obj.rect.y <<
+             ", h:" <<obj.rect.height <<
+             ", w:" <<obj.rect.width << "]";
+}
+ 
+// coalesces objects with the same labels into single rectangles if they
+// overlap
+void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs) {
+  multimap<string, CObject*> tmp;
+  set<string> labels;
+  for(size_t iobj=0; iobj<firstobjs->size(); iobj++) {
+    CObject& obj = (*firstobjs)[iobj]; 
+    tmp.insert(make_pair(obj.label,&obj));
+    labels.insert(obj.label);
+  }
+  //cout << "Merging overlapping rectangles: " << endl;
+  // for each label...
+  for(set<string>::iterator itl=labels.begin(); itl!=labels.end(); itl++) {
+    const string& label = *itl;
+    //cout << "Processing label: " << label << endl;
+    vector<CObject> currbuff;
+    multimap<string, CObject*>::iterator uit = tmp.upper_bound(label);
+    multimap<string, CObject*>::iterator lit = tmp.lower_bound(label);
+    multimap<string, CObject*>::iterator it;
+    for(it=lit; it!=uit; it++) {
+      currbuff.push_back(*(it->second));
+    }
+    bool merge_exists;
+    do {
+      // cout << "Attempting merge of " << currbuff.size() << " objects..." <<endl;
+      //for(size_t iobj=0; iobj<currbuff.size(); iobj++) {
+        //cout << "Object: " << iobj << endl;
+        //printCObject(currbuff[iobj]); cout << endl;
+      //}
+      merge_exists = false;
+      vector<CObject> buff = currbuff;
+      currbuff.clear();
+      set<size_t> merged;
+      for(size_t iobj1=0;iobj1<buff.size(); iobj1++) {
+        for(size_t iobj2=iobj1; iobj2<buff.size(); iobj2++) {
+          if(iobj1==iobj2) continue;
+          int overlap = buff[iobj1].overlap(buff[iobj2]);
+          double overlap_ratio = (double)(2*overlap)/
+                                   (buff[iobj1].area()+buff[iobj2].area());
+          if(overlap_ratio < 0.05) continue;
+          //cout << "Overlap ratio: " << overlap_ratio << endl;
+          merged.insert(iobj1); merged.insert(iobj2);
+          merge_exists = true; 
+          CvRect sup = cvMaxRect(&(buff[iobj1].rect),&(buff[iobj2].rect));
+          CObject newobj(sup,label);
+          //cout << "Merged: " << endl; 
+          //printCObject(buff[iobj1]); cout << " and " << endl;
+          //printCObject(buff[iobj2]); cout << " into " << endl;
+          //printCObject(newobj); cout << endl;
+          bool alreadyadded = false;
+          for(size_t ic=0; ic<currbuff.size(); ic++) {
+            if((currbuff[ic].rect.x==sup.x)&&
+               (currbuff[ic].rect.y==sup.y)&&
+               (currbuff[ic].rect.width=sup.width)&&
+               (currbuff[ic].rect.height==sup.height)) {
+              alreadyadded = true; 
+              break;
+            }
+          } 
+          if(!alreadyadded) {
+            currbuff.push_back(newobj);
+          }
+        } 
+        if(merged.find(iobj1)==merged.end()) { 
+          currbuff.push_back(buff[iobj1]);
+        }
+      }      
+      // keep coalescing if you find merges...
+    } while(merge_exists);
+    for(size_t iobj=0; iobj<currbuff.size(); iobj++) {
+      resobjs->push_back(currbuff[iobj]);
+    }
+  }
+}
+
 // run
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
@@ -81,26 +165,26 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
       IPL_DEPTH_8U,
       1);
     cvCvtColor(frame, gray, CV_BGR2GRAY);
-
+    CObjectList firstpassobjects;
     //Use a sliding window,
     int const MIN_LENGTH_SIZE = 64;
-    int const MAX_LENGTH_SIZE = 104;
+    int const MAX_LENGTH_SIZE = 208; // 104
     for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
       for(int x = 0; x < gray->width - length; x = x + 8) {
         for(int y = 0; y < gray->height - length; y = y + 8) {
 //          cerr << "New window: " << x << " " << y << " " << length << endl;
           //Clip the frame to a square
-	  CvRect region = cvRect(x, y, length, length);
-	  IplImage *clippedImage = cvCreateImage(
-	    cvSize(region.width, region.height),
-	    gray->depth, gray->nChannels);
-	  cvSetImageROI(gray, region);
-	  cvCopyImage(gray, clippedImage);
-	  cvResetImageROI(gray);
+          CvRect region = cvRect(x, y, length, length);
+          IplImage *clippedImage = cvCreateImage(
+          cvSize(region.width, region.height),
+          gray->depth, gray->nChannels);
+          cvSetImageROI(gray, region);
+          cvCopyImage(gray, clippedImage);
+          cvResetImageROI(gray);
 
           //Resize clipped image to 64 x 64
           IplImage *smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
-	  cvResize(clippedImage, smallImage);
+          cvResize(clippedImage, smallImage);
 
           //Get Haar feature values
           vector<double> values;
@@ -112,21 +196,22 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           bool isFound = decisionTree.predictClassLabel(imagesExample);
 
           //Create bounding box
-	  if(isFound) {
+          if(isFound) {
             CObject obj;
             obj.rect = cvRect(0, 0, length, length);
-	    obj.rect.x = x;
-	    obj.rect.y = y;
-	    obj.label = string("mug");
-	    objects->push_back(obj);
-	  }
-	  
-	  //Release images
-	  cvReleaseImage(&clippedImage);
-	  cvReleaseImage(&smallImage);
-	}
+            obj.rect.x = x;
+            obj.rect.y = y;
+            obj.label = string("mug");
+            firstpassobjects.push_back(obj);
+          }
+	        
+          //Release images
+          cvReleaseImage(&clippedImage);
+          cvReleaseImage(&smallImage);
+        }
       }
     }
+    coalesceOverlappingRectangles(&firstpassobjects,objects);
 
     cvReleaseImage(&gray);
     // cout << "Number of results found: " << objects->size() << endl;
