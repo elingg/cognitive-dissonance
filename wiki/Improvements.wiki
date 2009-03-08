@@ -1,0 +1,12 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+Final report. As we find new information, please update the page, so we have what we tried documented here.
+
+
+= Documentation of improvements attempted and results =
+
+|| *What we tried (in sequence)* || *F1 score (mug)* || *Overall F1 score* ||
+|| Haar features || 0.00416667 || 0.00320342 ||
+|| Clubbing overlapping rectangles || 0.209366 || 0.131148 ||
+|| Max window length to 208 (from 104) || 0.414073 || 0.261092 ||
