@@ -25,6 +25,7 @@
 #include "cv.h"
 #include "cxcore.h"
 #include "highgui.h"
+#include "cvaux.h"
 
 #include "objects.h"
 #include "classifier.h"
@@ -179,6 +180,13 @@ int main(int argc, char *argv[])
     IplImage *frame = NULL;
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
+
+    // Kalman Filter setup 
+    // TODO(alecmgo): Externalize this
+    CObjectList kalmanObjects;
+    CvBlobTrackPredictor* predictor = cvCreateModuleBlobTrackPredictKalman();
+    bool USE_KALMAN = false;
+
     CObjectList::iterator iObj;
     int frameCount = 0;
     while ((frame = cvQueryFrame(capture)) != NULL) {
@@ -191,6 +199,36 @@ int main(int argc, char *argv[])
         groundTruthObjects.clear();
         replayer.run(frame, &groundTruthObjects);
 
+        //Kalman Filter - START
+	//TODO(alecmgo): Externalize this
+        if(USE_KALMAN) {     
+          CvBlob blob;
+          blob.x = classifierObjects.at(0).rect.x;
+          blob.y = classifierObjects.at(0).rect.y;
+          blob.w = classifierObjects.at(0).rect.width;
+          blob.h = classifierObjects.at(0).rect.height;
+          predictor->Update(&blob);
+          CvBlob* predicted = predictor->Predict();
+          if(predicted) {
+            //cout << "Kalman: ";
+            //cout << predicted->x << " " << predicted->y << " ";
+	    //cout << predicted->w << " " << predicted->w << endl;
+          } else {
+            cout << "No prediction" << endl;
+          }
+
+          //Add prediction to list of Kalman objects
+          CObject obj;
+          obj.rect = cvRect(0, 0, predicted->w, predicted->h); 
+          //TODO: Check w and h ordering
+          obj.rect.x = predicted->x;
+          obj.rect.y = predicted->y;
+          obj.label = string("kalman");
+          kalmanObjects.clear();
+          kalmanObjects.push_back(obj);
+	}
+        //Klaman Filter - END
+	
         if (outputStream) {
             *outputStream << "  <frame id=\"" << (frameCount - 1) << "\">" << endl;
             for (iObj = classifierObjects.begin(); iObj != classifierObjects.end(); iObj++) {
@@ -208,6 +246,12 @@ int main(int argc, char *argv[])
             for (iObj = classifierObjects.begin(); iObj != classifierObjects.end(); iObj++) {
                 iObj->draw(frameCopy, CV_RGB(0, 255, 0), &font);
             }
+	    //Show Kalman object
+	    if(USE_KALMAN) {
+              for (iObj = kalmanObjects.begin(); iObj != kalmanObjects.end(); iObj++) {
+                iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
+	      }
+	    }
             cvShowImage(WINDOW_NAME, frameCopy);
             cvReleaseImage(&frameCopy);
 
