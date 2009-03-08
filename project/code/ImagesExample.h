@@ -7,20 +7,28 @@ using namespace std;
 class ImagesExample : public TrainingExample {
 public:
   ImagesExample(
+           const vector<double>& hfeatures);
+  ImagesExample(
            const vector<double>& hfeatures,
-           bool classlabel);
+           const string& classlabel);
 
   size_t getNumberOfFeatures() const {
             return m_featureValues.size();
           }
-  bool   getClassLabel() const {
+  string getLabel() const {
             return m_classLabel;
+          }
+  bool   getClassLabel() const {
+            if(m_classLabel.compare("mug")==0)  {
+              return true;
+            }
+            return false;
           }
   double getFeatureDoubleValue(int feature_index) const {
             return m_featureValues[feature_index];
           }
 private:
   vector<double> m_featureValues;
-  bool m_classLabel;
+  string m_classLabel;
 };
 

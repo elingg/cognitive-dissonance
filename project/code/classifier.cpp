@@ -195,11 +195,11 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 	  //sobel.getFeatureValues(values,smallImage);
 
           //Check for image
-          ImagesExample imagesExample(values, true); 
-          bool isFound = decisionTree.predict(imagesExample);
+          ImagesExample imagesExample(values); 
+          string label = decisionTree.predict(imagesExample);
 
           //Create bounding box
-          if(isFound) {
+          if(label=="mug") {
             CObject obj;
             obj.rect = cvRect(0, 0, length, length);
             obj.rect.x = x;
@@ -307,13 +307,7 @@ bool CClassifier::train(TTrainingFileList& fileList) {
             haar.getFeatureValues(values,smallImage);
             //sobel.getFeatureValues(values,smallImage);
 
-	    if(fileList.files[i].label == "mug") {
-  	      trainingSet.push_back(new ImagesExample(values, true));
-	    } if(fileList.files[i].label == "other") {
-              trainingSet.push_back(new ImagesExample(values, false));
-	    } else {
-              assert("Encountered bad label while training");
-	    }
+  	  trainingSet.push_back(new ImagesExample(values, fileList.files[i].label));
 	    // free memory
 	    cvReleaseImage(&image);
 	}
@@ -330,8 +324,8 @@ bool CClassifier::train(TTrainingFileList& fileList) {
     cerr << "Testing tree on trained images: " << endl;
     size_t correct = trainingSet.size();
     for(size_t i=0; i< trainingSet.size(); ++i) {
-      bool predicted = decisionTree.predict(*trainingSet[i]);
-      if(predicted!=trainingSet[i]->getClassLabel()) {
+      string predictedLabel = decisionTree.predict(*trainingSet[i]);
+      if(trainingSet[i]->getLabel().compare(predictedLabel)!=0) { // incorrect
         correct--;
       }     
     }
