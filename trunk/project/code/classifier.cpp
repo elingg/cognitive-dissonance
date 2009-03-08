@@ -21,6 +21,7 @@
 
 #include "classifier.h"
 #include "HaarFeatures.h"
+#include "EdgeDetectionFeatures.h"
 #include "DecisionTree.h"
 using namespace std;
 
@@ -190,6 +191,8 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           vector<double> values;
           HaarFeatures haar;
           haar.getFeatureValues(values,smallImage);
+          //EdgeDetectionFeatures sobel;
+	  //sobel.getFeatureValues(values,smallImage);
 
           //Check for image
           ImagesExample imagesExample(values, true); 
@@ -271,6 +274,7 @@ bool CClassifier::train(TTrainingFileList& fileList) {
     // example code for loading and resizing image files--
     // you may find this useful for the milestone    
     HaarFeatures haar;
+    //EdgeDetectionFeatures sobel;
     IplImage *image, *smallImage;
     
     vector<TrainingExample*> trainingSet;
@@ -301,6 +305,7 @@ bool CClassifier::train(TTrainingFileList& fileList) {
 	    // CS221 TO DO: extract features from image here
             vector<double> values;
             haar.getFeatureValues(values,smallImage);
+            //sobel.getFeatureValues(values,smallImage);
 
 	    if(fileList.files[i].label == "mug") {
   	      trainingSet.push_back(new ImagesExample(values, true));
