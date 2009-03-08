@@ -31,9 +31,18 @@ public:
   virtual bool getClassLabel() const = 0; // 0/1 for now
 };
 
+class AbstractBinaryClassifier {
+  public: 
+    virtual ~AbstractBinaryClassifier() {}
+    virtual void train(const vector<TrainingExample*>& examples)=0;
+    virtual bool predict(const Example& example) const=0;
+    virtual bool loadState(const char* filename)=0;
+    virtual bool saveState(const char* filename) const =0;
+};
+
 // Decision tree operates on generic TrainingExamples and predicts
 // classes for Examples (which could also be TrainingExamples)...
-class DecisionTree {
+class DecisionTree : public AbstractBinaryClassifier {
 public:
   DecisionTree():m_root(0){}
   DecisionTree(const vector<string>& feature_names)
@@ -41,8 +50,8 @@ public:
   ~DecisionTree() {}
 
   void initialize(const vector<string>& fnames) { m_features = fnames; }
-  void trainTree(const vector<TrainingExample*>& examples);
-  bool predictClassLabel(const Example& example) const;
+  void train(const vector<TrainingExample*>& examples);
+  bool predict(const Example& example) const;
   double getFeatureThreshold(size_t feature_index) const;
   string getFeatureName(size_t feature_index) const; 
   void printTree() const; 
