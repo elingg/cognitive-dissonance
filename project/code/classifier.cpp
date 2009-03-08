@@ -196,7 +196,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 
           //Check for image
           ImagesExample imagesExample(values, true); 
-          bool isFound = decisionTree.predictClassLabel(imagesExample);
+          bool isFound = decisionTree.predict(imagesExample);
 
           //Create bounding box
           if(isFound) {
@@ -325,12 +325,12 @@ bool CClassifier::train(TTrainingFileList& fileList) {
 
     // CS221 TO DO: train you classifier here
     cerr << "Training tree:" << endl;
-    decisionTree.trainTree(trainingSet);
+    decisionTree.train(trainingSet);
     
     cerr << "Testing tree on trained images: " << endl;
     size_t correct = trainingSet.size();
     for(size_t i=0; i< trainingSet.size(); ++i) {
-      bool predicted = decisionTree.predictClassLabel(*trainingSet[i]);
+      bool predicted = decisionTree.predict(*trainingSet[i]);
       if(predicted!=trainingSet[i]->getClassLabel()) {
         correct--;
       }     

@@ -257,7 +257,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   return T; 
 }
 
-void DecisionTree::trainTree
+void DecisionTree::train
 (const vector<TrainingExample*>& examples) {
   cerr << "Train tree:\n";
   cerr << "Tree max-depth used: " << getMaxDepth() << endl;
@@ -296,7 +296,7 @@ void DecisionTree::trainTree
   printTree();
 }
 
-bool DecisionTree::predictClassLabel(const Example& example) const {
+bool DecisionTree::predict(const Example& example) const {
   return m_root->predictClassLabel(example); 
 }
 
