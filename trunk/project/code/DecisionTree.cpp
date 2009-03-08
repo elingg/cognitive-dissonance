@@ -296,8 +296,11 @@ void DecisionTree::train
   printTree();
 }
 
-bool DecisionTree::predict(const Example& example) const {
-  return m_root->predictClassLabel(example); 
+string DecisionTree::predict(const Example& example) const {
+  if(m_root->predictClassLabel(example)) {
+    return "mug";
+  }
+  return "other";
 }
 
 const DecisionTree::Node* DecisionTree::Node::getLeftChild() const {
