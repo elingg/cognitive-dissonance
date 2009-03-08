@@ -26,6 +26,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "DecisionTree.h"
+#include "MotionTracker.h"
 
 #include "ImagesExample.h"
 /* CClassifier class ---------------------------------------------------------
@@ -57,5 +58,6 @@ public:
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
     DecisionTree decisionTree;
+    MotionTracker motionTracker;
 };
 
