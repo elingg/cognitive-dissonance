@@ -510,23 +510,6 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
   }
 }
 
-/**
- * Returns the probability of going from state to statePrime given action (which is set in the action model)
- * TODO: This seems like it's really inefficient.  Determine better way.
- */
-double getStateTransitionProbability(MapCoord statePrime, MapCoord state, ActionModel *am) {
-  am->SetCurrentPosition(state);
-  for(int i = 0; i < am->GetNumNewLocations(); i++) {
-    MapCoord temp = am->GetNewLocCoord(i);
-    //cout << am->GetProbNewLocGivenAction(i) << endl;
-    if(temp.x == statePrime.x && temp.y == statePrime.y) {
-      return am->GetProbNewLocGivenAction(i);
-    }
-  }
-  return 0;
-}
-
-
 /* UpdateLocationBeliefs */
 /* --------------------- */
 /* This function should use the action model and and the sensor model to
