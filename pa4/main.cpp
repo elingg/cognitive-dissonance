@@ -442,8 +442,11 @@ void RunExperiment(SimpleActionModel *sam, RandomActionModel *ram, RobotSimulati
       /** CS221 TASK 4: BEGIN EDIT CODE **/
       // you'll need to handle the 'forgetful robot'
       // (i.e., no history) case here:
-
-
+      
+      // beliefs to uniform again...
+      for(size_t cellIndex = 0; cellIndex < bmap->allCells.size(); cellIndex++){
+        bmap->allCells[cellIndex]->belief = 1.0/bmap->allCells.size();
+      }
       /** CS221 TASK 4: END EDIT CODE **/
     }
 
