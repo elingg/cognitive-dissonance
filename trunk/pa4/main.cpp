@@ -508,6 +508,23 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
   }
 }
 
+/**
+ * Returns the probability of going from state to statePrime given action (which is set in the action model)
+ * TODO: This seems like it's really inefficient.  Determine better way.
+ */
+double getStateTransitionProbability(MapCoord statePrime, MapCoord state, ActionModel *am) {
+  am->SetCurrentPosition(state);
+  for(int i = 0; i < am->GetNumNewLocations(); i++) {
+    MapCoord temp = am->GetNewLocCoord(i);
+    //cout << am->GetProbNewLocGivenAction(i) << endl;
+    if(temp.x == statePrime.x && temp.y == statePrime.y) {
+      return am->GetProbNewLocGivenAction(i);
+    }
+  }
+  return 0;
+}
+
+
 /* UpdateLocationBeliefs */
 /* --------------------- */
 /* This function should use the action model and and the sensor model to
@@ -524,7 +541,7 @@ void UpdateLocationBeliefs(SensorModel *sm, ActionModel *am, RobotState *robotSt
   sm->SetReadings(robotState);
   am->SetAction(robotState);
 
-  /** CS221 TASK 2: BEGIN EDIT CODE **/
+  /** CS221 TASK 2(DONE): BEGIN EDIT CODE **/
   // 1.  Use the action model to update the beliefs.
   // 2.  Use the sensor model to update the beliefs.
   //
@@ -538,26 +555,42 @@ void UpdateLocationBeliefs(SensorModel *sm, ActionModel *am, RobotState *robotSt
   // about overwriting probabilities that you still need...
   // b. Make sure that when you're done, all the beliefs add up to 1.
   // c. Lastly, be sure to make use of the BeliefMap::IsCoordInMap function with the Action Model.
+
+  //Reset buffers
+  for(size_t cellIndex = 0; cellIndex < bmap->allCells.size(); cellIndex++){
+    bmap->allCells[cellIndex]->buffer = 0; 
+  }
+
+  //Dynamics Update - take into account action model
+  for(size_t cellIndex = 0; cellIndex < bmap->allCells.size(); cellIndex++){
+    MapCoord coord = bmap->allCells[cellIndex]->coord; 
+    am->SetCurrentPosition(coord); 
+    for(int i = 0; i < am->GetNumNewLocations(); i++) {
+      MapCoord coordPrime = am->GetNewLocCoord(i);
+      if(bmap->IsCoordInMap(coordPrime)) {
+        bmap->GetCell(coordPrime)->buffer += bmap->GetCell(coord)->belief *
+	                                     am->GetProbNewLocGivenAction(i);
+      }
+    }
+  }
   
-   MapCoord coord = bmap->GetMapCoordFromMeters(robotState->ptActual);
-   Cell* cell = bmap->GetCell(coord);
-   cell->buffer= cell->belief;
+  //Observation Update - take into account sensor model
+  double z = 0; //normalization factor
+  for(size_t stateIndex = 0; stateIndex < bmap->allCells.size(); stateIndex++) {
+    Cell* statePrime = bmap->allCells[stateIndex];
+    statePrime->belief = sm->GetPFromMapCoord(statePrime->coord) *
+                         statePrime->buffer;
+    z += statePrime->belief;
+  }
 
-   //Action model update
-   int n = am->GetNumNewLocations();
-   for(int i=0; i<n; i++)
-   {
-	cell->belief = cell->belief + (cell->buffer * am->GetProbNewLocGivenAction(i));
-   }
-   
-   //Sensor model update   
-   cell->belief = cell->belief *sm->GetPFromMapCoord(coord);
-   //TODO: normalize probabilities
-
-
-  /** CS221 TASK 2: END EDIT CODE **/
+  //Normalize the beliefs
+  for(size_t stateIndex = 0; stateIndex < bmap->allCells.size(); stateIndex++) {
+    Cell* statePrime = bmap->allCells[stateIndex];
+    statePrime->belief = (statePrime->belief) / z;
+  }
+ 
+  /** CS221 TASK 2(DONE): END EDIT CODE **/
 }
-
 
 /* Dump{ResultImage, Image, Info, Error} */
 /* ------------------------------------- */
