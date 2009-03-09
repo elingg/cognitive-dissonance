@@ -493,7 +493,7 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
     // where it is starting (HINT: all squares are equally
     // likely so the distribution is "uniform" over squares)
     for(size_t cellIndex = 0; cellIndex < bmap->allCells.size(); cellIndex++){
-      bmap->allCells[cellIndex]->belief = 1 / bmap->allCells.size(); 
+      bmap->allCells[cellIndex]->belief = 1.0 / bmap->allCells.size(); 
     }
 
     /** CS221 TASK 3: END EDIT CODE **/
