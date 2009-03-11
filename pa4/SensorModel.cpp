@@ -163,13 +163,54 @@ void CustomLASensorModel::SetReadings(RobotState *robotState)
 
 double CustomLASensorModel::GetProbReadingGivenDistance(double sensor, double distance)
 {
-  double alpha;
-
+  //Take into account the maximum effective range dmax (pg. 6)
+  const double dMax = 30.0;
+  if(sensor > dMax) {
+    sensor = dMax;
+  }
+  
   // alpha is 1.0 divided by the area of the normal curve that is to
   // the right of 0.0.  basically it is our renormalization constant.
-  alpha = 1.0 / (1.0 - GetCND(0.0, distance, stddev));
 
-  return alpha * GetProbND(sensor, distance, stddev);
+  //Model the noise with the sensor (same as initial sensor model)
+  double sensorAlpha = 1.0 / (1.0 - GetCND(0.0, distance, stddev));
+  double sensorModel = sensorAlpha * GetProbND(sensor, distance, stddev);
+
+  //The rest of these distributions are based on pg. 7 of the handout
+
+  //Model unexpected obstacles (exponential distribution)
+  double lambda = 0.5;
+  double unexpectedModel = GetProbExponential(sensor, lambda);
+
+  //Model laser failures (spikey distribution?)
+  //TODO: Verify that this is the correct approach
+  double failureModel = 0;
+  if(sensor == dMax) {
+    failureModel = 1.0;
+  }
+
+  //Model inexplicable measurements (uniform distribution)
+  double inexplicableModel = GetProbUniform(dMax); 
+  
+  //We're returning a mixed model.  These are the relative weights.  These
+  //must add up to 1.0
+  //TODO: Allow these numbers to be passed in as parameters
+  double sensorModelWeight = 0.968;
+  double unexpectedModelWeight = 0.001;
+  double failureModelWeight = 0.001;
+  double inexplicableModelWeight = 0.03;
+
+  //Make sure probabilities add up to 1.  We have to assert a range because
+  //of crazy floating point math
+  assert(sensorModelWeight + unexpectedModelWeight + 
+         failureModelWeight + inexplicableModelWeight > 0.999);
+  assert(sensorModelWeight + unexpectedModelWeight + 
+         failureModelWeight + inexplicableModelWeight < 1.001);
+
+  return sensorModelWeight * sensorModel +
+	 unexpectedModelWeight * unexpectedModel + 
+	 failureModelWeight * failureModel +
+	 inexplicableModelWeight * inexplicableModel;
 }
 
 /* GetPFromMapCoord */
