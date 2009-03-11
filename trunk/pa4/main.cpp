@@ -452,6 +452,15 @@ void RunExperiment(SimpleActionModel *sam, RandomActionModel *ram, RobotSimulati
 
     // Update the belief map by applying the motion and sensor updates.
     robotState = rsim->states.at(i);
+   
+    /*
+    //For generating graphs
+    for(int j = 0; j < 30; j++) {
+      double prob = sm->GetProbReadingGivenDistance(i, 15);
+      cout << prob << " " << i << endl;
+    }
+    */
+
     UpdateLocationBeliefs(sm, am, robotState, bmap);
 
     // dump out the belief values for all free cells.

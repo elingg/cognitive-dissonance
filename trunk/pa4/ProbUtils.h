@@ -29,4 +29,19 @@ inline double GetProbND(double x, double mean, double stddev)
   return 1.0 / denom;
 }
 
+/**
+ * Returns the value of a uniform distribution
+ */
+inline double GetProbUniform(double n) {
+  return 1.0 / n;
+}
+
+/**
+ * Returns the value of an exponential distribution
+ */
+inline double GetProbExponential(double x, double lambda) {
+  return lambda * exp(-lambda * x);
+}
+
+
 #endif
