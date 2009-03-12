@@ -148,6 +148,14 @@ void CustomLASensorModel::Initialize(BeliefMap *bm, double stddev,
   unexpectedModelWeight = unexpectedWt;
   failureModelWeight = failureWt;
   inexplicableModelWeight = inexplicableWt;
+
+  //Outputs numbers for graphing
+  /*
+  for(int j = 0; j < 30; j++) {
+    double prob = GetProbReadingGivenDistance(j, 5);
+    cout << j << " " << prob << endl;
+  }
+  */
 }
 
 void CustomLASensorModel::SetReadings(RobotState *robotState)
