@@ -203,16 +203,19 @@ int main(int argc, char *argv[])
 	//TODO(alecmgo): Externalize this
         if(USE_KALMAN) {     
           CvBlob blob;
-          blob.x = classifierObjects.at(0).rect.x;
-          blob.y = classifierObjects.at(0).rect.y;
-          blob.w = classifierObjects.at(0).rect.width;
-          blob.h = classifierObjects.at(0).rect.height;
-          predictor->Update(&blob);
+	  //cout << "# objects found: " << classifierObjects.size() << endl;
+	  if(classifierObjects.size() > 0) {
+            blob.x = classifierObjects.at(0).rect.x;
+            blob.y = classifierObjects.at(0).rect.y;
+            blob.w = classifierObjects.at(0).rect.width;
+            blob.h = classifierObjects.at(0).rect.height;
+            predictor->Update(&blob);
+          }
           CvBlob* predicted = predictor->Predict();
           if(predicted) {
             //cout << "Kalman: ";
             //cout << predicted->x << " " << predicted->y << " ";
-	    //cout << predicted->w << " " << predicted->w << endl;
+            //cout << predicted->w << " " << predicted->w << endl;
           } else {
             cout << "No prediction" << endl;
           }
@@ -220,7 +223,6 @@ int main(int argc, char *argv[])
           //Add prediction to list of Kalman objects
           CObject obj;
           obj.rect = cvRect(0, 0, predicted->w, predicted->h); 
-          //TODO: Check w and h ordering
           obj.rect.x = predicted->x;
           obj.rect.y = predicted->y;
           obj.label = string("kalman");
