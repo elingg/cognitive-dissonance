@@ -139,10 +139,15 @@ CustomLASensorModel::CustomLASensorModel()
  * the laser sensor model.
  */
 
-void CustomLASensorModel::Initialize(BeliefMap *bm, double stddev)
+void CustomLASensorModel::Initialize(BeliefMap *bm, double stddev,
+   double sensorWt, double unexpectedWt, double failureWt, double inexplicableWt)
 {
   bmap = bm; 
   this->stddev = stddev;
+  sensorModelWeight = sensorWt;
+  unexpectedModelWeight = unexpectedWt;
+  failureModelWeight = failureWt;
+  inexplicableModelWeight = inexplicableWt;
 }
 
 void CustomLASensorModel::SetReadings(RobotState *robotState)
@@ -165,6 +170,7 @@ double CustomLASensorModel::GetProbReadingGivenDistance(double sensor, double di
 {
   //Take into account the maximum effective range dmax (pg. 6)
   const double dMax = 30.0;
+  // cerr << " sensor: " << sensor << ", distance: " << distance << endl;
   if(sensor > dMax) {
     sensor = dMax;
   }
@@ -195,10 +201,10 @@ double CustomLASensorModel::GetProbReadingGivenDistance(double sensor, double di
   //We're returning a mixed model.  These are the relative weights.  These
   //must add up to 1.0
   //TODO: Allow these numbers to be passed in as parameters
-  double sensorModelWeight = 0.968;
-  double unexpectedModelWeight = 0.001;
-  double failureModelWeight = 0.001;
-  double inexplicableModelWeight = 0.03;
+  //double sensorModelWeight = 0.968;
+  //double unexpectedModelWeight = 0.001;
+  //double failureModelWeight = 0.001;
+  //double inexplicableModelWeight = 0.03;
 
   //Make sure probabilities add up to 1.  We have to assert a range because
   //of crazy floating point math

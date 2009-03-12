@@ -162,12 +162,13 @@ protected:
   double stddev;
   BeliefMap *bmap;
   LaserArraySensorReading lsr;
-
+  double sensorModelWeight, unexpectedModelWeight, failureModelWeight, inexplicableModelWeight;
 public:
   CustomLASensorModel();
   virtual ~CustomLASensorModel() {}
 
-  void Initialize(BeliefMap *bm, double stddev);
+  void Initialize(BeliefMap *bm, double stddev, double sensorWt, 
+                  double unexpectedWt, double failureWt, double inexplicableWt);
 
   virtual void SetReadings(RobotState *robotState);
   virtual double GetPFromMapCoord(MapCoord mc);
