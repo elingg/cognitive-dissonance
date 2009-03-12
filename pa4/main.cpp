@@ -63,6 +63,12 @@ char *v_logFilename;  // log file name
 
 double v_totalError;
 
+// Custom Sensor Model weights...
+double v_sensorModelWeight;
+double v_unexpectedModelWeight;
+double v_failureModelWeight;
+double v_inexplicableModelWeight;
+
 /* =================== */
 /* Function Prototypes */
 /* =================== */
@@ -299,6 +305,45 @@ void ReadArguments(int argc, char **argv)
     numArgs--;
   }
 
+  v_sensorModelWeight = 0.968;
+  // custom laser weights...
+  if(numArgs > 1 && strcmp(arguments[0], "-sensormodelweight")==0) {
+    arguments++;
+    numArgs--;
+    v_sensorModelWeight = atof(arguments[0]);
+    arguments++;
+    numArgs--;
+  }
+  v_unexpectedModelWeight = 0.001;
+  if(numArgs > 1 && strcmp(arguments[0], "-unexpectedmodelweight")==0) {
+    arguments++;
+    numArgs--;
+    v_unexpectedModelWeight = atof(arguments[0]);
+    arguments++;
+    numArgs--;
+  }
+  v_failureModelWeight = 0.001;
+  if(numArgs > 1 && strcmp(arguments[0], "-failuremodelweight")==0) {
+    arguments++;
+    numArgs--;
+    v_failureModelWeight = atof(arguments[0]);
+    arguments++;
+    numArgs--;
+  }
+  v_inexplicableModelWeight = 1.0-(v_sensorModelWeight+v_unexpectedModelWeight+v_failureModelWeight);
+  if(numArgs > 1 && strcmp(arguments[0], "-inexplicablemodelweight")==0) {
+    arguments++;
+    numArgs--;
+    v_inexplicableModelWeight = atof(arguments[0]);
+    arguments++;
+    numArgs--;
+  }
+  if(v_useSM == USE_CUSTOM_SM) {
+    printf("sensor-model-weight: %f\n",v_sensorModelWeight);
+    printf("unexpected-model-weight: %f\n",v_unexpectedModelWeight);
+    printf("failure-model-weight: %f\n",v_failureModelWeight);
+    printf("inexplicable-model-weight: %f\n",v_inexplicableModelWeight);
+  } 
   if(numArgs > 0) {
     // too many arguments...
     ErrorIntro(argc, argv);
@@ -392,7 +437,9 @@ void RunExperiment(SimpleActionModel *sam, RandomActionModel *ram, RobotSimulati
   // custom-laser-array-and-bump model here feel free to change
   // custom_lsm and do any initializing you need here...
   // NOTE: again, DO NOT use custom_lsm, DO use custom_lbsm
-  custom_lsm.Initialize(bmap, 2.5);
+  custom_lsm.Initialize(bmap, 2.5, v_sensorModelWeight, 
+                        v_unexpectedModelWeight, v_failureModelWeight, 
+                        v_inexplicableModelWeight);
   custom_lbsm.Initialize(&custom_lsm, &bsm);
 
   // choose sensor model here by setting sm to the address of
@@ -439,7 +486,7 @@ void RunExperiment(SimpleActionModel *sam, RandomActionModel *ram, RobotSimulati
     cout << "Processing Frame " << i + 1 << " of " << rsim->states.size() << endl;
 
     if (v_noHistory) {
-      /** CS221 TASK 4: BEGIN EDIT CODE **/
+      /** CS221 TASK 4(DONE): BEGIN EDIT CODE **/
       // you'll need to handle the 'forgetful robot'
       // (i.e., no history) case here:
       
@@ -447,19 +494,23 @@ void RunExperiment(SimpleActionModel *sam, RandomActionModel *ram, RobotSimulati
       for(size_t cellIndex = 0; cellIndex < bmap->allCells.size(); cellIndex++){
         bmap->allCells[cellIndex]->belief = 1.0/bmap->allCells.size();
       }
-      /** CS221 TASK 4: END EDIT CODE **/
+      /** CS221 TASK 4(DONE): END EDIT CODE **/
     }
 
     // Update the belief map by applying the motion and sensor updates.
     robotState = rsim->states.at(i);
    
+    
     /*
     //For generating graphs
-    for(int j = 0; j < 30; j++) {
-      double prob = sm->GetProbReadingGivenDistance(i, 15);
-      cout << prob << " " << i << endl;
+    if(v_useSM==USE_CUSTOM_SM) {
+      for(int j = 0; j < 30; j++) {
+        double prob = custom_lsm.GetProbReadingGivenDistance(i, 15);
+        cout << prob << " " << i << endl;
+      }
     }
     */
+    
 
     UpdateLocationBeliefs(sm, am, robotState, bmap);
 
@@ -500,7 +551,7 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
   // the Cell.buffer field since you'll be using it for temporary storage
 
   if(kidnapped) {
-    /** CS221 TASK 3: BEGIN EDIT CODE **/
+    /** CS221 TASK 3(DONE): BEGIN EDIT CODE **/
     // initialize beliefs as though robot has no idea
     // where it is starting (HINT: all squares are equally
     // likely so the distribution is "uniform" over squares)
@@ -508,9 +559,9 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
       bmap->allCells[cellIndex]->belief = 1.0 / bmap->allCells.size(); 
     }
 
-    /** CS221 TASK 3: END EDIT CODE **/
+    /** CS221 TASK 3(DONE): END EDIT CODE **/
   } else {
-    /** CS221 TASK 1: BEGIN EDIT CODE **/
+    /** CS221 TASK 1(DONE): BEGIN EDIT CODE **/
     // robot knows exactly where it is starting (HINT: use the
     // RobotSimulation::GetInitialPosition() method)
        MapCoord coord = rsim->GetInitialPosition();
@@ -518,7 +569,7 @@ void InitializeBeliefs(BeliefMap *bmap, RobotSimulation *rsim, bool kidnapped)
        cell->belief= 1;
     
 
-    /** CS221 TASK 1: END EDIT CODE **/
+    /** CS221 TASK 1(DONE): END EDIT CODE **/
   }
 }
 
