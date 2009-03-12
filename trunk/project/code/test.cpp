@@ -184,7 +184,13 @@ int main(int argc, char *argv[])
     // Kalman Filter setup 
     // TODO(alecmgo): Externalize this
     CObjectList kalmanObjects;
-    CvBlobTrackPredictor* predictor = cvCreateModuleBlobTrackPredictKalman();
+    CvBlobTrackPredictor* predictor1 = cvCreateModuleBlobTrackPredictKalman();
+    CvBlob blob1;
+    
+    //Hacky way to know if struct is initialized
+    //TODO: Ask Anand how to avoid this hack
+    blob1.x = -1;
+
     bool USE_KALMAN = false;
 
     CObjectList::iterator iObj;
@@ -202,23 +208,25 @@ int main(int argc, char *argv[])
         //Kalman Filter - START
 	//TODO(alecmgo): Externalize this
         if(USE_KALMAN) {     
-          CvBlob blob;
-	  //cout << "# objects found: " << classifierObjects.size() << endl;
-	  if(classifierObjects.size() > 0) {
-            blob.x = classifierObjects.at(0).rect.x;
-            blob.y = classifierObjects.at(0).rect.y;
-            blob.w = classifierObjects.at(0).rect.width;
-            blob.h = classifierObjects.at(0).rect.height;
-            predictor->Update(&blob);
+	  cout << "Objects found: " << classifierObjects.size() << endl;
+          for(size_t i = 0; i < classifierObjects.size(); i++) {
+	    CvBlob blob; 
+            blob.x = classifierObjects.at(i).rect.x;
+            blob.y = classifierObjects.at(i).rect.y;
+            blob.w = classifierObjects.at(i).rect.width;
+            blob.h = classifierObjects.at(i).rect.height;
+	    if(blob1.x == -1) {
+              //Assign first blob
+	      blob1 = blob;
+              predictor1->Update(&blob);
+	    }
+	    if(sqrt(pow(blob.x - blob1.x, 2) + pow(blob.y - blob1.y, 2)) < 25) {
+              //Assign first blob
+	      blob1 = blob;
+              predictor1->Update(&blob);
+	    }
           }
-          CvBlob* predicted = predictor->Predict();
-          if(predicted) {
-            //cout << "Kalman: ";
-            //cout << predicted->x << " " << predicted->y << " ";
-            //cout << predicted->w << " " << predicted->w << endl;
-          } else {
-            cout << "No prediction" << endl;
-          }
+          CvBlob* predicted = predictor1->Predict();
 
           //Add prediction to list of Kalman objects
           CObject obj;
