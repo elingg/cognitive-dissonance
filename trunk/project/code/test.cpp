@@ -186,6 +186,9 @@ int main(int argc, char *argv[])
     KalmanFilter kalmanFilter; 
     CObjectList kalmanObjects;
 
+    LucasKanade lucasKanade;
+    CObjectList lkObjects;
+
     CObjectList::iterator iObj;
     int frameCount = 0;
     while ((frame = cvQueryFrame(capture)) != NULL) {
@@ -198,13 +201,18 @@ int main(int argc, char *argv[])
         groundTruthObjects.clear();
         replayer.run(frame, &groundTruthObjects);
 
-        //Switch for using Kalman
+        //Kalman Filter
 	//TODO: Make this command-line argument
         bool USE_KALMAN = false;
 	if(USE_KALMAN) {
           kalmanFilter.update(&classifierObjects); 
 	  kalmanObjects = kalmanFilter.predict();
         }
+
+	bool USE_LK = false;
+	if(USE_LK) {
+	  lkObjects = lucasKanade.getObjectList(frame, &classifierObjects); 
+	}
 
         if (outputStream) {
             *outputStream << "  <frame id=\"" << (frameCount - 1) << "\">" << endl;
