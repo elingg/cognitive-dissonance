@@ -31,6 +31,8 @@
 #include "classifier.h"
 #include "replay.h"
 
+#include "MotionTracker.h"
+
 #define WINDOW_NAME "CS221 Computer Vision Project"
 
 using namespace std;
@@ -181,17 +183,8 @@ int main(int argc, char *argv[])
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
 
-    // Kalman Filter setup 
-    // TODO(alecmgo): Externalize this
+    KalmanFilter kalmanFilter; 
     CObjectList kalmanObjects;
-    CvBlobTrackPredictor* predictor1 = cvCreateModuleBlobTrackPredictKalman();
-    CvBlob blob1;
-    
-    //Hacky way to know if struct is initialized
-    //TODO: Ask Anand how to avoid this hack
-    blob1.x = -1;
-
-    bool USE_KALMAN = false;
 
     CObjectList::iterator iObj;
     int frameCount = 0;
@@ -205,40 +198,14 @@ int main(int argc, char *argv[])
         groundTruthObjects.clear();
         replayer.run(frame, &groundTruthObjects);
 
-        //Kalman Filter - START
-	//TODO(alecmgo): Externalize this
-        if(USE_KALMAN) {     
-	  cout << "Objects found: " << classifierObjects.size() << endl;
-          for(size_t i = 0; i < classifierObjects.size(); i++) {
-	    CvBlob blob; 
-            blob.x = classifierObjects.at(i).rect.x;
-            blob.y = classifierObjects.at(i).rect.y;
-            blob.w = classifierObjects.at(i).rect.width;
-            blob.h = classifierObjects.at(i).rect.height;
-	    if(blob1.x == -1) {
-              //Assign first blob
-	      blob1 = blob;
-              predictor1->Update(&blob);
-	    }
-	    if(sqrt(pow(blob.x - blob1.x, 2) + pow(blob.y - blob1.y, 2)) < 25) {
-              //Assign first blob
-	      blob1 = blob;
-              predictor1->Update(&blob);
-	    }
-          }
-          CvBlob* predicted = predictor1->Predict();
+        //Switch for using Kalman
+	//TODO: Make this command-line argument
+        bool USE_KALMAN = false;
+	if(USE_KALMAN) {
+          kalmanFilter.update(&classifierObjects); 
+	  kalmanObjects = kalmanFilter.predict();
+        }
 
-          //Add prediction to list of Kalman objects
-          CObject obj;
-          obj.rect = cvRect(0, 0, predicted->w, predicted->h); 
-          obj.rect.x = predicted->x;
-          obj.rect.y = predicted->y;
-          obj.label = string("kalman");
-          kalmanObjects.clear();
-          kalmanObjects.push_back(obj);
-	}
-        //Klaman Filter - END
-	
         if (outputStream) {
             *outputStream << "  <frame id=\"" << (frameCount - 1) << "\">" << endl;
             for (iObj = classifierObjects.begin(); iObj != classifierObjects.end(); iObj++) {
@@ -256,12 +223,14 @@ int main(int argc, char *argv[])
             for (iObj = classifierObjects.begin(); iObj != classifierObjects.end(); iObj++) {
                 iObj->draw(frameCopy, CV_RGB(0, 255, 0), &font);
             }
+
 	    //Show Kalman object
 	    if(USE_KALMAN) {
               for (iObj = kalmanObjects.begin(); iObj != kalmanObjects.end(); iObj++) {
                 iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
 	      }
 	    }
+
             cvShowImage(WINDOW_NAME, frameCopy);
             cvReleaseImage(&frameCopy);
 
