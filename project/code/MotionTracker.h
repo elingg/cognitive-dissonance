@@ -4,7 +4,6 @@
 #include "cvaux.h"
 #include "objects.h"
 
-
 class MotionTracker {
   public:
     MotionTracker();
@@ -12,7 +11,29 @@ class MotionTracker {
 };
 
 /**
- * Kalman Filter for a group of objects
+ * Lucas Kanade optical flow for multiple objects.  The built-in OpenCV
+ * doesn't handle the specific case of different objects.
+ */
+class LucasKanade {
+  public:
+    LucasKanade();
+    ~LucasKanade();
+    CObjectList getObjectList(IplImage* frame, CObjectList* classifierObjects);
+  private:
+    void initialize(IplImage* frame);
+
+    int frameCount;
+    IplImage* prevGrayFrame;
+
+    IplImage* eigImage;
+    IplImage* tmpImage;
+    IplImage* pyramidA;
+    IplImage* pyramidB;
+};
+
+/**
+ * Kalman Filter for a group of objects.  The built-in OpenCV Kalman Filter
+ * is only for one object.  This Kalman Filter handles multiple objects.
  */
 class KalmanFilter {
   public:
