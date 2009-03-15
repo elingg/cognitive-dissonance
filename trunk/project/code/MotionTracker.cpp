@@ -73,6 +73,7 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
   char featuresFound[MAX_CORNERS];
   float featureErrors[MAX_CORNERS];
 
+  cout << "Before calculating optical flow" << endl;
   cvCalcOpticalFlowPyrLK(
     prevGrayFrame,
     grayFrame,
@@ -88,6 +89,7 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
     cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3),
     0
   );
+  cout << "Calculated optical flow" << endl;
 
   //Debug code
   //TODO: Move this debug code
@@ -101,13 +103,18 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
   }
   cvShowImage(LK_WINDOW_NAME, frame);
   //End Debug code
+  cout << "Drew points" << endl;
   
   
   //Important, and this will probably lead to bugs if you forget about it:
   //swap the corners
+  cout << "Before swapping corners " << endl;
   cornersA = cornersB;
-
+  cout << "After swapping corners " << endl;
   //TODO: Return something here
+  //
+  CObject obj;
+  return obj;
 }
 
 /**
@@ -130,9 +137,14 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
   IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
 
+  //if((frameCount == 0) && (classifierObjects->size() > 0)) {
   if(frameCount == 0) {
     cout << "Classifier object size: " << classifierObjects->size() << endl;
     LKObject lkObject;
+    //CObject object;
+    //object.rect.x = classifierObjects->at(0).rect.x;
+    //object.label = classifierObjects->at(0).label;
+
     lkObject.initialize(grayFrame);
     blobs.push_back(lkObject);
   }
@@ -142,10 +154,11 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
       blobs[i].getNewPosition(prevGrayFrame, grayFrame, frame);
     }
   }
-
+  cout << "Before coping gray image " << endl;
   prevGrayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCopyImage(grayFrame, prevGrayFrame);
- 
+  cout << "Copied gray image " << endl;
+
   //Release previous frame
   //TODO: Determine if we need to release these images to avoid memory leak
   /*
