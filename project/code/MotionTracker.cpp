@@ -36,11 +36,39 @@ LKObject::~LKObject() {
 }
 
 /**
+ * Utility function to create a boudning box
+ */
+CvRect createBoundingBox(CvPoint2D32f *corners, int numCorners) {
+  int minX = corners[0].x;
+  int minY = corners[0].y;
+  int maxX = corners[0].x;
+  int maxY = corners[0].y;
+
+  for(int i = 0; i < numCorners; i++) {
+    if(corners[i].x < minX) {
+      minX = corners[i].x;
+    }
+    if(corners[i].y < minY) {
+      minY = corners[i].y;
+    }
+    if(corners[i].x > maxX) {
+      maxX = corners[i].x;
+    }
+    if(corners[i].y > maxY) {
+      maxY = corners[i].y;
+    }
+  }
+  return cvRect(minX, minY, maxX - minX, maxY - minY);
+}
+
+/**
  * Initialize the Lucas Kanade object.  We need the first frame of the video
  * to know the size for the temporary images we build.
  * Based on sample code of OpenCV book on page 333.
  */
-void LKObject::initialize(IplImage* grayFrame) {
+void LKObject::initialize(IplImage* grayFrame, CObject object) {
+    cobject = object; //save a local copy
+    
     cornerCount = MAX_CORNERS;
     //Workspace objects
     eigImage = cvCreateImage(cvGetSize(grayFrame), IPL_DEPTH_32F, 1);
@@ -62,6 +90,25 @@ void LKObject::initialize(IplImage* grayFrame) {
       NULL);
     cout << "Initially found: " << cornerCount << endl;
 
+    //Only keep corners found in bounding box
+    //TODO: Use image ROI to speed up
+    cout << "Object: " << object.rect.x << " " << object.rect.y << " " 
+         << object.rect.width << " " << object.rect.height << endl;
+    CvPoint2D32f* validCorners = new CvPoint2D32f[MAX_CORNERS];
+    int validCornersCount = 0;
+    for(int i = 0; i < cornerCount; i++) {
+      if((cornersA[i].x >= object.rect.x) &&
+         (cornersA[i].x <= object.rect.x + object.rect.width) &&
+	 (cornersA[i].y >= object.rect.y) &&
+	 (cornersA[i].y <= object.rect.y + object.rect.height)) {
+         validCorners[validCornersCount] = cornersA[i];
+	 validCornersCount++;
+      } else {
+         cout << "Did not pass: " << cornersA[i].x << " " << cornersA[i].y << endl;
+      }
+    }
+    cornersA = validCorners;
+    cornerCount = validCornersCount;
 }
 
 //Remove frame from parameter list
@@ -73,7 +120,6 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
   char featuresFound[MAX_CORNERS];
   float featureErrors[MAX_CORNERS];
 
-  cout << "Before calculating optical flow" << endl;
   cvCalcOpticalFlowPyrLK(
     prevGrayFrame,
     grayFrame,
@@ -89,32 +135,49 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
     cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3),
     0
   );
-  cout << "Calculated optical flow" << endl;
 
   //Debug code
   //TODO: Move this debug code
+  float  meanX = 0;
+  float  meanY = 0;
+  int numGoodCorners = 0;
+
+  //We want to filter out any bad points
+  CvPoint2D32f* goodCorners = new CvPoint2D32f[MAX_CORNERS];
+
   for(int i = 0; i < cornerCount; i++) {
-    if(featuresFound[i] == 0 || featureErrors[i] > 550) {
-      continue;
+    if(featuresFound[i] != 0 && featureErrors[i] < 550) {
+    //if(!featuresFound[i] || featureErrors[i] < 550) {
+      CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
+      CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
+      cvLine(frame, p0, p1, CV_RGB(255,0,0), 2);
+
+      meanX += cornersB[i].x;
+      meanY += cornersB[i].y;
+
+      goodCorners[numGoodCorners] = cornersB[i];
+
+      numGoodCorners++;
+    } else {
+      //cout << "Found a bad point" << endl;
+      //cout << "Error is " << featureErrors[i] << endl;
     }
-    CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
-    CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
-    cvLine(frame, p0, p1, CV_RGB(255,0,0),2);
   }
-  cvShowImage(LK_WINDOW_NAME, frame);
-  //End Debug code
-  cout << "Drew points" << endl;
-  
+  meanX = meanX / numGoodCorners;
+  meanY = meanY / numGoodCorners;
+  //cout << "Number of valid points " << numGoodCorners;
+  CvPoint meanPoint = cvPoint((int) meanX, (int) meanY);
+  cvCircle(frame, meanPoint, 5, CV_RGB(0, 0, 255));
+
+  //cvShowImage(LK_WINDOW_NAME, frame);
   
   //Important, and this will probably lead to bugs if you forget about it:
   //swap the corners
-  cout << "Before swapping corners " << endl;
-  cornersA = cornersB;
-  cout << "After swapping corners " << endl;
-  //TODO: Return something here
-  //
-  CObject obj;
-  return obj;
+  cornersA = goodCorners;
+  cornerCount = numGoodCorners;
+  
+  cobject.rect = createBoundingBox(cornersA, cornerCount);
+  return cobject;
 }
 
 /**
@@ -122,12 +185,12 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
  */
 LucasKanade::LucasKanade() {
   frameCount = 0;
-  cvNamedWindow(LK_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
+  //cvNamedWindow(LK_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
 
 }
 
 LucasKanade::~LucasKanade() {
-  cvDestroyWindow(LK_WINDOW_NAME);
+  //cvDestroyWindow(LK_WINDOW_NAME);
 }
 
 CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects) {
@@ -137,27 +200,23 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
   IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-  //if((frameCount == 0) && (classifierObjects->size() > 0)) {
-  if(frameCount == 0) {
+  if((frameCount == 0) && (classifierObjects->size() > 0)) {
+  //if(frameCount == 0) {
     cout << "Classifier object size: " << classifierObjects->size() << endl;
     LKObject lkObject;
-    //CObject object;
-    //object.rect.x = classifierObjects->at(0).rect.x;
-    //object.label = classifierObjects->at(0).label;
-
-    lkObject.initialize(grayFrame);
+    CObject object = classifierObjects->at(0);
+    lkObject.initialize(grayFrame, object);
     blobs.push_back(lkObject);
   }
 
   if(frameCount > 0) { //Need to have at least one previousFrame
     for(size_t i = 0; i < blobs.size(); i++) {
-      blobs[i].getNewPosition(prevGrayFrame, grayFrame, frame);
+      CObject obj = blobs[i].getNewPosition(prevGrayFrame, grayFrame, frame);
+      objectList.push_back(obj);
     }
   }
-  cout << "Before coping gray image " << endl;
   prevGrayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCopyImage(grayFrame, prevGrayFrame);
-  cout << "Copied gray image " << endl;
 
   //Release previous frame
   //TODO: Determine if we need to release these images to avoid memory leak

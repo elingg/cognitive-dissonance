@@ -16,7 +16,7 @@ class MotionTracker {
 class LKObject {
   public:
     LKObject();
-    void initialize(IplImage* grayFrame);
+    void initialize(IplImage* grayFrame, CObject object);
     ~LKObject();
     CObject getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, IplImage* frame);
   private:
@@ -30,7 +30,7 @@ class LKObject {
     IplImage* pyramidA;
     IplImage* pyramidB;
     
-    CObject object;
+    CObject cobject;
 };
 
 /**

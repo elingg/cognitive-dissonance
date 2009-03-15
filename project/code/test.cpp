@@ -183,11 +183,9 @@ int main(int argc, char *argv[])
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
 
+    CObjectList debugObjects;
     KalmanFilter kalmanFilter; 
-    CObjectList kalmanObjects;
-
     LucasKanade lucasKanade;
-    CObjectList lkObjects;
 
     CObjectList::iterator iObj;
     int frameCount = 0;
@@ -206,14 +204,14 @@ int main(int argc, char *argv[])
 	bool USE_KALMAN = false;
 	if(USE_KALMAN) {
 		kalmanFilter.update(&classifierObjects); 
-		kalmanObjects = kalmanFilter.predict();
-		cout << "Kalman objects: " << kalmanObjects.size();
-		classifierObjects = kalmanObjects;
+		debugObjects = kalmanFilter.predict();
+		cout << "Kalman objects: " << debugObjects.size();
+		classifierObjects = debugObjects;
 	}
 
 	bool USE_LK = false;
 	if(USE_LK) {
-	  lkObjects = lucasKanade.process(frame, &classifierObjects); 
+	  debugObjects = lucasKanade.process(frame, &classifierObjects); 
 	}
 
         if (outputStream) {
@@ -235,8 +233,8 @@ int main(int argc, char *argv[])
             }
 
             //Show Kalman object
-	    if(USE_KALMAN) {
-              for (iObj = kalmanObjects.begin(); iObj != kalmanObjects.end(); iObj++) {
+	    if(USE_KALMAN || USE_LK) {
+              for (iObj = debugObjects.begin(); iObj != debugObjects.end(); iObj++) {
 		iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
 	      }
             }
