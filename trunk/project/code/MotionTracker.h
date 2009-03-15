@@ -11,19 +11,17 @@ class MotionTracker {
 };
 
 /**
- * Lucas Kanade optical flow for multiple objects.  The built-in OpenCV
- * doesn't handle the specific case of different objects.
+ * A single Lucas Kanade (for each object)
  */
-class LucasKanade {
+class LKObject {
   public:
-    LucasKanade();
-    ~LucasKanade();
-    CObjectList getObjectList(IplImage* frame, CObjectList* classifierObjects);
+    LKObject();
+    void initialize(IplImage* grayFrame);
+    ~LKObject();
+    CObject getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, IplImage* frame);
   private:
-    void initialize(IplImage* frame);
+    int cornerCount;
 
-    int frameCount;
-    IplImage* prevGrayFrame;
     CvPoint2D32f *cornersA;
     CvPoint2D32f *cornersB;
 
@@ -31,10 +29,28 @@ class LucasKanade {
     IplImage* tmpImage;
     IplImage* pyramidA;
     IplImage* pyramidB;
+    
+    CObject object;
 };
 
 /**
- * Tracker
+ * Lucas Kanade optical flow for multiple objects.  The built-in OpenCV
+ * doesn't handle the specific case of different objects.
+ */
+class LucasKanade {
+  public:
+    LucasKanade();
+    ~LucasKanade();
+    CObjectList process(IplImage* frame, CObjectList* classifierObjects);
+  private:
+    int frameCount;
+    IplImage* prevGrayFrame;
+    std::vector<LKObject> blobs;
+ 
+};
+
+/**
+ * A single Kalman Filter (for each object)
  */
 class KFObject {
   public:
@@ -64,9 +80,6 @@ class KalmanFilter {
   private:
     std::vector<KFObject> filters;
     CObjectList kalmanObjects;
-    CvBlob blob1;
-    CObject cvBlobToCObject(CvBlob *blob);
-    CvBlob cObjectToCVBlob(CObject cObject);
 };
 
 
