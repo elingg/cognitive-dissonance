@@ -23,6 +23,7 @@
 #include "HaarFeatures.h"
 #include "EdgeDetectionFeatures.h"
 #include "DecisionTree.h"
+#include "Hough.h"
 using namespace std;
 
 // CClassifier class ---------------------------------------------------------
@@ -191,6 +192,8 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           vector<double> values;
           HaarFeatures haar;
           haar.getFeatureValues(values,smallImage);
+	  Hough hough;
+	  hough.getCircles(values,smallImage);
           //EdgeDetectionFeatures sobel;
 	  //sobel.getFeatureValues(values,smallImage);
 
