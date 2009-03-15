@@ -41,6 +41,17 @@ LucasKanade::~LucasKanade() {
  * Based on sample code of OpenCV book on page 333.
  */
 void LucasKanade::initialize(IplImage* frame) {
+ 
+}
+
+CObjectList LucasKanade::getObjectList(IplImage* frame, CObjectList* classifierObjects) {
+  CObjectList objectList;
+
+  int cornerCount = MAX_CORNERS;
+  if(frameCount == 0) {
+
+    initialize(frame);
+    //TODO: Copy this back into initialize
     cvNamedWindow(LK_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
 
     //Workspace objects
@@ -57,13 +68,18 @@ void LucasKanade::initialize(IplImage* frame) {
     cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
     cvCopyImage(grayFrame, prevGrayFrame);
     frameCount++;
-}
-
-CObjectList LucasKanade::getObjectList(IplImage* frame, CObjectList* classifierObjects) {
-  CObjectList objectList;
-
-  if(frameCount == 0) {
-    initialize(frame);
+     
+    cornersA = new CvPoint2D32f[MAX_CORNERS];
+    cvGoodFeaturesToTrack(
+      grayFrame,
+      eigImage,
+      tmpImage,
+      cornersA,
+      &cornerCount,
+      0.01,
+      0.01,
+      NULL);
+    cout << "Initially found: " << cornerCount << endl;
     return objectList;
   }
 
@@ -71,20 +87,9 @@ CObjectList LucasKanade::getObjectList(IplImage* frame, CObjectList* classifierO
   cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
   //cout << "Converted gray frame" << endl;
 
-  int cornerCount = MAX_CORNERS;
-  CvPoint2D32f* cornersA = new CvPoint2D32f[MAX_CORNERS];
-  CvPoint2D32f* cornersB = new CvPoint2D32f[MAX_CORNERS];
-  cvGoodFeaturesToTrack(
-    grayFrame,
-    eigImage,
-    tmpImage,
-    cornersA,
-    &cornerCount,
-    0.01,
-    0.01,
-    NULL);
   //TODO: use cvFindCornerSubPix
   //cout << "Found features" << endl;
+  cornersB = new CvPoint2D32f[MAX_CORNERS];
 
   char featuresFound[MAX_CORNERS];
   float featureErrors[MAX_CORNERS];
@@ -105,21 +110,21 @@ CObjectList LucasKanade::getObjectList(IplImage* frame, CObjectList* classifierO
     cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3),
     0
   );
-
   //cout << "Calculated optical flow" << endl;
 
   for(int i = 0; i < cornerCount; i++) {
     if(featuresFound[i] == 0 || featureErrors[i] > 550) {
       continue;
     }
+    //cout << "Corner " << i << ": " << featuresFound[i] << ";" << featureErrors[i] << endl;
     CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
     CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
-    cvLine(grayFrame, p0, p1, CV_RGB(255,0,0),2);
+    cvLine(frame, p0, p1, CV_RGB(255,0,0),2);
   }
 
   //cout << "Created optical flow image" << endl;
 
-  cvShowImage(LK_WINDOW_NAME, grayFrame);
+  cvShowImage(LK_WINDOW_NAME, frame);
   //cout << "Showed image" << endl;
 
   //Release previous frame
@@ -132,6 +137,7 @@ CObjectList LucasKanade::getObjectList(IplImage* frame, CObjectList* classifierO
   */
 
   cvCopyImage(grayFrame, prevGrayFrame);
+	cornersA = cornersB;
   //cout << "Copied old image" << endl;
   frameCount++;
   return objectList; 
