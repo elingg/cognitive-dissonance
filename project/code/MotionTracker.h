@@ -32,6 +32,24 @@ class LucasKanade {
 };
 
 /**
+ * Tracker
+ */
+class KFObject {
+  public:
+    KFObject();
+    ~KFObject();
+    void update(CObject object);
+    CObject predict();
+    void incrementCount();
+    void decrementCount();
+    int getCount();
+  private:
+    CvBlobTrackPredictor* predictor;
+    CObject lastObject;
+    int count;
+};
+
+/**
  * Kalman Filter for a group of objects.  The built-in OpenCV Kalman Filter
  * is only for one object.  This Kalman Filter handles multiple objects.
  */
@@ -39,10 +57,14 @@ class KalmanFilter {
   public:
     KalmanFilter();
     ~KalmanFilter();
-    void update(CObjectList* classifierObjects);
+    void update(CObjectList *classifierObjects);
     CObjectList predict();
   private:
+    std::vector<KFObject> filters;
     CObjectList kalmanObjects;
-    CvBlobTrackPredictor* predictor1;
     CvBlob blob1;
+    CObject cvBlobToCObject(CvBlob *blob);
+    CvBlob cObjectToCVBlob(CObject cObject);
 };
+
+
