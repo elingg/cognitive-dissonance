@@ -193,7 +193,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           HaarFeatures haar;
           haar.getFeatureValues(values,smallImage);
 	  Hough hough;
-	  hough.getCircles(values,smallImage);
+	 // hough.getCircles(values,smallImage);
           //EdgeDetectionFeatures sobel;
 	  //sobel.getFeatureValues(values,smallImage);
 
