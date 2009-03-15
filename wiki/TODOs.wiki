@@ -8,7 +8,7 @@ Please add items that you think need to be done for the vision project to this p
   * Replace decision tree with OpenCV's decision tree (add unit test) (*Anand*)
   * OpenCV Bagging and Boosting (*Anand*)
   * Add support for multi-class (*Anand*)
-  * Create Haar features for other classes [http://lab.cntl.kyutech.ac.jp/~kobalab/nishida/opencv/OpenCV_ObjectDetection_HowTo.pdf Tutoria]
+  * Create Haar features for other classes ([http://lab.cntl.kyutech.ac.jp/~kobalab/nishida/opencv/OpenCV_ObjectDetection_HowTo.pdf Tutorial])
   * Implement 'Attentional Cascade' described in the Viola and Jones paper.
   * Use CvSVM after honing down on features to use.
 
