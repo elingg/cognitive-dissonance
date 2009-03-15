@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
 	bool USE_LK = false;
 	if(USE_LK) {
-	  lkObjects = lucasKanade.getObjectList(frame, &classifierObjects); 
+	  lkObjects = lucasKanade.process(frame, &classifierObjects); 
 	}
 
         if (outputStream) {
