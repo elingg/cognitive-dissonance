@@ -24,6 +24,8 @@ class LucasKanade {
 
     int frameCount;
     IplImage* prevGrayFrame;
+    CvPoint2D32f *cornersA;
+    CvPoint2D32f *cornersB;
 
     IplImage* eigImage;
     IplImage* tmpImage;

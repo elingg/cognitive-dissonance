@@ -203,13 +203,13 @@ int main(int argc, char *argv[])
 
         //Kalman Filter
 	//TODO: Make this command-line argument
-        bool USE_KALMAN = false;
+	bool USE_KALMAN = false;
 	if(USE_KALMAN) {
-          kalmanFilter.update(&classifierObjects); 
-	  kalmanObjects = kalmanFilter.predict();
-	  cout << "Kalman objects: " << kalmanObjects.size();
-	  classifierObjects = kalmanObjects;
-        }
+		kalmanFilter.update(&classifierObjects); 
+		kalmanObjects = kalmanFilter.predict();
+		cout << "Kalman objects: " << kalmanObjects.size();
+		classifierObjects = kalmanObjects;
+	}
 
 	bool USE_LK = false;
 	if(USE_LK) {
@@ -234,12 +234,12 @@ int main(int argc, char *argv[])
                 iObj->draw(frameCopy, CV_RGB(0, 255, 0), &font);
             }
 
-	    //Show Kalman object
+            //Show Kalman object
 	    if(USE_KALMAN) {
               for (iObj = kalmanObjects.begin(); iObj != kalmanObjects.end(); iObj++) {
-                iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
+		iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
 	      }
-	    }
+            }
 
             cvShowImage(WINDOW_NAME, frameCopy);
             cvReleaseImage(&frameCopy);
