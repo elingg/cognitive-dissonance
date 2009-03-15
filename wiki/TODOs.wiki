@@ -15,6 +15,7 @@ Please add items that you think need to be done for the vision project to this p
   * Implement edge detection (sobel filter) (add unit test) (*Liz*)
   * Implement line detection (hough filter) (add unit test) (Don't try because we don't know what to do with it)
   * Implement corner detection (harris filter) (add unit test) (Don't try because we don't know what to do with it)
+  * Optical Flow (*Alec*)
   * Kalman Filter (*Alec*)
   * Particle filters
   * “Sharing visual features for multiclass and multiview object detection.”
