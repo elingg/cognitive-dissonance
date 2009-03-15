@@ -10,3 +10,4 @@ Final report. As we find new information, please update the page, so we have wha
 || Haar features || 0.00416667 || 0.00320342 ||
 || Clubbing overlapping rectangles || 0.209366 || 0.131148 ||
 || Max window length to 208 (from 104) || 0.414073 || 0.261092 ||
+|| Kalman Filter || 0.440678 || 0.281667 ||
