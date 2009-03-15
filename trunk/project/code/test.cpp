@@ -207,6 +207,8 @@ int main(int argc, char *argv[])
 	if(USE_KALMAN) {
           kalmanFilter.update(&classifierObjects); 
 	  kalmanObjects = kalmanFilter.predict();
+	  cout << "Kalman objects: " << kalmanObjects.size();
+	  classifierObjects = kalmanObjects;
         }
 
 	bool USE_LK = false;
