@@ -13,5 +13,4 @@ Final report. As we find new information, please update the page, so we have wha
 || Kalman Filter || 0.440678 || 0.281667 ||
 || Kalman Filter with classifier returning less false positives`*`|| 0.530612 || 0.32529 ||
 
-
-`*` The decision tree was retrained with depth = 6, classification threshold = 0.8 
+`*` The decision tree was retrained with depth = 7, classification threshold = 0.8 
