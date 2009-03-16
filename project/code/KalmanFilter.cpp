@@ -9,16 +9,40 @@
 using namespace std;
 
 /**
+ * Utility function to convert a CvBlob to a CObject
+ */
+CObject cvBlobToCObject(CvBlob* blob, string label) {
+  CObject obj;
+  obj.rect = cvRect(0, 0, blob->w, blob->h); 
+  obj.rect.x = blob->x;
+  obj.rect.y = blob->y;
+  obj.label = label;
+  return obj; 
+}
+
+/**
+ * Utility function to convert a CObject to CvBlob
+ */
+CvBlob cObjectToCVBlob(CObject cObject) {
+  CvBlob blob; 
+  blob.x = cObject.rect.x;
+  blob.y = cObject.rect.y;
+  blob.w = cObject.rect.width;
+  blob.h = cObject.rect.height;
+  return blob;
+}
+
+/**
  * Kalman Filter
  */
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
 
-//TODO: Merge update and predict functions after experimenting with different ordering
+/**
+ * Runs the update step for all the filters
+ */
 void KalmanFilter::update(CObjectList* classifierObjects) {
-  cout << "Objects found: " << classifierObjects->size() << endl;
-
   size_t numFilters = filters.size(); //need this because the filters.size changes
   bool shouldPenalize[numFilters];
   for(size_t i = 0; i < numFilters; i++) {
@@ -29,19 +53,18 @@ void KalmanFilter::update(CObjectList* classifierObjects) {
     bool foundMatchingBlob = false;
     for(size_t j = 0; j < filters.size(); j++) {
       CObject predicted = filters[j].predict();
-      int overlap = predicted.overlap(classifierObjects->at(i));
-      //cout << "Overlap is" << overlap << endl;
-      //cout << "Size is" << predicted.area() << endl;
-      //cout << "Size is" << classifierObjects->at(i).area() << endl;
-      double overlapRatio = (double) (2*overlap) /
+      if(predicted.label == classifierObjects->at(i).label) {
+        //check overlap between filter and classifier object
+        int overlap = predicted.overlap(classifierObjects->at(i));
+        double overlapRatio = (double) (2*overlap) /
                             (predicted.area() + classifierObjects->at(i).area()); 
-      //check overlap between filter and classifier object
-      if(overlapRatio >= 0.8) {
-        filters[j].update(classifierObjects->at(i));
-	filters[j].incrementCount();
-	shouldPenalize[j] = false;
-        foundMatchingBlob = true;
-	break;
+        if(overlapRatio >= 0.8) {
+          filters[j].update(classifierObjects->at(i));
+	  filters[j].incrementCount();
+	  shouldPenalize[j] = false;
+          foundMatchingBlob = true;
+	  break;
+        }
       }
     }
     if(!foundMatchingBlob) {
@@ -60,30 +83,8 @@ void KalmanFilter::update(CObjectList* classifierObjects) {
 }
 
 /**
- * Utility function to convert a CvBlob to a CObject
- * TODO: Externalize label name
+ * Runs predict step for all the kalman filters
  */
-CObject cvBlobToCObject(CvBlob* blob) {
-  CObject obj;
-  obj.rect = cvRect(0, 0, blob->w, blob->h); 
-  obj.rect.x = blob->x;
-  obj.rect.y = blob->y;
-  obj.label = string("mug");
-  return obj; 
-}
-
-/**
- * Utility function to convert a CObject to CvBlob
- */
-CvBlob cObjectToCVBlob(CObject cObject) {
-  CvBlob blob; 
-  blob.x = cObject.rect.x;
-  blob.y = cObject.rect.y;
-  blob.w = cObject.rect.width;
-  blob.h = cObject.rect.height;
-  return blob;
-}
-
 CObjectList KalmanFilter::predict() {
   kalmanObjects.clear();
   for(size_t i = 0; i < filters.size(); i++) {
@@ -103,7 +104,7 @@ CObjectList KalmanFilter::predict() {
 }
 
 /**
- * Generic Tracker for each Object 
+ * Individual Kalman Filters for each blob tracked
  */
 KFObject::KFObject() {
   count = 0;
@@ -114,13 +115,17 @@ KFObject::~KFObject() {};
 
 CObject KFObject::predict() {
   CvBlob* predicted = predictor->Predict();
-  return cvBlobToCObject(predicted);
+  return cvBlobToCObject(predicted, label);
 }
 
 void KFObject::update(CObject object) {
-  lastObject = object;
+  label = object.label;
   CvBlob blob = cObjectToCVBlob(object);
   predictor->Update(&blob); 
+}
+
+int KFObject::getCount() {
+  return count;
 }
 
 void KFObject::incrementCount() {
@@ -130,8 +135,3 @@ void KFObject::incrementCount() {
 void KFObject::decrementCount() {
   count--;
 }
-
-int KFObject::getCount() {
-  return count;
-}
-

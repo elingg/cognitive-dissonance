@@ -5,7 +5,7 @@
 #include "objects.h"
 
 /**
- * A single Kalman Filter (for each object)
+ * A single Kalman Filter (for each blob being tracked)
  */
 class KFObject {
   public:
@@ -18,7 +18,7 @@ class KFObject {
     int getCount();
   private:
     CvBlobTrackPredictor* predictor;
-    CObject lastObject;
+    std::string label;
     int count;
 };
 
