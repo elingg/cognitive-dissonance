@@ -212,6 +212,7 @@ int main(int argc, char *argv[])
 	bool USE_LK = false;
 	if(USE_LK) {
 	  debugObjects = lucasKanade.process(frame, &classifierObjects); 
+	  classifierObjects = debugObjects;
 	}
 
         if (outputStream) {

@@ -16,21 +16,25 @@ class MotionTracker {
 class LKObject {
   public:
     LKObject();
-    void initialize(IplImage* grayFrame, CObject object);
     ~LKObject();
+    void initialize(IplImage* grayFrame, CObject object);
     CObject getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, IplImage* frame);
+    CObject getObject();
+    double getPercentRemaining();
+    int getCount();
+    void incrementCount();
+    void decrementCount();
   private:
     int cornerCount;
-
+    int initialCount;
     CvPoint2D32f *cornersA;
     CvPoint2D32f *cornersB;
-
-    IplImage* eigImage;
-    IplImage* tmpImage;
+ 
     IplImage* pyramidA;
     IplImage* pyramidB;
-    
     CObject cobject;
+
+    int count; //number of occurrences
 };
 
 /**

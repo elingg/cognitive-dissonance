@@ -13,9 +13,6 @@
 #include "highgui.h"
 #include <iostream>
 
-#define LK_WINDOW_NAME "Lucas Kanade Debug"
-#define KF_WINDOW_NAME "Kalman Filter Debug Window"
-
 using namespace std;
 
 MotionTracker::MotionTracker() {}
@@ -28,15 +25,31 @@ const int MAX_CORNERS = 500;
 const int WIN_SIZE = 10;
 
 LKObject::LKObject() {
-
+  count = 0;
 }
 
 LKObject::~LKObject() {
+  //TODO: Figure out why this causes a problem
+  /*
+  cvReleaseImage(&pyramidA);
+  cvReleaseImage(&pyramidB);
+  */
+}
 
+int LKObject::getCount() {
+  return count;
+}
+
+void LKObject::incrementCount() {
+  count++;
+}
+
+void LKObject::decrementCount() {
+  count--;
 }
 
 /**
- * Utility function to create a boudning box
+ * Utility function to create a bounding box
  */
 CvRect createBoundingBox(CvPoint2D32f *corners, int numCorners) {
   int minX = corners[0].x;
@@ -70,9 +83,10 @@ void LKObject::initialize(IplImage* grayFrame, CObject object) {
     cobject = object; //save a local copy
     
     cornerCount = MAX_CORNERS;
+
     //Workspace objects
-    eigImage = cvCreateImage(cvGetSize(grayFrame), IPL_DEPTH_32F, 1);
-    tmpImage = cvCreateImage(cvGetSize(grayFrame), IPL_DEPTH_32F, 1);
+    IplImage* eigImage = cvCreateImage(cvGetSize(grayFrame), IPL_DEPTH_32F, 1);
+    IplImage* tmpImage = cvCreateImage(cvGetSize(grayFrame), IPL_DEPTH_32F, 1);
 
     CvSize pyramidSize = cvSize(grayFrame->width+8, grayFrame->height/3);
     pyramidA = cvCreateImage(pyramidSize, IPL_DEPTH_32F, 1);
@@ -88,12 +102,15 @@ void LKObject::initialize(IplImage* grayFrame, CObject object) {
       0.01,
       0.01,
       NULL);
-    cout << "Initially found: " << cornerCount << endl;
+    //cout << "Initially found: " << cornerCount << endl;
 
+    cvReleaseImage(&eigImage);
+    cvReleaseImage(&tmpImage);
+
+    //TODO: use cvFindCornerSubPix
+    
     //Only keep corners found in bounding box
     //TODO: Use image ROI to speed up
-    cout << "Object: " << object.rect.x << " " << object.rect.y << " " 
-         << object.rect.width << " " << object.rect.height << endl;
     CvPoint2D32f* validCorners = new CvPoint2D32f[MAX_CORNERS];
     int validCornersCount = 0;
     for(int i = 0; i < cornerCount; i++) {
@@ -104,22 +121,32 @@ void LKObject::initialize(IplImage* grayFrame, CObject object) {
          validCorners[validCornersCount] = cornersA[i];
 	 validCornersCount++;
       } else {
-         cout << "Did not pass: " << cornersA[i].x << " " << cornersA[i].y << endl;
+         //cout << "Did not pass: " << cornersA[i].x << " " << cornersA[i].y << endl;
       }
     }
     cornersA = validCorners;
     cornerCount = validCornersCount;
+
+    initialCount = validCornersCount;
+}
+
+double LKObject::getPercentRemaining() {
+  return (double) cornerCount / (double) initialCount;
+}
+
+CObject LKObject::getObject() {
+  return cobject;
 }
 
 //Remove frame from parameter list
 CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, IplImage* frame) {
 
-  //TODO: use cvFindCornerSubPix
   cornersB = new CvPoint2D32f[MAX_CORNERS];
 
   char featuresFound[MAX_CORNERS];
   float featureErrors[MAX_CORNERS];
 
+  //cout << "Calculated optical flow" << endl;
   cvCalcOpticalFlowPyrLK(
     prevGrayFrame,
     grayFrame,
@@ -135,25 +162,19 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
     cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3),
     0
   );
+  //cout << "Finished optical flow " << endl;
 
-  //Debug code
-  //TODO: Move this debug code
-  float  meanX = 0;
-  float  meanY = 0;
   int numGoodCorners = 0;
 
   //We want to filter out any bad points
   CvPoint2D32f* goodCorners = new CvPoint2D32f[MAX_CORNERS];
 
   for(int i = 0; i < cornerCount; i++) {
-    if(featuresFound[i] != 0 && featureErrors[i] < 550) {
-    //if(!featuresFound[i] || featureErrors[i] < 550) {
+    //if(featuresFound[i] != 0 && featureErrors[i] < 550) {
+    if(featuresFound[i] != 0 && featureErrors[i] < 200) {
       CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
       CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
       cvLine(frame, p0, p1, CV_RGB(255,0,0), 2);
-
-      meanX += cornersB[i].x;
-      meanY += cornersB[i].y;
 
       goodCorners[numGoodCorners] = cornersB[i];
 
@@ -163,16 +184,9 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
       //cout << "Error is " << featureErrors[i] << endl;
     }
   }
-  meanX = meanX / numGoodCorners;
-  meanY = meanY / numGoodCorners;
   //cout << "Number of valid points " << numGoodCorners;
-  CvPoint meanPoint = cvPoint((int) meanX, (int) meanY);
-  cvCircle(frame, meanPoint, 5, CV_RGB(0, 0, 255));
-
-  //cvShowImage(LK_WINDOW_NAME, frame);
   
-  //Important, and this will probably lead to bugs if you forget about it:
-  //swap the corners
+  //Very important part: update the corners
   cornersA = goodCorners;
   cornerCount = numGoodCorners;
   
@@ -185,68 +199,97 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
  */
 LucasKanade::LucasKanade() {
   frameCount = 0;
-  //cvNamedWindow(LK_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
-
 }
 
 LucasKanade::~LucasKanade() {
-  //cvDestroyWindow(LK_WINDOW_NAME);
+
 }
 
 CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects) {
   CObjectList objectList;
 
+  size_t numBlobs = blobs.size();
+  bool shouldPenalize[numBlobs];
+  for(size_t i = 0; i < numBlobs; i++) {
+    shouldPenalize[i] = true;
+  }
+
   //Housekeeping
   IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
 
-  if((frameCount == 0) && (classifierObjects->size() > 0)) {
-  //if(frameCount == 0) {
-    cout << "Classifier object size: " << classifierObjects->size() << endl;
-    LKObject lkObject;
-    CObject object = classifierObjects->at(0);
-    lkObject.initialize(grayFrame, object);
-    blobs.push_back(lkObject);
+  for(size_t i = 0; i < classifierObjects->size(); i++) {
+    bool foundMatchingBlob = false;
+    for(size_t j = 0; j < blobs.size(); j++) {
+      CObject obj = blobs[j].getObject();
+      int overlap = obj.overlap(classifierObjects->at(i));
+      double overlapRatio = (double) (2*overlap) /
+                            (obj.area() + classifierObjects->at(i).area()); 
+      //check overlap between filter and classifier object
+      if(overlapRatio >= 0.8) {
+	foundMatchingBlob = true;
+	blobs[j].incrementCount();
+	shouldPenalize[j] = false;
+	break;
+      }
+    }
+    if(!foundMatchingBlob) {
+      LKObject lkObject;
+      lkObject.initialize(grayFrame, classifierObjects->at(i));
+      blobs.push_back(lkObject);
+    }
+  }
+
+  for(size_t i = 0; i < numBlobs; i++) {
+    if(shouldPenalize[i]) {
+      blobs[i].decrementCount();
+    }
   }
 
   if(frameCount > 0) { //Need to have at least one previousFrame
     for(size_t i = 0; i < blobs.size(); i++) {
+      //cout << "Looking at blob " << i << endl;
       CObject obj = blobs[i].getNewPosition(prevGrayFrame, grayFrame, frame);
-      objectList.push_back(obj);
+      //cout << "Finished getting position of blob " << i << endl;
+      //cout << "Percent corners remaining " << blobs[i].getPercentRemaining() << endl; 
+      double CORNER_PERCENT_REMAINING_THRESHOLD = 0.1;
+      if(blobs[i].getPercentRemaining() > CORNER_PERCENT_REMAINING_THRESHOLD) {
+        objectList.push_back(obj);
+      } else {
+        blobs.erase(blobs.begin() + i);
+      }
+
+      if(blobs[i].getCount() < -3) {
+        blobs.erase(blobs.begin() + i);
+      }
+
+      //cout << "Finishd with blob " << i << endl;
     }
   }
-  prevGrayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
-  cvCopyImage(grayFrame, prevGrayFrame);
 
-  //Release previous frame
-  //TODO: Determine if we need to release these images to avoid memory leak
-  /*
-  if(frameCount > 0) {
-    cvReleaseImage(&prevGrayFrame);
+  if(frameCount == 0) {
+    prevGrayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   }
-  cout << "Released old frame" << endl;
-  */
+  cvCopyImage(grayFrame, prevGrayFrame);
+  cvReleaseImage(&grayFrame);
 
   frameCount++;
   return objectList; 
 }
 
+
 /**
  * Kalman Filter
  */
-KalmanFilter::KalmanFilter() {
-  //cvNamedWindow(KF_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
-}
+KalmanFilter::KalmanFilter() {}
 
-KalmanFilter::~KalmanFilter() {
-  //cvDestroyWindow(KF_WINDOW_NAME);
-}
+KalmanFilter::~KalmanFilter() {}
 
 //TODO: Merge update and predict functions after experimenting with different ordering
 void KalmanFilter::update(CObjectList* classifierObjects) {
   cout << "Objects found: " << classifierObjects->size() << endl;
 
-  size_t numFilters = filters.size();
+  size_t numFilters = filters.size(); //need this because the filters.size changes
   bool shouldPenalize[numFilters];
   for(size_t i = 0; i < numFilters; i++) {
     shouldPenalize[i] = true;
