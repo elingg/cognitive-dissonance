@@ -183,9 +183,7 @@ int main(int argc, char *argv[])
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
 
-    CObjectList debugObjects;
-    KalmanFilter kalmanFilter; 
-    LucasKanade lucasKanade;
+    MotionTracker motionTracker;
 
     CObjectList::iterator iObj;
     int frameCount = 0;
@@ -199,21 +197,7 @@ int main(int argc, char *argv[])
         groundTruthObjects.clear();
         replayer.run(frame, &groundTruthObjects);
 
-        //Kalman Filter
-	//TODO: Make this command-line argument
-	bool USE_KALMAN = false;
-	if(USE_KALMAN) {
-		kalmanFilter.update(&classifierObjects); 
-		debugObjects = kalmanFilter.predict();
-		cout << "Kalman objects: " << debugObjects.size();
-		classifierObjects = debugObjects;
-	}
-
-	bool USE_LK = false;
-	if(USE_LK) {
-	  debugObjects = lucasKanade.process(frame, &classifierObjects); 
-	  classifierObjects = debugObjects;
-	}
+        classifierObjects = motionTracker.process(frame, classifierObjects);
 
         if (outputStream) {
             *outputStream << "  <frame id=\"" << (frameCount - 1) << "\">" << endl;
@@ -231,13 +215,6 @@ int main(int argc, char *argv[])
             }
             for (iObj = classifierObjects.begin(); iObj != classifierObjects.end(); iObj++) {
                 iObj->draw(frameCopy, CV_RGB(0, 255, 0), &font);
-            }
-
-            //Show Kalman object
-	    if(USE_KALMAN || USE_LK) {
-              for (iObj = debugObjects.begin(); iObj != debugObjects.end(); iObj++) {
-		iObj->draw(frameCopy, CV_RGB(0, 0, 255), &font);
-	      }
             }
 
             cvShowImage(WINDOW_NAME, frameCopy);
