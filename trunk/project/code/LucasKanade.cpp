@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 /**
  * Lucas Kanade
  */
@@ -129,10 +128,9 @@ CObject LKObject::getObject() {
   return cobject;
 }
 
-//Remove frame from parameter list
 CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, 
                                  IplImage* frame) {
-
+  //TODO:Remove frame from parameter list
   cornersB = new CvPoint2D32f[MAX_CORNERS];
 
   char featuresFound[MAX_CORNERS];
@@ -211,15 +209,17 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
     bool foundMatchingBlob = false;
     for(size_t j = 0; j < blobs.size(); j++) {
       CObject obj = blobs[j].getObject();
-      int overlap = obj.overlap(classifierObjects->at(i));
-      double overlapRatio = (double) (2*overlap) /
-                            (obj.area() + classifierObjects->at(i).area()); 
-      //check overlap between filter and classifier object
-      if(overlapRatio >= 0.8) {
-	foundMatchingBlob = true;
-	blobs[j].incrementCount();
-	shouldPenalize[j] = false;
-	break;
+      if(obj.label == classifierObjects->at(i).label) {
+        //check overlap between filter and classifier object
+        int overlap = obj.overlap(classifierObjects->at(i));
+        double overlapRatio = (double) (2*overlap) /
+                              (obj.area() + classifierObjects->at(i).area()); 
+        if(overlapRatio >= 0.8) {
+          foundMatchingBlob = true;
+	  blobs[j].incrementCount();
+	  shouldPenalize[j] = false;
+	  break;
+        }
       }
     }
     if(!foundMatchingBlob) {
@@ -265,5 +265,3 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
   frameCount++;
   return objectList; 
 }
-
-
