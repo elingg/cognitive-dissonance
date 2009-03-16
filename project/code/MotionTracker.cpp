@@ -49,7 +49,7 @@ void LKObject::decrementCount() {
 }
 
 /**
- * Utility function to create a bounding box
+ * Utility function to create a bounding box when given a list of corners
  */
 CvRect createBoundingBox(CvPoint2D32f *corners, int numCorners) {
   int minX = corners[0].x;
@@ -139,7 +139,8 @@ CObject LKObject::getObject() {
 }
 
 //Remove frame from parameter list
-CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, IplImage* frame) {
+CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, 
+                                 IplImage* frame) {
 
   cornersB = new CvPoint2D32f[MAX_CORNERS];
 
@@ -164,29 +165,26 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, I
   );
   //cout << "Finished optical flow " << endl;
 
-  int numGoodCorners = 0;
-
   //We want to filter out any bad points
   CvPoint2D32f* goodCorners = new CvPoint2D32f[MAX_CORNERS];
+  int numGoodCorners = 0;
 
   for(int i = 0; i < cornerCount; i++) {
-    //if(featuresFound[i] != 0 && featureErrors[i] < 550) {
-    if(featuresFound[i] != 0 && featureErrors[i] < 200) {
+    int CORNER_ERROR_THRESHOLD = 200;  //controls how far away corners can move
+    if(featuresFound[i] != 0 && featureErrors[i] < CORNER_ERROR_THRESHOLD) {
       CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
       CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
       cvLine(frame, p0, p1, CV_RGB(255,0,0), 2);
 
       goodCorners[numGoodCorners] = cornersB[i];
-
       numGoodCorners++;
     } else {
-      //cout << "Found a bad point" << endl;
       //cout << "Error is " << featureErrors[i] << endl;
     }
   }
   //cout << "Number of valid points " << numGoodCorners;
   
-  //Very important part: update the corners
+  //Very important part: update the corners to include only the good corners
   cornersA = goodCorners;
   cornerCount = numGoodCorners;
   
