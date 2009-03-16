@@ -80,12 +80,11 @@ cvThreshold(image, image, 160, 255, CV_THRESH_BINARY);
  CvSeq* lines = cvHoughLines2(
     image,
     storage,
-    CV_HOUGH_STANDARD,
-    1, 
-    CV_PI/180,
-    100,
-    0,
-    0
+    CV_HOUGH_PROBABILISTIC,
+    1,
+   .1, 
+   90 
+    
   );
 
 
@@ -101,14 +100,14 @@ cvThreshold(image, image, 160, 255, CV_THRESH_BINARY);
             pt1.y = cvRound(y0 + 1000*(a));
             pt2.x = cvRound(x0 - 1000*(-b));
             pt2.y = cvRound(y0 - 1000*(a));
-            cvLine( image, pt1, pt2, CV_RGB(255,0,0), 3, 8 );
+            cvLine( (CvArr*)img, pt1, pt2, CV_RGB(0,0,255), 3, 8 );
         }
 
   const char * window = "cvHoughLines";
   if(lines->total>0)
   {
-      cvNamedWindow( window, 1 );
-      cvShowImage( window, image);
+      cvNamedWindow( window, 2 );
+      cvShowImage( window, img);
   }
 
   cvReleaseMemStorage(&storage);
