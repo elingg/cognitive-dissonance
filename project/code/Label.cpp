@@ -20,7 +20,7 @@ Label getLabel(const string& str) {
     case(3): /*("mug"):*/ return 1; // 3
     case(7): /*("stapler"):*/ return 2; // 7
     case(8): /*("keyboard"):*/ if(str[0]=='k') return 3; else return 5; // 8
-    case(5): /*("clock"):*/ return 4; // 5
+    case(5): /*("clock"):*/ if(str[0]=='o') return 0; else return 4; // 5
     // case("scissors"): return 5; // 8
     default: return 0;
   }
