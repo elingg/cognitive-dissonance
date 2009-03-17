@@ -18,4 +18,4 @@ Final report. As we find new information, please update the page, so we have wha
 
 `**` CvBoost used with 1000 tree-forest and depth of 3
 
-= HaarFeaturesExptRuns
+= HaarFeaturesExptRuns =
