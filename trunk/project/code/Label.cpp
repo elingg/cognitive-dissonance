@@ -17,12 +17,11 @@ string getClassifierFileName(const Label& label, const string& basename) {
 Label getLabel(const string& str) {
   switch (str.size()) {
     // exploit known string sizes...
-    case(3): /*("mug"):*/ return 1; // 3
-    case(7): /*("stapler"):*/ return 2; // 7
-    case(8): /*("keyboard"):*/ if(str[0]=='k') return 3; else return 5; // 8
-    case(5): /*("clock"):*/ if(str[0]=='o') return 0; else return 4; // 5
-    // case("scissors"): return 5; // 8
-    default: return 0;
+    case(3): /*("mug"):*/ return 0; // 3
+    case(7): /*("stapler"):*/ return 1; // 7
+    case(8): /*("keyboard"):*/ if(str[0]=='k') return 2; else return 4; // 8
+    case(5): /*("clock"):*/ if(str[0]=='o') return 5; else return 3; // 5
+    default: return 5;
   }
 }
 
@@ -43,11 +42,11 @@ void getAllLabelStrings(vector<string>& labels) {
 
 string getLabelString(const Label& l) {
   // make more efficient...
-  if(l==1) { return "mug"; }
-  if(l==2) { return "stapler"; }
-  if(l==3) { return "keyboard"; }
-  if(l==4) { return "clock"; }
-  if(l==5) { return "scissors"; }
+  if(l==0) { return "mug"; }
+  if(l==1) { return "stapler"; }
+  if(l==2) { return "keyboard"; }
+  if(l==3) { return "clock"; }
+  if(l==4) { return "scissors"; }
   // else...
   return "other"; 
 }
