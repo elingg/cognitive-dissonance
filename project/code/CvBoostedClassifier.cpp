@@ -61,38 +61,6 @@ void CvBoostedClassifier::train(const vector<TrainingExample*>& examples) {
   cvReleaseMat(&var_type); 
 }
 
-#if 0
-void CvBoostedClassifier::train(const vector<TrainingExample*>& examples) {
-  CvMat* train_data = cvCreateMat(2, 1, CV_32F);
-  CV_MAT_ELEM(*train_data, float, 0, 0) = 2.0;
-  CV_MAT_ELEM(*train_data, float, 1, 0) = 3.0;
-
-  CvMat* responses = cvCreateMat(2, 1, CV_32SC1);
-  CV_MAT_ELEM(*responses, int, 0, 0) = 1;
-  CV_MAT_ELEM(*responses, int, 1, 0) = 0;
-
-  CvMat* var_type = cvCreateMat(2, 1, CV_8UC1);
-
-  CV_MAT_ELEM(*var_type, int, 0, 0) = CV_VAR_NUMERICAL;
-  CV_MAT_ELEM(*var_type, int, 1, 0) = CV_VAR_CATEGORICAL;
-
-  CvBoostParams params(CvBoost::GENTLE, 1, 0.95, 1, false, 0);
-  params.split_criteria = CvBoost::DEFAULT;
-
-  // cvSet(train_data, cvScalarAll(0.0));
-  cerr << " Label rows: " << responses->rows << ", cols: " << responses->cols << endl;
-  cerr << " Train data rows: " << train_data->rows << ", cols: " << train_data->cols << endl;
-
-  cerr << "Training cvboost" << endl;
-  m_cvimpl.train(train_data, CV_ROW_SAMPLE, responses, 0, 0, var_type, 0, params);
-  cerr << "Done training cvboost" << endl;
-  cvReleaseMat(&train_data); 
-  cvReleaseMat(&responses); 
-  cvReleaseMat(&var_type); 
-  exit(-1);
-}
-#endif
-
 double CvBoostedClassifier::predict(const Example& example) const {
   CvMat* weak_responses = cvCreateMat(1, 
                              (const_cast<CvBoostedClassifier*>(this))->

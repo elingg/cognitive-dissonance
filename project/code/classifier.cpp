@@ -32,7 +32,9 @@ using namespace std;
 // CClassifier class ---------------------------------------------------------
 
 // default constructor
-CClassifier::CClassifier()
+CClassifier::CClassifier(bool verbose_flag, 
+                         size_t numtrees, size_t depth,
+                         bool homegrown):verbose(verbose_flag)
 {
     // initalize the random number generator (for sample code)
     rng = cvRNG(-1);
@@ -45,9 +47,9 @@ CClassifier::CClassifier()
     classes.push_back(getLabel("clock"));
     classes.push_back(getLabel("scissors"));
     classes.push_back(getLabel("other"));
-
-    classifier = new MulticlassClassifier(classes, 1000, 2);
-    // classifier = new MulticlassClassifier(classes, 1000, 2, true);
+ 
+    classifier = new MulticlassClassifier(classes, numtrees, 
+                                          depth, homegrown, verbose);
 }
     
 // destructor
@@ -80,7 +82,7 @@ bool CClassifier::saveState(const char *filename)
     
     // CS221 TO DO: replace this with your own configuration code
     classifier->saveState(filename); 
-    cerr << "Finished saving state" << endl;
+    if(verbose) cerr << "Finished saving state" << endl;
     return true;
 }
 
@@ -203,7 +205,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 
           //Get Haar feature values
           vector<double> values;
-          HaarFeatures haar;
+          HaarFeatures haar(verbose);
           haar.getFeatureValues(values,smallImage);
 	 // Hough hough;
 	  //hough.getCircles(values,smallImage);
@@ -230,7 +232,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
         }
       }
     }
-    cerr << "coalescing " << firstpassobjects.size() << endl;
+    if(verbose) cerr << "coalescing " << firstpassobjects.size() << endl;
     coalesceOverlappingRectangles(&firstpassobjects,objects);
 
     cvReleaseImage(&gray);
@@ -255,81 +257,102 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 
     return true;
 }
-        
+      
+bool extractFeatures(TTrainingFileList& fileList, 
+                     vector<TrainingExample*>& trainingSet, bool verbose) {
+  Timer t("extracting features from images",verbose);
+  HaarFeatures haar(verbose);
+  //EdgeDetectionFeatures sobel;
+  IplImage *image, *smallImage;
+  smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
+  for (int i = 0; i < (int)fileList.files.size(); i++) {
+    // show progress
+    if (i % 1000 == 0) {
+      showProgress(i, fileList.files.size());
+    }
+
+    if ((fileList.files[i].label == "mug") ||
+     (fileList.files[i].label == "stapler") ||
+     (fileList.files[i].label == "clock") ||
+     (fileList.files[i].label == "scissors") ||
+     (fileList.files[i].label == "keyboard") ||
+     (fileList.files[i].label == "other")) {
+    
+      // load the image
+      image = cvLoadImage(fileList.files[i].filename.c_str(), 0);
+      if (image == NULL) {
+         cerr << "ERROR: could not load image "
+              << fileList.files[i].filename.c_str() << endl;
+         continue;
+      }
+
+      // resize to 64 x 64
+      cvResize(image, smallImage);
+
+      // CS221 TO DO: extract features from image here
+      vector<double> values;
+      haar.getFeatureValues(values,smallImage);
+      //sobel.getFeatureValues(values,smallImage);
+
+      trainingSet.push_back(new ImagesExample(values, 
+                                    getLabel(fileList.files[i].label)));
+      // free memory
+      cvReleaseImage(&image);
+    }
+  }
+  // free memory
+  cvReleaseImage(&smallImage);
+  return fileList.files.size()==trainingSet.size();
+}
+  
 // train
 // Trains the classifier to recognize the objects given in the
 // training file list.
 bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
     // example code to show you number of samples for each object class
-    cout << "Classes:" << endl;
+    if(verbose) cout << "Classes:" << endl;
     for (int i = 0; i < (int)fileList.classes.size(); i++) {
-      cout << fileList.classes[i] << " (";
+      if(verbose) cout << fileList.classes[i] << " (";
       int count = 0;
       for (int j = 0; j < (int)fileList.files.size(); j++) {
         if (fileList.files[j].label == fileList.classes[i]) {
           count += 1;
 	      }
 	    }
-      cout << count << " samples)" << endl;
+      if(verbose) cout << count << " samples)" << endl;
     }
-    cout << endl;
+    if(verbose) cout << endl;
 
     // example code for loading and resizing image files--
     // you may find this useful for the milestone    
-    HaarFeatures haar;
-    //EdgeDetectionFeatures sobel;
-    IplImage *image, *smallImage;
     
+    if(verbose) cout << "Processing images..." << endl;
     vector<TrainingExample*> trainingSet;
-
-    cout << "Processing images..." << endl;
-    smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
-    { Timer t("extracting features from images");
-    for (int i = 0; i < (int)fileList.files.size(); i++) {
-      // show progress
-      if (i % 1000 == 0) {
-        showProgress(i, fileList.files.size());
+    if(!extractFeatures(fileList, trainingSet, verbose)) {
+      for(size_t it=0;it<trainingSet.size(); it++) {
+        delete trainingSet[it];
       }
-
-     if ((fileList.files[i].label == "mug") ||
-	     (fileList.files[i].label == "stapler") ||
-	     (fileList.files[i].label == "clock") ||
-	     (fileList.files[i].label == "scissors") ||
-	     (fileList.files[i].label == "keyboard") ||
-	     (fileList.files[i].label == "other")) {
-	    
-	      // load the image
-	      image = cvLoadImage(fileList.files[i].filename.c_str(), 0);
-	      if (image == NULL) {
-          cerr << "ERROR: could not load image "
-		       << fileList.files[i].filename.c_str() << endl;
-          continue;
-	      }
-
-	      // resize to 64 x 64
-	      cvResize(image, smallImage);
-
-	      // CS221 TO DO: extract features from image here
-        vector<double> values;
-        haar.getFeatureValues(values,smallImage);
-        //sobel.getFeatureValues(values,smallImage);
-
-  	    trainingSet.push_back(new ImagesExample(values, getLabel(fileList.files[i].label)));
-	      // free memory
-        cvReleaseImage(&image);
-      }
+      exit(-1);
     }
-    }
-    // free memory
-    cvReleaseImage(&smallImage);
-    cout << endl;
-
+    if(verbose) cout << endl;
     // CS221 TO DO: train you classifier here
-    cerr << "Training tree:" << endl;
+    if(verbose) cerr << "Training tree:" << endl;
     classifier->train(trainingSet);
-    
-    cerr << "Testing tree on trained images: " << endl;
+    return true;
+}
+
+size_t CClassifier::test(TTrainingFileList& fileList) {
+    if(verbose) cerr << "Testing tree on trained images: " << endl;
+    Timer t("testing on images",verbose);
+    if(verbose) cout << "Processing images..." << endl;
+    vector<TrainingExample*> trainingSet;
+    if(!extractFeatures(fileList, trainingSet, verbose)) {
+      for(size_t it=0;it<trainingSet.size(); it++) {
+        delete trainingSet[it];
+      }
+      exit(-1);
+    }
     size_t correct = trainingSet.size();
     for(size_t i=0; i< trainingSet.size(); ++i) {
       // cerr << "Actual label: " << getLabelString(trainingSet[i]->getLabel()) << ", " ;
@@ -339,6 +362,6 @@ bool CClassifier::train(TTrainingFileList& fileList) {
         correct--;
       }     
     }
-    cerr << "Correctly predicted " << correct << " out of " << trainingSet.size()<< endl;
-    return true;
+    // cerr << "Correctly predicted " << correct << " out of " << trainingSet.size()<< endl;
+    return correct;
 }

@@ -12,7 +12,7 @@ public:
   } 
   ~Timer() { 
      if(m_print) { 
-       cerr << "\nTime taken in " << m_tag << ": " 
+       cerr << "Time taken in " << m_tag << ": " 
             << get_time_in_sec()<< " seconds\n";
      }
   }

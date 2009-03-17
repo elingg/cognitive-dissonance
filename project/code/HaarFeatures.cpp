@@ -264,10 +264,10 @@ double computeFeatureValueBrute(const IplImage* img, HaarFeature f) {
 /**
  * Reads in the feature list and saves it
  */
-HaarFeatures::HaarFeatures() {
+HaarFeatures::HaarFeatures(bool v):verbose(v) {
   //TODO: This check shouldn't be necessary (I don't understand why I need it)
   if(features.size() == 0) {
-    cerr << "Start: building haar features list" << endl;
+    if(verbose) cerr << "Start: building haar features list" << endl;
     ifstream input;
     //TODO: Externalize this filename
     input.open("haarfeatures.txt");
@@ -286,7 +286,7 @@ HaarFeatures::HaarFeatures() {
       features.push_back(feature);
     }
     input.close();
-    cerr << "End: finished building haar features list" << endl;
+    if(verbose) cerr << "End: finished building haar features list" << endl;
   }
 }
 

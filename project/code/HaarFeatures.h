@@ -8,7 +8,7 @@ using namespace std;
 
 class HaarFeatures {
 public:
-  HaarFeatures();
+  HaarFeatures(bool verbose);
   ~HaarFeatures();
 
   void getFeatureValues(vector<double>& feature_values,
@@ -17,6 +17,6 @@ public:
                         const IplImage* img) const;
 
 private:
-
+  bool verbose;
 };
 

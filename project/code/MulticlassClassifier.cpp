@@ -7,8 +7,9 @@
 
 MulticlassClassifier::MulticlassClassifier(const vector<Label>& classes, 
                                            size_t numtrees, size_t depth, 
-                                           bool homegrown)
-:m_classes(classes), m_numtrees(numtrees), m_depth(depth), m_homegrown(homegrown) {
+                                           bool homegrown, bool verbose)
+:m_classes(classes), m_numtrees(numtrees), m_depth(depth), 
+m_homegrown(homegrown), m_verbose(verbose) {
   for(size_t ic=0; ic<m_classes.size(); ic++) {
     if(homegrown) {
       m_classifiers.push_back(new BoostedClassifier(m_classes[ic], m_numtrees, m_depth));
@@ -40,9 +41,9 @@ Label MulticlassClassifier::predict(const Example& example) const {
 }
 
 void MulticlassClassifier::train(const vector<TrainingExample*>& examples) {
-  cerr << "Training multiclass classifier..."<< endl;
+  if(m_verbose) cerr << "Training multiclass classifier..."<< endl;
   for(size_t ic=0; ic<m_classes.size(); ic++) {
-    Timer t(string("training boosted classifier for ")+getLabelString(m_classes[ic]));
+    Timer t(string("training boosted classifier for ")+getLabelString(m_classes[ic]), m_verbose);
     m_classifiers[ic]->train(examples);
   } 
 }
@@ -52,7 +53,7 @@ bool MulticlassClassifier::loadState(const char* filename) {
     delete m_classifiers[ic];
   } 
   m_classifiers.clear();
-  cerr << "MulticlassClassifier loadState\n";
+  if(m_verbose) cerr << "MulticlassClassifier loadState\n";
   ifstream ifs(filename);
   if(ifs.fail()) {
     cerr << "Failed loading file : " << filename << endl;
@@ -85,7 +86,7 @@ bool MulticlassClassifier::loadState(const char* filename) {
 }
 
 bool MulticlassClassifier::saveState(const char* filename) const {
-  cerr << "MulticlassClassifier saveState\n";
+  if(m_verbose) cerr << "MulticlassClassifier saveState\n";
   ofstream ofs(filename);
   if(ofs.fail()) {
     cerr << "Failed loading file : " << filename << endl;
