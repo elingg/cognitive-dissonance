@@ -30,7 +30,7 @@ Please add items that you think need to be done for the vision project to this p
   * Use built in OpenCV samples folder such as blob detection (which works surprisingly well!)
 
 == Infrastructure tasks ==
-  * (DONE) Provide a way to do k-fold cross validation with outputing of confusion matrix to diagnose problems with features. (*Anand*)
+  * (*DONE*) Provide a way to do k-fold cross validation with outputing of confusion matrix to diagnose problems with features. (*Anand*)
   * This counts as a valid extension now: 
       * Run experiments and produce graphs for haar features and CvBoost:
       * F1/Precision vs depth of boost tree
