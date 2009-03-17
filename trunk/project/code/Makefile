@@ -17,8 +17,10 @@
 include Make.defaults
 
 PROGS = test train evaluate
-HDR = objects.h classifier.h replay.h utils.h CXMLParser.h HaarFeatures.h EdgeDetectionFeatures.h DecisionTree.h ImagesExample.h MotionTracker.h Hough.h KalmanFilter.h LucasKanade.h
-SRC = objects.cpp classifier.cpp replay.cpp utils.cpp CXMLParser.cpp HaarFeatures.cpp EdgeDetectionFeatures.cpp DecisionTree.cpp ImagesExample.cpp MotionTracker.cpp Hough.cpp KalmanFilter.cpp LucasKanade.cpp
+
+HDR = objects.h classifier.h replay.h utils.h CXMLParser.h HaarFeatures.h EdgeDetectionFeatures.h DecisionTree.h ImagesExample.h MotionTracker.h Hough.h KalmanFilter.h LucasKanade.h AbstractBinaryClassifier.h AbstractMulticlassClassifier.h BoostedClassifier.h MulticlassClassifier.h Label.h CvBoostedClassifier.h TrainingExample.h Timer.h
+
+SRC = objects.cpp classifier.cpp replay.cpp utils.cpp CXMLParser.cpp HaarFeatures.cpp EdgeDetectionFeatures.cpp DecisionTree.cpp ImagesExample.cpp MotionTracker.cpp Hough.cpp KalmanFilter.cpp LucasKanade.cpp BoostedClassifier.cpp MulticlassClassifier.cpp Label.cpp CvBoostedClassifier.cpp
 
 #MORE_LIBS=-ltiff -lpthread -lpng -lm
 #GTK_LIBS=$(shell pkg-config gtk+ --libs)

@@ -161,7 +161,7 @@ int main(int argc, char ** argv)
       cout << endl;
     }
 
-  double scoreSum = 0;
+  // double scoreSum = 0;
 
   cout << "(The confusion matrix can be helpful for identifying the mistakes that your classifier makes, but it does not affect your score)" << endl;
   cout << endl;

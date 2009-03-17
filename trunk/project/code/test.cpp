@@ -133,6 +133,9 @@ int main(int argc, char *argv[])
         cout << "Output file:        "
              << (outputFile == NULL ? "(none)" : outputFile) << endl;
         cout << "Test AVI file:      " << aviFile << endl;       
+        if(bShowVideo) { 
+          cout << "Showing video" << endl;       
+        }
     }
 
     CClassifier classifier;

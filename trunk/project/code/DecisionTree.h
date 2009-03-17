@@ -4,60 +4,25 @@
 #include <vector>
 #include <string>
 #include <set>
+#include "TrainingExample.h"
+#include "Label.h"
 
 using namespace std;
 
-// an example is just a bunch of features... (could be a test or training
-// example). generic enough to just call 'data', but might have name clashes 
-// so using 'Example' for now (but applies to test data as well)...
-class Example {
-public:
-  Example() {}
-  virtual ~Example() {}
-
-  virtual size_t getNumberOfFeatures() const = 0;
-
-  // features could be any type, so if adding int/string features
-  // provide other functions, for now just double... 
-  virtual double getFeatureDoubleValue(int feature_index) const = 0;
-};
-
-// training example is an example for which we know the class label...
-class TrainingExample : public Example {
-public:
-  TrainingExample() {}
-  virtual ~TrainingExample() {}
-
-  virtual string getLabel() const = 0; // 0/1 for now only for mug
-  virtual bool getClassLabel() const = 0; // 0/1 for now only for mug
-};
-
-class AbstractBinaryClassifier {
-  public: 
-    virtual ~AbstractBinaryClassifier() {}
-    virtual void train(const vector<TrainingExample*>& examples)=0;
-    virtual string predict(const Example& example) const=0;
-    virtual bool loadState(const char* filename)=0;
-    virtual bool saveState(const char* filename) const =0;
-};
-
 // Decision tree operates on generic TrainingExamples and predicts
 // classes for Examples (which could also be TrainingExamples)...
-class DecisionTree : public AbstractBinaryClassifier {
+class DecisionTree {
 public:
-  DecisionTree():m_root(0){}
-  DecisionTree(const vector<string>& feature_names)
-     :m_features(feature_names),m_root(0) {}
+  DecisionTree(const Label& positive_label)
+  :m_root(0),m_positive_label(positive_label){}
   ~DecisionTree() {}
 
-  void initialize(const vector<string>& fnames) { m_features = fnames; }
   void train(const vector<TrainingExample*>& examples);
-  string predict(const Example& example) const;
+  double predict(const Example& example) const;
   double getFeatureThreshold(size_t feature_index) const;
-  string getFeatureName(size_t feature_index) const; 
   void printTree() const; 
-  bool loadState(const char* filename);
-  bool saveState(const char* filename) const;
+  bool loadState(ifstream& ifs);
+  bool saveState(ofstream& ofs) const;
 
   class Node {
   public:
@@ -75,7 +40,7 @@ public:
     bool loadState(ifstream& ifs); 
     bool saveState(ofstream& ofs) const;
 
-    bool predictClassLabel(const Example& example) const;
+    double predictClassLabel(const Example& example) const;
     bool isLeaf() const;
     double getLeafProbability() const; // only sane if isLeaf() is true.
   private:
@@ -86,10 +51,11 @@ public:
     const DecisionTree* m_tree;
   };
 private:
+  string getFeatureName(size_t feature_index) const; 
   Node* recursiveTrainTree(const vector<TrainingExample*>& examples,
                            const set<size_t>& used_feature_indeces);
   vector<double> m_feature_thresholds;
-  vector<string> m_features;
   Node* m_root;
+  Label m_positive_label;
 };
 

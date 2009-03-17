@@ -4,13 +4,14 @@
 #include <iostream>
 #include "assert.h"
 #include <fstream>
+#include <sstream>
 
 size_t getMaxDepth() {
-  return 9;
+  return 3;
 }
 
 double getClassificationThreshold() {
-  return 0.98;
+  return 0.5;
 }
 
 double H(double p) {
@@ -21,10 +22,11 @@ double H(double p) {
   return -p*(log10(p)/log10(2)) - (1-p)*(log10(1-p)/log10(2));
 }
 
-size_t countPositiveClassLabels(const vector<TrainingExample*>& examples) {
+size_t countPositiveClassLabels(const Label& label,
+ const vector<TrainingExample*>& examples) {
   size_t count = 0;
   for(size_t iex=0; iex<examples.size(); ++iex) {
-    if(examples[iex]->getClassLabel()) {
+    if(isLabelEqual(examples[iex]->getLabel(),label)) {
       count++;
     }
   }
@@ -51,18 +53,20 @@ void splitExamplesByThreshold(
   }
 }
 
-size_t chooseFeature(const vector<TrainingExample*>& examples,
- const vector<string>& feature_names, 
+size_t chooseFeature(const Label& positive_label,
+ const vector<TrainingExample*>& examples,
  const vector<double>& feature_thresholds,
  const set<size_t>& used_feature_indeces) {
-  size_t positives = countPositiveClassLabels(examples);
+  size_t positives = countPositiveClassLabels(positive_label, examples);
   double ptot = (double)(positives)/(double)(examples.size());
   double mtot = examples.size()*H(ptot);
   // cerr << "Positive: " << positives << ", ptot: " << ptot << ", mtot: " << mtot <<", number of used indeces: " << used_feature_indeces.size() <<  endl;
   double max_gain = -DBL_MAX;
   size_t chosen_feature = -1; 
   // for each feature in feature_names...
-  for(size_t ifeat=0;ifeat<feature_names.size(); ++ifeat) {
+  assert(examples.size()>0);
+  size_t num_features = examples[0]->getNumberOfFeatures();
+  for(size_t ifeat=0;ifeat<num_features; ++ifeat) {
     if(used_feature_indeces.find(ifeat)!=used_feature_indeces.end()) {
       // index is used...
       // cerr << "Feature " << ifeat << " used, skipping\n";
@@ -76,10 +80,10 @@ size_t chooseFeature(const vector<TrainingExample*>& examples,
                              ifeat,
                              feature_thresholds[ifeat]);
     // get number of examples with positive class labels...
-    double pplus = countPositiveClassLabels(above_examples)/
+    double pplus = countPositiveClassLabels(positive_label, above_examples)/
                           (double)(above_examples.size());
     double mplus = above_examples.size()*H(pplus);
-    double pminus = countPositiveClassLabels(below_examples)/
+    double pminus = countPositiveClassLabels(positive_label, below_examples)/
                           (double)(below_examples.size());
     double mminus = below_examples.size()*H(pminus);
     double gain = mtot - (mplus + mminus);
@@ -138,11 +142,12 @@ void DecisionTree::Node::setLeftChild(Node* left_child) {
   left_child->m_parent = this; 
 }
 
-bool DecisionTree::Node::predictClassLabel(const Example& example) const {
+double DecisionTree::Node::predictClassLabel(const Example& example) const {
   if(m_right==0) { // leaf...
     assert(m_left==0);
     assert((m_probability>=0) && (m_probability<=1));
-    return (m_probability>getClassificationThreshold());
+    // return (m_probability>getClassificationThreshold());
+    return m_probability;
   }
   if(example.getFeatureDoubleValue(m_feature_index)>
      m_tree->getFeatureThreshold(m_feature_index)) { 
@@ -171,10 +176,12 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   // split on feature that gives greatest increase in the log likelihood..
   // (the feature that gives greatest reduction in entropy)..
   // if((used_feature_indeces.size()==m_features.size())) {
-  if((used_feature_indeces.size()==m_features.size()) || 
+  assert(examples.size()>0);
+  size_t num_features = examples[0]->getNumberOfFeatures();
+  if((used_feature_indeces.size()==num_features) || 
      (used_feature_indeces.size()==getMaxDepth())) { // all used up
     // stop criteria 3...
-    double pl = (double)(countPositiveClassLabels(examples))/
+    double pl = (double)(countPositiveClassLabels(m_positive_label, examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
     // cerr << "encountered main leaf: features used up.\n";
@@ -182,10 +189,10 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   }
  
   size_t chosen_feature_index = 
-               chooseFeature(examples, m_features, 
+               chooseFeature(m_positive_label, examples, 
                              m_feature_thresholds, used_feature_indeces);
   if(chosen_feature_index==(size_t)(-1)) { // all examples are one or the other
-    double pl = (double)(countPositiveClassLabels(examples))/
+    double pl = (double)(countPositiveClassLabels(m_positive_label, examples))/
                                (double)(examples.size());
     Node* T = new Node(this, pl); // leaf
     // cerr << "encountered main leaf: invalid chosen_feature_index, all examples one or the other.\n";
@@ -206,7 +213,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
                            m_feature_thresholds[chosen_feature_index]);
   Node* right_child=0;
   size_t count_positive_class_labels_for_above_examples = 
-                 countPositiveClassLabels(above_examples);
+                 countPositiveClassLabels(m_positive_label, above_examples);
   if(above_examples.size()==0) { // stop criteria 2... (use parents examples)...
     double pl = (double)(count_positive_class_labels_for_above_examples)/
                  (double)(examples.size());
@@ -231,7 +238,7 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
  
   Node* left_child=0; 
   size_t count_positive_class_labels_for_below_examples = 
-                 countPositiveClassLabels(below_examples);
+                 countPositiveClassLabels(m_positive_label, below_examples);
   if(below_examples.size()==0) { // stop criteria 2... (use parents examples)...
     double pl = (double)(count_positive_class_labels_for_below_examples)/
                  (double)(examples.size());
@@ -259,26 +266,29 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
 
 void DecisionTree::train
 (const vector<TrainingExample*>& examples) {
-  cerr << "Train tree:\n";
-  cerr << "Tree max-depth used: " << getMaxDepth() << endl;
-  cerr << "Classification threshold used: " << getClassificationThreshold() << endl;
+  // cerr << "Training tree with " << examples.size() << " training examples\n";
+  // cerr << "Tree max-depth used: " << getMaxDepth() << endl;
+  // cerr << "Classification threshold used: " << getClassificationThreshold() << endl;
   if(m_root) {
     delete m_root;
     m_root = 0;
   }
   m_feature_thresholds.clear();
- 
-  size_t num_features = m_features.size();
+  assert(examples.size()>0); 
+  size_t num_features = examples[0]->getNumberOfFeatures();
   size_t num_examples = examples.size();
 
   // compute feature averages that we shall use as thresholds...
   vector<double> feature_averages;
-
+  // cerr << "Number of examples: " << num_examples << ", Number of features: " << num_features << endl;
   feature_averages.resize(num_features,0.0);
   for(size_t ie=0; ie<num_examples; ++ie) {
+    // cerr << "Processing example: " << ie << endl;
     const TrainingExample* ex = examples[ie];
+    // cerr << "Number of features: " << examples[ie]->getNumberOfFeatures() << endl;
     assert(ex->getNumberOfFeatures()==num_features);
     for(size_t ifeat=0; ifeat<num_features; ifeat++) {
+      // cerr << "Feature: " << ifeat << ", value: " << ex->getFeatureDoubleValue(ifeat);
       double fv = ex->getFeatureDoubleValue(ifeat);
       feature_averages[ifeat]+=fv; 
     }
@@ -290,17 +300,14 @@ void DecisionTree::train
   }
   m_feature_thresholds = feature_averages;
  
-  cerr << "\nRecursive train tree:\n";
+  // cerr << "Recursive train tree:\n";
   set<size_t> empty_used_features;
   m_root = recursiveTrainTree(examples,empty_used_features);
-  printTree();
+  // printTree();
 }
 
-string DecisionTree::predict(const Example& example) const {
-  if(m_root->predictClassLabel(example)) {
-    return "mug";
-  }
-  return "other";
+double DecisionTree::predict(const Example& example) const {
+  return m_root->predictClassLabel(example);
 }
 
 const DecisionTree::Node* DecisionTree::Node::getLeftChild() const {
@@ -312,7 +319,10 @@ const DecisionTree::Node* DecisionTree::Node::getRightChild() const {
 }
 
 string DecisionTree::getFeatureName(size_t feature_index) const {
-  return m_features[feature_index];
+  stringstream result; 
+  result << "feat";
+  result << feature_index;
+  return result.str();
 }
 
 bool DecisionTree::Node::loadState(ifstream& ifs) {
@@ -388,13 +398,8 @@ void DecisionTree::printTree() const {
   cerr << endl;
 }
  
-bool DecisionTree::loadState(const char* filename) {
+bool DecisionTree::loadState(ifstream& ifs) {
   cerr << "DecisionTree loadState\n";
-  ifstream ifs(filename);
-  if(ifs.fail()) {
-    cerr << "Failed loading file : " << filename << endl;
-    return false;
-  }
   size_t num_features;
   ifs >> num_features;
   // cerr << "num_features: ["<<num_features<< "]";
@@ -404,35 +409,19 @@ bool DecisionTree::loadState(const char* filename) {
     m_feature_thresholds.push_back(threshold);
     // cerr << "[" << threshold << "]";
   }
-  for(size_t i=0; i<num_features; ++i) {
-    string feature_name;
-    ifs >> feature_name;
-    m_features.push_back(feature_name);
-    // cerr << "[" << feature_name << "]";
-  }
   // cerr << "..done DecisionTree loadState\n";
   m_root = new Node(this);
   bool ret_val = m_root->loadState(ifs);
-  ifs.close();
   return ret_val;
 }
 
-bool DecisionTree::saveState(const char* filename) const {
+bool DecisionTree::saveState(ofstream& ofs) const {
   cerr << "DecisionTree saveState\n";
-  ofstream ofs(filename);
-  if(ofs.fail()) {
-    cerr << "Failed loading file : " << filename << endl;
-    return false;
-  }
   ofs << m_feature_thresholds.size() << " ";
   for(size_t i=0; i<m_feature_thresholds.size(); ++i) {
     ofs << m_feature_thresholds[i] << " ";
   }
-  for(size_t i=0; i<m_features.size(); ++i) {
-    ofs << m_features[i] << " ";
-  }
   cerr << "..done DecisionTree saveState\n";
   bool ret_val = m_root->saveState(ofs);
-  ofs.close();
   return ret_val;
 }
