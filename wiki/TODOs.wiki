@@ -30,8 +30,9 @@ Please add items that you think need to be done for the vision project to this p
   * Use built in OpenCV samples folder such as blob detection (which works surprisingly well!)
 
 == Infrastructure tasks ==
-  * Need a way to tune various feature weights so we get optimal performance. 
-    * A kind of infrastructure script that tunes for these parameters automatically by running various tests and getting F1 measures would be useful. 
-    * Something on the lines of what WEKA does.
-    * Its ok to expect features in a file if that makes it easier.
-  * Maybe think of a pipeline design, so its easy to add features (not sure).
+  * (DONE) Provide a way to do k-fold cross validation with outputing of confusion matrix to diagnose problems with features. (*Anand*)
+  * This counts as a valid extension now: 
+      * Run experiments and produce graphs for haar features and CvBoost:
+      * F1/Precision vs depth of boost tree
+      * F1/Precision vs size of forest      
+      * Write up report portion for this
