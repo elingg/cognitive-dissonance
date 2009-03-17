@@ -14,7 +14,7 @@ public:
   void getCircles(vector<double>& feature_values,
                         const IplImage* img) const;
 
-  void getLines(vector<double>& feature_values,
+  void getEdges(vector<double>& feature_values,
                         const IplImage* img) const;
 
 
