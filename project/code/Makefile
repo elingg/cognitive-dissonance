@@ -30,7 +30,7 @@ LIBS=$(MORE_LIBS) $(GT_LIBS) $(GTK_LIBS) $(CV_LIBS)
 
 
 
-DEFS = -O2
+DEFS = -O3
 CC = g++
 #OPENCV_LIB_DIR = /afs/ir.stanford.edu/class/cs221/lib64/
 
