@@ -66,7 +66,7 @@ cvReleaseMemStorage(&storage);
  *  * Returns Hough Lines 
  *   * Precondition: image should be 64x64
  *    */
-void Hough::getLines(vector<double>& feature_values,
+void Hough::getEdges(vector<double>& feature_values,
                                     const IplImage* img) const {
   assert(img->width == 64);
   assert(img->height == 64);
@@ -76,19 +76,22 @@ void Hough::getLines(vector<double>& feature_values,
 
   CvMemStorage* storage = cvCreateMemStorage(0);
 cvThreshold(image, image, 160, 255, CV_THRESH_BINARY);
-
- CvSeq* lines = cvHoughLines2(
+cvCanny(image, image, 0.5, 0.5, 3); 
+cvThreshold(image,image,160,255, CV_THRESH_BINARY_INV);
+/* CvSeq* lines = cvHoughLines2(
     image,
     storage,
-    CV_HOUGH_PROBABILISTIC,
+    CV_HOUGH_STANDARD,
     1,
-   .1, 
-   90 
+   CV_PI/180, 
+   120 
     
-  );
+  );*/
 
 
-    for( int i = 0; i < MIN(lines->total,100); i++ )
+
+
+/*    for( int i = 0; i < MIN(lines->total,100); i++ )
         {
             float* line = (float*)cvGetSeqElem(lines,i);
             float rho = line[0];
@@ -100,14 +103,14 @@ cvThreshold(image, image, 160, 255, CV_THRESH_BINARY);
             pt1.y = cvRound(y0 + 1000*(a));
             pt2.x = cvRound(x0 - 1000*(-b));
             pt2.y = cvRound(y0 - 1000*(a));
-            cvLine( (CvArr*)img, pt1, pt2, CV_RGB(0,0,255), 3, 8 );
-        }
+            cvLine( (CvArr*)image, pt1, pt2, CV_RGB(0,255,0), 3, 8 );
+        }*/
 
   const char * window = "cvHoughLines";
-  if(lines->total>0)
+  //if(lines->total>0)
   {
-      cvNamedWindow( window, 2 );
-      cvShowImage( window, img);
+      cvNamedWindow( window, 1 );
+      cvShowImage( window, image);
   }
 
   cvReleaseMemStorage(&storage);
