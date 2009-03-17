@@ -7,7 +7,7 @@ class MulticlassClassifier : public AbstractMulticlassClassifier {
 public:
   MulticlassClassifier(const vector<Label>& classes, 
                        size_t numtrees, size_t depth, 
-                       bool homegrown=false); 
+                       bool homegrown, bool verbose); 
   ~MulticlassClassifier();
   bool loadState(const char* filename);
   bool saveState(const char* filename) const;
@@ -20,6 +20,7 @@ private:
   size_t m_numtrees;
   size_t m_depth;
   bool m_homegrown;
+  bool m_verbose;
 };
 
  

@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    CClassifier classifier;
+    CClassifier classifier(bVerbose,1000,2,false);
     CObjectReplay replayer;
     CvFont font;
     ofstream *outputStream = NULL;

@@ -42,7 +42,10 @@ protected:
     
 public:
     // constructors
-    CClassifier();
+    CClassifier(bool verbose_flag/*=true*/, 
+                size_t numtrees/*=1000*/, 
+                size_t depth/*=2*/, 
+                bool ourclassifier/*=false*/);
     
     // destructor
     virtual ~CClassifier();
@@ -57,9 +60,13 @@ public:
     // train the classifier using given set of files
     virtual bool train(TTrainingFileList&);
 
+    // test the classifier using given set of files
+    virtual size_t test(TTrainingFileList&); // returns number correctly predicted 
+
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
     AbstractMulticlassClassifier* classifier;
     MotionTracker motionTracker;
+    bool verbose;
 };
 

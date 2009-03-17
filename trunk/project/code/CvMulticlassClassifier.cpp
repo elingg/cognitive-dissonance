@@ -4,9 +4,10 @@
 #include "Timer.h"
 
 CvMulticlassClassifier::CvMulticlassClassifier(const vector<Label>& classes, 
-                                               size_t numtrees, size_t depth)
-:m_classes(classes), m_numtrees(numtrees), m_depth(depth) {
-  cerr << "Creating CvMulticlassClassifier with " << classes.size() << " classes\n";
+                                               size_t numtrees, size_t depth, 
+                                               bool verbose)
+:m_classes(classes), m_numtrees(numtrees), m_depth(depth), m_verbose(verbose) {
+  if(m_verbose) cerr << "Creating CvMulticlassClassifier with " << classes.size() << " classes\n";
   for(size_t ic=0; ic<m_classes.size(); ic++) {
     m_classifiers.push_back(new CvBoostedClassifier(m_classes[ic], m_numtrees, m_depth));
   }
@@ -34,16 +35,16 @@ Label CvMulticlassClassifier::predict(const Example& example) const {
 }
 
 void CvMulticlassClassifier::train(const vector<TrainingExample*>& examples) {
-  Timer t(true);
-  cerr << "Training multiclass classifier..."<< endl;
+  Timer t ("multiclass classifier",m_verbose);
+  if(m_verbose) cerr << "Training multiclass classifier..."<< endl;
   for(size_t ic=0; ic<m_classes.size(); ic++) {
-    cerr << "Training boosted classifier for " << getLabelString(m_classes[ic]) << endl;
+    if(m_verbose) cerr << "Training boosted classifier for " << getLabelString(m_classes[ic]) << endl;
     m_classifiers[ic]->train(examples);
   } 
 }
 
 bool CvMulticlassClassifier::loadState(const char* filename) {
-  cerr << "CvMulticlassClassifier loadState\n";
+  if(m_verbose) cerr << "CvMulticlassClassifier loadState\n";
   ifstream ifs(filename);
   if(ifs.fail()) {
     cerr << "Failed loading file : " << filename << endl;
@@ -69,7 +70,7 @@ bool CvMulticlassClassifier::loadState(const char* filename) {
 }
 
 bool CvMulticlassClassifier::saveState(const char* filename) const {
-  cerr << "CvMulticlassClassifier saveState\n";
+  if(m_verbose) cerr << "CvMulticlassClassifier saveState\n";
   ofstream ofs(filename);
   if(ofs.fail()) {
     cerr << "Failed loading file : " << filename << endl;

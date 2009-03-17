@@ -6,7 +6,7 @@
 class CvMulticlassClassifier : public AbstractMulticlassClassifier {
 public:
   CvMulticlassClassifier(const vector<Label>& classes, 
-                         size_t numtrees, size_t depth); 
+                         size_t numtrees, size_t depth, bool verbose); 
   ~CvMulticlassClassifier();
   bool loadState(const char* filename);
   bool saveState(const char* filename) const;
@@ -18,6 +18,7 @@ private:
   size_t        m_numtrees;
   size_t        m_depth;
   vector<CvBoostedClassifier*> m_classifiers;
+  bool          m_verbose;
 };
 
  

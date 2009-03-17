@@ -62,8 +62,6 @@ int main(int argc, char *argv[])
     bool bVerbose;
     char **args;
  
-    CClassifier classifier;
-
     // set defaults
     configurationFile = NULL;   // set using -c <filename>
     bVerbose = false;           // turn on with -v
@@ -94,6 +92,8 @@ int main(int argc, char *argv[])
       usage();
       exit(-1);
     }
+
+    CClassifier classifier(bVerbose,1000,2,false);
 
     // load the training file list
     TTrainingFileList fileList;
