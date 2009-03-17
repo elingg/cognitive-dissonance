@@ -1,0 +1,30 @@
+{{{
+=================================================
+Using 5 folds for validation.
+Using cv for classification.
+Using 1000 trees in the boosted tree.
+Using max depth 2 in the tree.
+=================================================
+Running experiments on total of: 46359 files
+Average test errors: 
+Fold 0: 0.0120807
+Time taken in fold : 695.56 seconds
+Fold 1: 0.01262 
+Time taken in fold : 663.98 seconds
+Fold 2: 0.0135908
+Time taken in fold : 696.53 seconds
+Fold 3: 0.0121885
+Time taken in fold : 665.66 seconds
+Fold 4: 0.0130458
+Time taken in fold : 696.01 seconds
+Confusion Matrix:
+                mug     stapl   keybo   clock   sciss   other   
+mug             175     3       3       0       1       113
+stapl           4       249     8       0       1       131
+keybo           7       7       124     0       2       95
+clock           0       1       0       27      0       21
+sciss           2       0       4       0       202     99
+other           17      38      11      2       19      44993
+Time taken in entire experiment: 3417.74 seconds
+
+}}}
