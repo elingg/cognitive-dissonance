@@ -44,6 +44,7 @@ CClassifier::CClassifier()
     classes.push_back(getLabel("keyboard"));
     classes.push_back(getLabel("clock"));
     classes.push_back(getLabel("scissors"));
+    classes.push_back(getLabel("other"));
 
     classifier = new MulticlassClassifier(classes, 1000, 2);
     // classifier = new MulticlassClassifier(classes, 1000, 2, true);
@@ -213,14 +214,15 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           //Check for image
           ImagesExample imagesExample(values); 
           Label label = classifier->predict(imagesExample);
-
+          // cerr << "label: " << getLabelString(label) << endl;
           //Create bounding box
           CObject obj;
           obj.rect = cvRect(0, 0, length, length);
           obj.rect.x = x;
           obj.rect.y = y;
           obj.label = getLabelString(label);
-          firstpassobjects.push_back(obj);
+          if(!isLabelEqual(label, getLabel("other"))) 
+            firstpassobjects.push_back(obj);
 	        
           //Release images
           cvReleaseImage(&clippedImage);
@@ -228,6 +230,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
         }
       }
     }
+    cerr << "coalescing " << firstpassobjects.size() << endl;
     coalesceOverlappingRectangles(&firstpassobjects,objects);
 
     cvReleaseImage(&gray);
