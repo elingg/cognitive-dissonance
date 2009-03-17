@@ -22,8 +22,11 @@
 #include "classifier.h"
 #include "HaarFeatures.h"
 #include "EdgeDetectionFeatures.h"
-#include "DecisionTree.h"
-#include "Hough.h"
+#include "MulticlassClassifier.h"
+#include "Label.h"
+#include "Timer.h"
+
+//#include "Hough.h"
 using namespace std;
 
 // CClassifier class ---------------------------------------------------------
@@ -34,8 +37,16 @@ CClassifier::CClassifier()
     // initalize the random number generator (for sample code)
     rng = cvRNG(-1);
     parameters = NULL;
-
     // CS221 TO DO: add initialization for any member variables   
+    vector<Label> classes;
+    classes.push_back(getLabel("mug"));
+    classes.push_back(getLabel("stapler"));
+    classes.push_back(getLabel("keyboard"));
+    classes.push_back(getLabel("clock"));
+    classes.push_back(getLabel("scissors"));
+
+    classifier = new MulticlassClassifier(classes, 1000, 2);
+    // classifier = new MulticlassClassifier(classes, 1000, 2, true);
 }
     
 // destructor
@@ -46,6 +57,7 @@ CClassifier::~CClassifier()
     }
 
     // CS221 TO DO: free any memory allocated by the object
+    delete classifier;
 }
 
 // loadState
@@ -53,7 +65,7 @@ CClassifier::~CClassifier()
 bool CClassifier::loadState(const char *filename)
 {
     assert(filename != NULL);
-    decisionTree.loadState(filename);
+    classifier->loadState(filename);
     // CS221 TO DO: replace this with your own configuration code
     
     return true;
@@ -66,8 +78,8 @@ bool CClassifier::saveState(const char *filename)
     assert(filename != NULL);
     
     // CS221 TO DO: replace this with your own configuration code
-    decisionTree.saveState(filename); 
-    cerr << "Finished saving state";
+    classifier->saveState(filename); 
+    cerr << "Finished saving state" << endl;
     return true;
 }
 
@@ -192,7 +204,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           vector<double> values;
           HaarFeatures haar;
           haar.getFeatureValues(values,smallImage);
-	  Hough hough;
+	 // Hough hough;
 	  //hough.getCircles(values,smallImage);
 	  //hough.getEdges(values,smallImage);
           //EdgeDetectionFeatures sobel;
@@ -200,17 +212,15 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 
           //Check for image
           ImagesExample imagesExample(values); 
-          string label = decisionTree.predict(imagesExample);
+          Label label = classifier->predict(imagesExample);
 
           //Create bounding box
-          if(label=="mug") {
-            CObject obj;
-            obj.rect = cvRect(0, 0, length, length);
-            obj.rect.x = x;
-            obj.rect.y = y;
-            obj.label = string("mug");
-            firstpassobjects.push_back(obj);
-          }
+          CObject obj;
+          obj.rect = cvRect(0, 0, length, length);
+          obj.rect.x = x;
+          obj.rect.y = y;
+          obj.label = getLabelString(label);
+          firstpassobjects.push_back(obj);
 	        
           //Release images
           cvReleaseImage(&clippedImage);
@@ -248,30 +258,17 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 // training file list.
 bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
-    vector<string> feature_names;
-
-    string temp;
-    for(int i=0; i<57; i++) {
-      std::string s;
-      std::stringstream out;
-      out << i;
-      s = out.str();
-      temp = "h"+ s;
-      feature_names.push_back(temp);
-    }
-    decisionTree.initialize(feature_names);
-
     // example code to show you number of samples for each object class
     cout << "Classes:" << endl;
     for (int i = 0; i < (int)fileList.classes.size(); i++) {
-	cout << fileList.classes[i] << " (";
-	int count = 0;
-	for (int j = 0; j < (int)fileList.files.size(); j++) {
-	    if (fileList.files[j].label == fileList.classes[i]) {
-		count += 1;
+      cout << fileList.classes[i] << " (";
+      int count = 0;
+      for (int j = 0; j < (int)fileList.files.size(); j++) {
+        if (fileList.files[j].label == fileList.classes[i]) {
+          count += 1;
+	      }
 	    }
-	}
-	cout << count << " samples)" << endl;
+      cout << count << " samples)" << endl;
     }
     cout << endl;
 
@@ -285,51 +282,57 @@ bool CClassifier::train(TTrainingFileList& fileList) {
 
     cout << "Processing images..." << endl;
     smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
+    { Timer t("extracting features from images");
     for (int i = 0; i < (int)fileList.files.size(); i++) {
-	// show progress
-	if (i % 1000 == 0) {
-	    showProgress(i, fileList.files.size());
-	}
+      // show progress
+      if (i % 1000 == 0) {
+        showProgress(i, fileList.files.size());
+      }
 
-	// skip non-mug and non-other images (milestone only)
-	if ((fileList.files[i].label == "mug") ||
-	    (fileList.files[i].label == "other")) {
+     if ((fileList.files[i].label == "mug") ||
+	     (fileList.files[i].label == "stapler") ||
+	     (fileList.files[i].label == "clock") ||
+	     (fileList.files[i].label == "scissors") ||
+	     (fileList.files[i].label == "keyboard") ||
+	     (fileList.files[i].label == "other")) {
 	    
-	    // load the image
-	    image = cvLoadImage(fileList.files[i].filename.c_str(), 0);
-	    if (image == NULL) {
-		cerr << "ERROR: could not load image "
-		     << fileList.files[i].filename.c_str() << endl;
-		continue;
-	    }
+	      // load the image
+	      image = cvLoadImage(fileList.files[i].filename.c_str(), 0);
+	      if (image == NULL) {
+          cerr << "ERROR: could not load image "
+		       << fileList.files[i].filename.c_str() << endl;
+          continue;
+	      }
 
-	    // resize to 64 x 64
-	    cvResize(image, smallImage);
+	      // resize to 64 x 64
+	      cvResize(image, smallImage);
 
-	    // CS221 TO DO: extract features from image here
-            vector<double> values;
-            haar.getFeatureValues(values,smallImage);
-            //sobel.getFeatureValues(values,smallImage);
+	      // CS221 TO DO: extract features from image here
+        vector<double> values;
+        haar.getFeatureValues(values,smallImage);
+        //sobel.getFeatureValues(values,smallImage);
 
-  	  trainingSet.push_back(new ImagesExample(values, fileList.files[i].label));
-	    // free memory
-	    cvReleaseImage(&image);
-	}
+  	    trainingSet.push_back(new ImagesExample(values, getLabel(fileList.files[i].label)));
+	      // free memory
+        cvReleaseImage(&image);
+      }
     }
-
+    }
     // free memory
     cvReleaseImage(&smallImage);
     cout << endl;
 
     // CS221 TO DO: train you classifier here
     cerr << "Training tree:" << endl;
-    decisionTree.train(trainingSet);
+    classifier->train(trainingSet);
     
     cerr << "Testing tree on trained images: " << endl;
     size_t correct = trainingSet.size();
     for(size_t i=0; i< trainingSet.size(); ++i) {
-      string predictedLabel = decisionTree.predict(*trainingSet[i]);
-      if(trainingSet[i]->getLabel().compare(predictedLabel)!=0) { // incorrect
+      // cerr << "Actual label: " << getLabelString(trainingSet[i]->getLabel()) << ", " ;
+      Label predictedLabel = classifier->predict(*trainingSet[i]);
+      // cerr << "Predicted label: " << getLabelString(predictedLabel) << endl;; 
+      if(!isLabelEqual(trainingSet[i]->getLabel(),predictedLabel)) {
         correct--;
       }     
     }

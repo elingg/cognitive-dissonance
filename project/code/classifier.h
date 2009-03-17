@@ -25,10 +25,12 @@
 
 #include "utils.h"
 #include "objects.h"
-#include "DecisionTree.h"
 #include "MotionTracker.h"
 
 #include "ImagesExample.h"
+
+class AbstractMulticlassClassifier;
+
 /* CClassifier class ---------------------------------------------------------
  */
 class CClassifier {
@@ -57,7 +59,7 @@ public:
 
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
-    DecisionTree decisionTree;
+    AbstractMulticlassClassifier* classifier;
     MotionTracker motionTracker;
 };
 

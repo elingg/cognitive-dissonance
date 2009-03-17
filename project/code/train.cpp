@@ -21,6 +21,7 @@
 ** CS221 TO DO:
 **  You are free to modify anything in this file.
 ** 
+**      % ./train -c parameters.txt -v data
 *****************************************************************************/
 
 #include <cstdio>
@@ -40,6 +41,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "classifier.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
     char *configurationFile;
     bool bVerbose;
     char **args;
-    
+ 
     CClassifier classifier;
 
     // set defaults
@@ -77,9 +79,9 @@ int main(int argc, char *argv[])
             }
             configurationFile = *args;
         } else if (!strcmp(*args, "-h")) {
-	    usage();
-	    return 0;
-	} else if (!strcmp(*args, "-v")) {
+            usage();
+            return 0;
+        } else if (!strcmp(*args, "-v")) {
             bVerbose = !bVerbose;
         } else {
             cerr << "ERROR: unrecognized option " << *args << endl;
@@ -89,18 +91,20 @@ int main(int argc, char *argv[])
     }
 
     if (argc != 1) {
-	usage();
-	exit(-1);
+      usage();
+      exit(-1);
     }
 
     // load the training file list
     TTrainingFileList fileList;
-    fileList = getTrainingFiles(*args, ".jpg");
-
+    { 
+      Timer t("reading training files");
+      fileList = getTrainingFiles(*args, ".jpg");
+    }
     // now train the classifier
     if (!classifier.train(fileList)) {
-	cerr << "ERROR: could not train classifier" << endl;
-	exit(-1);
+      cerr << "ERROR: could not train classifier" << endl;
+      exit(-1);
     }
 
     // save classifier configuration
