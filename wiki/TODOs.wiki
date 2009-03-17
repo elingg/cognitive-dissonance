@@ -32,7 +32,7 @@ Please add items that you think need to be done for the vision project to this p
 == Infrastructure tasks ==
   * (*DONE*) Provide a way to do k-fold cross validation with outputing of confusion matrix to diagnose problems with features. (*Anand*)
   * This counts as a valid extension now: 
-      * Run experiments and produce graphs for haar features and CvBoost:
-      * F1/Precision vs depth of boost tree
-      * F1/Precision vs size of forest      
-      * Write up report portion for this
+      * Run experiments and produce graphs for just haar features and CvBoost.
+      * F1/Precision vs depth of boost tree (1, 2, 3, 4 atleast). Also plot time to train.
+      * F1/Precision vs size of forest (100, 200, 500, 1000). Also plot time to train.
+      * Write up report portion for this.
