@@ -15,4 +15,5 @@ Final report. As we find new information, please update the page, so we have wha
 || With above, but using CvBoost now with multiclass`**` || 0.563218 || 0.246408 ||
 
 `*` The decision tree was retrained with depth = 7, classification threshold = 0.8 
+
 `**` CvBoost used with 1000 tree-forest and depth of 3
