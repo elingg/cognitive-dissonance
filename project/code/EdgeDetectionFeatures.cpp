@@ -19,13 +19,13 @@ CvHistogram* computeFeatureValueIntegral(const IplImage* iImage) {
 
   IplImage* destination;
   cvSobel(iImage,destination,1,1,3);
-  //CvHistogram * hist;
-  //int bins = 32;
-  //int hist_size[] = {bins};
-  //hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
-  //cvCalcHist(&destination,hist);
+  CvHistogram * hist;
+  int bins = 32;
+  int hist_size[] = {bins};
+  hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
+  cvCalcHist(&destination,hist);
 
-  //return hist;
+  return hist;
 
 }
 
