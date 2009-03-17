@@ -41,12 +41,11 @@ CClassifier::CClassifier(bool verbose_flag,
     parameters = NULL;
     // CS221 TO DO: add initialization for any member variables   
     vector<Label> classes;
-    classes.push_back(getLabel("mug"));
-    classes.push_back(getLabel("stapler"));
-    classes.push_back(getLabel("keyboard"));
-    classes.push_back(getLabel("clock"));
-    classes.push_back(getLabel("scissors"));
-    classes.push_back(getLabel("other"));
+    vector<string> labels;
+    getAllLabelStrings(labels);
+    for(size_t il=0;il<labels.size(); il++) {
+      classes.push_back(getLabel(labels[il]));
+    }
  
     classifier = new MulticlassClassifier(classes, numtrees, 
                                           depth, homegrown, verbose);
@@ -265,19 +264,14 @@ bool extractFeatures(TTrainingFileList& fileList,
   //EdgeDetectionFeatures sobel;
   IplImage *image, *smallImage;
   smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
+  vector<string> labels; 
+  getAllLabelStrings(labels);
   for (int i = 0; i < (int)fileList.files.size(); i++) {
     // show progress
     if (i % 1000 == 0) {
       showProgress(i, fileList.files.size());
     }
-
-    if ((fileList.files[i].label == "mug") ||
-     (fileList.files[i].label == "stapler") ||
-     (fileList.files[i].label == "clock") ||
-     (fileList.files[i].label == "scissors") ||
-     (fileList.files[i].label == "keyboard") ||
-     (fileList.files[i].label == "other")) {
-    
+    if (find(labels.begin(),labels.end(),fileList.files[i].label)!=labels.end()) {
       // load the image
       image = cvLoadImage(fileList.files[i].filename.c_str(), 0);
       if (image == NULL) {
@@ -342,26 +336,25 @@ bool CClassifier::train(TTrainingFileList& fileList) {
     return true;
 }
 
-size_t CClassifier::test(TTrainingFileList& fileList) {
+double CClassifier::test(TTrainingFileList& fileList, Stats& stat) {
     if(verbose) cerr << "Testing tree on trained images: " << endl;
     Timer t("testing on images",verbose);
     if(verbose) cout << "Processing images..." << endl;
-    vector<TrainingExample*> trainingSet;
-    if(!extractFeatures(fileList, trainingSet, verbose)) {
-      for(size_t it=0;it<trainingSet.size(); it++) {
-        delete trainingSet[it];
+    vector<TrainingExample*> testSet;
+    if(!extractFeatures(fileList, testSet, verbose)) {
+      for(size_t it=0;it<testSet.size(); it++) {
+        delete testSet[it];
       }
       exit(-1);
     }
-    size_t correct = trainingSet.size();
-    for(size_t i=0; i< trainingSet.size(); ++i) {
-      // cerr << "Actual label: " << getLabelString(trainingSet[i]->getLabel()) << ", " ;
-      Label predictedLabel = classifier->predict(*trainingSet[i]);
-      // cerr << "Predicted label: " << getLabelString(predictedLabel) << endl;; 
-      if(!isLabelEqual(trainingSet[i]->getLabel(),predictedLabel)) {
-        correct--;
+    size_t incorrect = 0;
+    for(size_t i=0; i< testSet.size(); ++i) {
+      Label predictedLabel = classifier->predict(*testSet[i]);
+      stat.log_prediction_result(testSet[i]->getLabel(),predictedLabel);
+      if(!isLabelEqual(testSet[i]->getLabel(),predictedLabel)) {
+        incorrect++;
       }     
     }
-    // cerr << "Correctly predicted " << correct << " out of " << trainingSet.size()<< endl;
-    return correct;
+    // cerr << "Incorrectly predicted " << incorrect << " out of " << testSet.size()<< endl;
+    return (double)(incorrect)/(double)(testSet.size());
 }

@@ -28,6 +28,7 @@
 #include "MotionTracker.h"
 
 #include "ImagesExample.h"
+#include "Stats.h"
 
 class AbstractMulticlassClassifier;
 
@@ -60,8 +61,8 @@ public:
     // train the classifier using given set of files
     virtual bool train(TTrainingFileList&);
 
-    // test the classifier using given set of files
-    virtual size_t test(TTrainingFileList&); // returns number correctly predicted 
+    // test the classifier using given set of files, returns test error...
+    virtual double test(TTrainingFileList& fls, Stats& stats); 
 
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE

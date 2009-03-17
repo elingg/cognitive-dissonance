@@ -32,6 +32,15 @@ string getLabelString(const Label& l) {
 }
 #endif 
 
+void getAllLabelStrings(vector<string>& labels) {
+  labels.push_back("mug");
+  labels.push_back("stapler");
+  labels.push_back("keyboard");
+  labels.push_back("clock");
+  labels.push_back("scissors");
+  labels.push_back("other");
+}
+
 string getLabelString(const Label& l) {
   // make more efficient...
   if(l==1) { return "mug"; }
