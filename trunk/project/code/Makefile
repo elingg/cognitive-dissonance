@@ -56,11 +56,9 @@ evaluate: evaluate.o $(OBJ)
 tune: tune.cpp tune.o $(OBJ)
 	$(CC) $(CCFLAGS) $(LDFLAGS) $(OBJ) tune.o -o $@ $(LIBS) 
 
-unittests: TestDecisionTree.h TestDecisionTree.cpp DecisionTree.h DecisionTree.cpp $(OBJ)
-	$(CC) $(CCFLAGS) -c TestDecisionTree.cpp -o TestDecisionTree.o
-	$(CC) $(CCFLAGS) -c DecisionTree.cpp -o DecisionTree.o
-	$(CC) $(CCFLAGS) -c ImagesExample.cpp -o ImagesExample.o
-	$(CC) $(CCFLAGS) $(LDFLAGS) TestDecisionTree.o DecisionTree.o ImagesExample.o -o unittests
+unittests: UnitTests.o $(OBJ)
+	$(CC) $(CCFLAGS) -c UnitTests.cpp UnitTests.o 
+	$(CC) $(CCFLAGS) $(LDFLAGS) UnitTests.o Stats.o Label.o -o unittests
 
 unittestshaar: TestHaarFeatures.h TestHaarFeatures.cpp HaarFeatures.h HaarFeatures.cpp $(OBJ)
 	$(CC) $(CCFLAGS) -c TestHaarFeatures.cpp -o TestHaarFeatures.o
