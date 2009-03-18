@@ -161,7 +161,8 @@ int main(int argc, char *argv[])
       double test_error = classifier.test(testFileList,stats);
       cout << "Test error: " << test_error << endl;
       if(bTrainError) {
-        double train_error = classifier.test(trainFileList,stats);
+        Stats trainstats;
+        double train_error = classifier.test(trainFileList,trainstats);
         cout << "Training error: " << train_error << endl;
       }
       cout << "Fold " << ifold <<": " << test_error << endl;
