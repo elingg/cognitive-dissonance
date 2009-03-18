@@ -133,6 +133,8 @@ int main(int argc, char *argv[])
     cout << "Running experiments on total of: " << nExamples << " files\n";
     Stats stats;
     cout << "Average test errors: \n";
+    double avg_train_error=0;
+    double avg_test_error=0;
     for(size_t ifold=0; ifold<nFolds; ++ifold) {
       Timer t("fold ",true);
       CClassifier classifier(bVerbose,nTrees,nDepth,false);
@@ -160,13 +162,26 @@ int main(int argc, char *argv[])
       }
       double test_error = classifier.test(testFileList,stats);
       cout << "Test error: " << test_error << endl;
+      avg_test_error+= test_error;
       if(bTrainError) {
         Stats trainstats;
         double train_error = classifier.test(trainFileList,trainstats);
+        avg_train_error += train_error;
         cout << "Training error: " << train_error << endl;
       }
       cout << "Fold " << ifold <<": " << test_error << endl;
     }
+    if(bTrainError) 
+      avg_train_error /= (double)nFolds;
+    avg_test_error /= (double)nFolds;
+    cerr << "------------------------------------------------" << endl;
+    cout << "Avg Training error\t Avg Test error\n";
+    if(bTrainError)
+      cout << avg_train_error << "\t\t" << avg_test_error <<endl;
+    else 
+      cout << "-n/a-" << "\t\t" << avg_test_error <<endl;
+ 
+    cerr << "------------------------------------------------" << endl;
     stats.print_prediction_result();
     return 0;
 }
