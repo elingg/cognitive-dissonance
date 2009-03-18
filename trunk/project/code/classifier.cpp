@@ -208,7 +208,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           haar.getFeatureValues(values,smallImage);
 	  Hough hough;
 	  //hough.getCircles(values,smallImage);
-	  //hough.getEdges(values,smallImage);
+	  hough.getEdges(values,smallImage);
           //EdgeDetectionFeatures sobel;
 	  //sobel.getFeatureValues(values,smallImage);
 
@@ -288,7 +288,7 @@ bool extractFeatures(TTrainingFileList& fileList,
       vector<double> values;
       haar.getFeatureValues(values,smallImage);
       //hough.getCircles(values,smallImage);
-      //hough.getEdges(values,smallImage);
+      hough.getEdges(values,smallImage);
       //sobel.getFeatureValues(values,smallImage);
 
       trainingSet.push_back(new ImagesExample(values, 
