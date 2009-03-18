@@ -31,8 +31,59 @@ Depth	Trees	Examples	Training Error	Test Error	Time Taken
 2	400	46359	0.0039187	0.0134817	1020.47
 }}}
 
+
+This is the short cut run with just 400 trees and 16000 examples: (that took ~3 minutes)
+{{{
+=================================================
+Using 4 folds for validation.
+Using cv for classification.
+Using 400 trees in the boosted tree.
+Using max depth 1 in the tree.
+Using 16000 examples
+=================================================
+Running experiments on total of: 16000 files
+Average test errors: 
+Test error: 0.01425
+Fold 0: 0.01425
+Time taken in fold : 47.33 seconds
+Test error: 0.01575
+Fold 1: 0.01575
+Time taken in fold : 47.65 seconds
+Test error: 0.013
+Fold 2: 0.013
+Time taken in fold : 48.67 seconds
+Test error: 0.01475
+Fold 3: 0.01475
+Time taken in fold : 48.17 seconds
+------------------------------------------------
+Avg Training error       Avg Test error
+-n/a-           0.0144375
+------------------------------------------------
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             52      1       1       0       0       40
+stapl           0       70      2       0       0       62
+keybo           0       3       45      0       0       44
+clock           0       0       0       6       0       9
+sciss           0       1       2       0       60      42
+other           4       12      4       0       4       15536
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.929   0.553   0.693
+stapl   0.805   0.522   0.633
+keybo   0.833   0.489   0.616
+clock   1.000   0.400   0.571
+sciss   0.938   0.571   0.710
+other   0.987   0.998   0.993
+}}}
+
 Latest run (Wednesday 2.20PM). Uses depth of 1 but runs on all the examples. 
-Training error is close to 0, just didn't compute it to save on time:
+Training error is close to 0, just didn't compute it to save on time: (takes ~22 minutes)
 {{{
 =================================================
 Using 4 folds for validation.
