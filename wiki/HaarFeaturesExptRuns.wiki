@@ -1,4 +1,4 @@
-Latest run results:
+Latest run results (4-fold cross validation):
 {{{
 Depth	Trees	Examples	Training Error	Test Error	Time Taken
 2	100	10000	0.00776667	0.0198	78.37
