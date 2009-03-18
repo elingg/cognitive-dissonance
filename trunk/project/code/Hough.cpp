@@ -54,10 +54,15 @@ void Hough::getCircles(vector<double>& feature_values,
   const char * window = "cvHoughCircles";
    if(results->total>0)
   {
-  	cvNamedWindow( window, 1 ); 
-  	cvShowImage( window, image);
+	feature_values.push_back(results->total);	
+  	//cvNamedWindow( window, 1 ); 
+  	//cvShowImage( window, image);
   } 
-
+  
+  else
+  {
+	feature_values.push_back(0);
+  }
 cvReleaseMemStorage(&storage); 
 }
 
@@ -109,10 +114,21 @@ cvThreshold(image,image,160,255, CV_THRESH_BINARY_INV);
   const char * window = "cvHoughLines";
   //if(lines->total>0)
   {
-      cvNamedWindow( window, 1 );
-      cvShowImage( window, image);
+      //cvNamedWindow( window, 1 );
+      //cvShowImage( window, image);
   }
 
+   CvHistogram * hist;
+  int bins = 2;
+  int hist_size[] = {bins};
+  hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
+  cvCalcHist(&image,hist);
+  
+  for(int i =0; i<bins; i++)
+  {
+	feature_values.push_back(cvQueryHistValue_1D(hist,i));
+  }
+ 
   cvReleaseMemStorage(&storage);
 }
 

@@ -26,7 +26,7 @@
 #include "Label.h"
 #include "Timer.h"
 
-//#include "Hough.h"
+#include "Hough.h"
 using namespace std;
 
 // CClassifier class ---------------------------------------------------------
@@ -206,7 +206,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           vector<double> values;
           HaarFeatures haar(verbose);
           haar.getFeatureValues(values,smallImage);
-	 // Hough hough;
+	  Hough hough;
 	  //hough.getCircles(values,smallImage);
 	  //hough.getEdges(values,smallImage);
           //EdgeDetectionFeatures sobel;
@@ -262,6 +262,7 @@ bool extractFeatures(TTrainingFileList& fileList,
   Timer t("extracting features from images",verbose);
   HaarFeatures haar(verbose);
   //EdgeDetectionFeatures sobel;
+  Hough hough;
   IplImage *image, *smallImage;
   smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
   vector<string> labels; 
@@ -286,6 +287,8 @@ bool extractFeatures(TTrainingFileList& fileList,
       // CS221 TO DO: extract features from image here
       vector<double> values;
       haar.getFeatureValues(values,smallImage);
+      //hough.getCircles(values,smallImage);
+      //hough.getEdges(values,smallImage);
       //sobel.getFeatureValues(values,smallImage);
 
       trainingSet.push_back(new ImagesExample(values, 
