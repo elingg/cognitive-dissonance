@@ -42,6 +42,7 @@ void usage() {
     cerr << "    -classifier    :: cv (OpenCV boost), ours (home grown adaboost)\n";
     cerr << "    -examples      :: number of examples to use\n";
     cerr << "    -trainerror    :: output training error as well (will slow it down)\n";
+    cerr << "    -onefold       :: just perform one fold of the 'n' folds" <<endl;
     cerr << "    -v             :: verbose" << endl;
     cerr << endl;
 }
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
     size_t nTrees=100;
     size_t nDepth=2;
     size_t nExamples=0;
- 
+    bool bOneFold = false; 
     // set defaults
     configurationFile = NULL;   // set using -c <filename>
     bVerbose = false;           // turn on with -v
@@ -99,6 +100,8 @@ int main(int argc, char *argv[])
         } else if (!strcmp(*args, "-h")) {
             usage();
             return 0;
+        } else if (!strcmp(*args, "-onefold")) {
+            bOneFold = true;
         } else if (!strcmp(*args, "-trainerror")) {
             bTrainError = true;
         } else if (!strcmp(*args, "-v")) {
@@ -118,7 +121,9 @@ int main(int argc, char *argv[])
     cerr << "Using " << classifier_name << " for classification." << endl;
     cerr << "Using " << nTrees << " trees in the boosted tree." << endl;
     cerr << "Using max depth " << nDepth << " in the tree." << endl;
-
+    if(bOneFold) {
+      cerr << "Ending after first fold to save time."<<endl;
+    }
     // load the training file list
     TTrainingFileList fileList;
     fileList = getTrainingFiles(*args, ".jpg");
@@ -135,7 +140,9 @@ int main(int argc, char *argv[])
     cout << "Average test errors: \n";
     double avg_train_error=0;
     double avg_test_error=0;
+    size_t actualFoldsRun=0;
     for(size_t ifold=0; ifold<nFolds; ++ifold) {
+      actualFoldsRun++;
       Timer t("fold ",true);
       CClassifier classifier(bVerbose,nTrees,nDepth,false);
       TTrainingFileList trainFileList, testFileList;
@@ -170,16 +177,23 @@ int main(int argc, char *argv[])
         cout << "Training error: " << train_error << endl;
       }
       cout << "Fold " << ifold <<": " << test_error << endl;
+      if(bOneFold) { 
+        cout << "Terminating after 1 fold" << endl;
+        break;
+      }
     }
-    if(bTrainError) 
-      avg_train_error /= (double)nFolds;
-    avg_test_error /= (double)nFolds;
+    if(bTrainError)  {
+      avg_train_error /= (double)actualFoldsRun;
+    }
+    avg_test_error /= (double)actualFoldsRun;
     cerr << "------------------------------------------------" << endl;
     cout << "Avg Training error\t Avg Test error\n";
-    if(bTrainError)
+    if(bTrainError) {
       cout << avg_train_error << "\t\t" << avg_test_error <<endl;
-    else 
+    }
+    else { 
       cout << "-n/a-" << "\t\t" << avg_test_error <<endl;
+    }
  
     cerr << "------------------------------------------------" << endl;
     stats.print_prediction_result();
