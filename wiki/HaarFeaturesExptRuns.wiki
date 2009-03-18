@@ -31,34 +31,53 @@ Depth	Trees	Examples	Training Error	Test Error	Time Taken
 2	400	46359	0.0039187	0.0134817	1020.47
 }}}
 
-
+Latest run (Wednesday 2.20PM) (training error is close to 0, just didn't compute it to save on time):
 {{{
 =================================================
-Using 5 folds for validation.
+Using 4 folds for validation.
 Using cv for classification.
 Using 1000 trees in the boosted tree.
-Using max depth 2 in the tree.
+Using max depth 1 in the tree.
+Using 46359 examples
 =================================================
 Running experiments on total of: 46359 files
 Average test errors: 
-Fold 0: 0.0120807
-Time taken in fold : 695.56 seconds
-Fold 1: 0.01262 
-Time taken in fold : 663.98 seconds
-Fold 2: 0.0135908
-Time taken in fold : 696.53 seconds
-Fold 3: 0.0121885
-Time taken in fold : 665.66 seconds
-Fold 4: 0.0130458
-Time taken in fold : 696.01 seconds
-Confusion Matrix:
+Test error: 0.0109587
+Fold 0: 0.0109587
+Time taken in fold : 357.44 seconds
+Test error: 0.0136336
+Fold 1: 0.0136336
+Time taken in fold : 329.5 seconds
+Test error: 0.0118216
+Fold 2: 0.0118216
+Time taken in fold : 319.56 seconds
+Test error: 0.0128537
+Fold 3: 0.0128537
+Time taken in fold : 315.53 seconds
+------------------------------------------------
+Avg Training error       Avg Test error
+-n/a-           0.0123169
+------------------------------------------------
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
                 mug     stapl   keybo   clock   sciss   other   
-mug             175     3       3       0       1       113
-stapl           4       249     8       0       1       131
-keybo           7       7       124     0       2       95
-clock           0       1       0       27      0       21
-sciss           2       0       4       0       202     99
-other           17      38      11      2       19      44993
-Time taken in entire experiment: 3417.74 seconds
+-------------------------------------------------------------
+mug             182     5       3       0       1       104
+stapl           4       242     6       0       0       141
+keybo           5       8       134     0       1       87
+clock           0       0       0       24      0       25
+sciss           2       0       3       0       198     104
+other           17      28      12      2       13      45008
 
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.867   0.617   0.721
+stapl   0.855   0.616   0.716
+keybo   0.848   0.570   0.682
+clock   0.923   0.490   0.640
+sciss   0.930   0.645   0.762
+other   0.990   0.998   0.994
+Time taken in entire experiment: 1322.03 seconds
 }}}
