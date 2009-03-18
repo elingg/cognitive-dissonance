@@ -1,4 +1,4 @@
-Latest run results (4-fold cross validation):
+Experiments on CvBoost using our haar features alone (4-fold cross validation):
 {{{
 Depth	Trees	Examples	Training Error	Test Error	Time Taken
 2	100	10000	0.00776667	0.0198	78.37
@@ -31,7 +31,8 @@ Depth	Trees	Examples	Training Error	Test Error	Time Taken
 2	400	46359	0.0039187	0.0134817	1020.47
 }}}
 
-Latest run (Wednesday 2.20PM) (training error is close to 0, just didn't compute it to save on time):
+Latest run (Wednesday 2.20PM). Uses depth of 1 but runs on all the examples. 
+Training error is close to 0, just didn't compute it to save on time:
 {{{
 =================================================
 Using 4 folds for validation.
