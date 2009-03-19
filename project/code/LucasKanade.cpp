@@ -9,7 +9,7 @@
 #define LK_DEBUG_WINDOW "LK Debug Window"
 
 using namespace std;
-bool DEBUG_LK = true;
+bool DEBUG_LK = false;
 /***************************************************************************
  * LucasKanade - this is for a single blob
  ***************************************************************************/
@@ -21,7 +21,7 @@ LKObject::LKObject() {
 }
 
 LKObject::~LKObject() {
-  //TODO: Figure out why this causes a problem
+  //TODO: Release images appropriately
   /*
   cvReleaseImage(&pyramidA);
   cvReleaseImage(&pyramidB);
@@ -329,7 +329,7 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
         blobs.erase(blobs.begin() + i);
       }
 
-      //cout << "Finishd with blob " << i << endl;
+      //cout << "Finished with blob " << i << endl;
     }
   }
 
