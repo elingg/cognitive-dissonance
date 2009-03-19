@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 
     size_t nFolds=opts.getUintOption("fold");
     string classifier_name=opts.getStringOption("classifier");
+    bool bHomegrown = false; 
+    if(classifier_name.compare("ours")==0) bHomegrown = true;
     size_t nTrees=opts.getUintOption("trees");
     size_t nDepth=opts.getUintOption("depth");
 
@@ -66,6 +68,11 @@ int main(int argc, char *argv[])
     cerr << "Using max depth " << nDepth << " in the tree." << endl;
     if(bOneFold) {
       cerr << "Ending after first fold to save time."<<endl;
+    }
+    if(bHomegrown) {
+      cerr << "Using **homegrown** classifier: fasten your seatbelts" << endl;
+    } else {
+      cerr << "Using CvBoost classifier" << endl;
     }
     // load the training file list
     TTrainingFileList fileList;
@@ -91,7 +98,7 @@ int main(int argc, char *argv[])
       actualFoldsRun++;
       Timer t("fold ",true);
       CommandOptions optsforthisrun = opts;
-      CClassifier classifier(bVerbose,nTrees,nDepth,false,&optsforthisrun);
+      CClassifier classifier(bVerbose,nTrees,nDepth,bHomegrown,&optsforthisrun);
       TTrainingFileList trainFileList, testFileList;
       trainFileList.classes = fileList.classes;
       testFileList.classes = fileList.classes;

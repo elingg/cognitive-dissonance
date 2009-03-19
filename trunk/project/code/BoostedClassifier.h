@@ -22,7 +22,7 @@ class BoostedClassifier : public AbstractBinaryClassifier {
   private:
     vector<double> m_tree_alpha;
     double m_sum_alphas;
-    vector<DecisionTree*> m_trees;
+    vector<DecisionTree*> m_trees; // weak classifiers
     Label m_label;
     size_t m_num_max_trees; // B   
     size_t m_depth;

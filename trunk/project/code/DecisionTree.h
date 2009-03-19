@@ -1,5 +1,8 @@
-// Author: Cognitive-Dissonance team
+// Author: Anand Madhavan
+// THIS IS OUR DECISION TREE BASED ON THE ADABOOST ALGORITHM
+// DESPITE SHARING THE SAME NAME WITH PA2 CODE, IT IS NOT IN ANYWAY RELATED
 
+// COMPLETELY ORIGINAL IMPLEMENTATION
 #pragma once
 #include <vector>
 #include <string>
@@ -17,7 +20,8 @@ public:
   :m_root(0),m_positive_label(positive_label){}
   ~DecisionTree() {}
 
-  void train(const vector<TrainingExample*>& examples);
+  void train(const vector<TrainingExample*>& examples, 
+             const vector<double>& weights);
   double predict(const Example& example) const;
   double getFeatureThreshold(size_t feature_index) const;
   void printTree() const; 
@@ -53,6 +57,7 @@ public:
 private:
   string getFeatureName(size_t feature_index) const; 
   Node* recursiveTrainTree(const vector<TrainingExample*>& examples,
+                           const vector<double>& weights, double sum_weights,
                            const set<size_t>& used_feature_indeces);
   vector<double> m_feature_thresholds;
   Node* m_root;
