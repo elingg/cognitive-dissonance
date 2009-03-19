@@ -17,8 +17,10 @@
  */
 CvHistogram* computeFeatureValueIntegral(const IplImage* iImage) {
 
-  IplImage* destination = (IplImage*) iImage;
- // cvSobel(iImage,destination,0,1,3);
+  IplImage * destination;
+
+ destination = (IplImage*) iImage;
+//  cvSobel(iImage,destination,1,0,3);
 
   CvHistogram * hist;
   int bins = 80;
