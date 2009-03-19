@@ -297,7 +297,7 @@ bool extractFeatures(TTrainingFileList& fileList,
 
       // resize to 64 x 64
       cvResize(image, smallImage);
-
+      assert(smallImage->nChannels==1); // assert its grayscale
       // CS221 TO DO: extract features from image here
       vector<double> values;
       haar.getFeatureValues(values,smallImage);
