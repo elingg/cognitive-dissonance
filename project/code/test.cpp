@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
 
+    //TODO(alecmgo): Remove this
     MotionTracker motionTracker;
 
     CObjectList::iterator iObj;
@@ -205,6 +206,7 @@ int main(int argc, char *argv[])
         groundTruthObjects.clear();
         replayer.run(frame, &groundTruthObjects);
 
+        //TODO(alecmgo): Remove this
         classifierObjects = motionTracker.process(frame, classifierObjects);
 
         if (outputStream) {
@@ -227,6 +229,10 @@ int main(int argc, char *argv[])
 
             cvShowImage(WINDOW_NAME, frameCopy);
             cvReleaseImage(&frameCopy);
+            
+
+	    //TODO(alecmgo): Remove this
+	    char wait = cvWaitKey(100); 
 
             // check for user pressing <esc> and delay for fpsDelay milliseconds
             if (cvWaitKey(fpsDelay) == 27) break;

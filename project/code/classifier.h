@@ -69,8 +69,12 @@ public:
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
     AbstractMulticlassClassifier* classifier;
-    MotionTracker motionTracker;
     bool verbose;
+
+    //Motion Tracking items
+    int frameCount;
+    int interval;
+    LucasKanade lucasKanade;
     CommandOptions* ourOptions;
 };
 

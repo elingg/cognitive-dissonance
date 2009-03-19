@@ -55,6 +55,10 @@ CClassifier::CClassifier(bool verbose_flag,
 
     classifier = new MulticlassClassifier(classes, numtrees, 
                                           depth, homegrown, verbose);
+
+    frameCount = 0;
+    interval = 100;
+    cout << "Classifier used only for every " << interval << "th frame" << endl;
 }
     
 // destructor
@@ -178,11 +182,16 @@ void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs)
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
 bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
-    if(ourOptions) {
-      cerr << "Frames to skip: " << ourOptions->getUintOption("framestoskip") << endl;   } 
-    
+  size_t frames_to_skip = 0;
+  if(ourOptions) {
+    frames_to_skip = ourOptions->getUintOption("framestoskip");   
+  } 
+  assert((frame != NULL) && (objects != NULL));
+  
+  //In order to speed up running time, skip a few frames at a time
+  //and let Lucas kanade handle the interpolate the other points
+  if(frameCount % frames_to_skip == 0) {
     assert((frame != NULL) && (objects != NULL));
-
     //Convert to gray scale (from OpenCV lecture notes)
     IplImage *gray = cvCreateImage(
       cvGetSize(frame),
@@ -196,7 +205,6 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
     for(int length = MIN_LENGTH_SIZE; length <= MAX_LENGTH_SIZE; length += 8) {
       for(int x = 0; x < gray->width - length; x = x + 8) {
         for(int y = 0; y < gray->height - length; y = y + 8) {
-//          cerr << "New window: " << x << " " << y << " " << length << endl;
           //Clip the frame to a square
           CvRect region = cvRect(x, y, length, length);
           IplImage *clippedImage = cvCreateImage(
@@ -243,26 +251,13 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
     coalesceOverlappingRectangles(&firstpassobjects,objects);
 
     cvReleaseImage(&gray);
-    // cout << "Number of results found: " << objects->size() << endl;
-    // cout << objects->size() << "\t";
-    // Example code which returns up to 10 random objects, each object
-    // having a width and height equal to half the frame size.
-    /*
-    const char *labels[5] = {
-	"mug", "stapler", "keyboard", "clock", "scissors"
-    }; 
-    int n = cvRandInt(&rng) % 10;
-    while (n-- > 0) {
-        CObject obj;
-        obj.rect = cvRect(0, 0, frame->width / 2, frame->height / 2);
-        obj.rect.x = cvRandInt(&rng) % (frame->width - obj.rect.width);
-        obj.rect.y = cvRandInt(&rng) % (frame->height - obj.rect.height);
-	obj.label = string(labels[cvRandInt(&rng) % 5]);
-	objects->push_back(obj);        
-    }
-    */
+    lucasKanade.seed(frame, objects);
+  } else {
+    lucasKanade.interpolate(frame, objects); 
+  }
 
-    return true;
+  frameCount++;
+  return true;
 }
       
 bool extractFeatures(TTrainingFileList& fileList, 
