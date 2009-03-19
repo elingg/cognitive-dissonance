@@ -57,8 +57,10 @@ CClassifier::CClassifier(bool verbose_flag,
                                           depth, homegrown, verbose);
 
     frameCount = 0;
-    interval = 100;
-    cout << "Classifier used only for every " << interval << "th frame" << endl;
+    size_t frames_to_skip = ourOptions->getUintOption("framestoskip");   
+    if(verbose) {
+      cout << "Classifier used only for every " << frames_to_skip << "th frame" << endl;
+    }
 }
     
 // destructor

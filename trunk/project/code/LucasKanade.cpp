@@ -9,10 +9,10 @@
 #define LK_DEBUG_WINDOW "LK Debug Window"
 
 using namespace std;
-
-/**
- * Lucas Kanade
- */
+bool DEBUG_LK = true;
+/***************************************************************************
+ * LucasKanade - this is for a single blob
+ ***************************************************************************/
 const int MAX_CORNERS = 500;
 const int WIN_SIZE = 10;
 
@@ -166,7 +166,9 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame,
       CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
       CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
       cvLine(debugFrame, p0, p1, CV_RGB(255,0,0), 2);
-      cvShowImage(LK_DEBUG_WINDOW, debugFrame);
+      if(DEBUG_LK) {
+        cvShowImage(LK_DEBUG_WINDOW, debugFrame);
+      }
 
       goodCorners[numGoodCorners] = cornersB[i];
       numGoodCorners++;
@@ -193,14 +195,18 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame,
  */
 LucasKanade::LucasKanade() {
   frameCount = 0;
-  cvNamedWindow(LK_DEBUG_WINDOW, CV_WINDOW_AUTOSIZE);
+  if(DEBUG_LK) {
+    cvNamedWindow(LK_DEBUG_WINDOW, CV_WINDOW_AUTOSIZE);
+  }
 }
 
 /**
  * Lucas Kanade destructor
  */
 LucasKanade::~LucasKanade() {
-  cvDestroyWindow(LK_DEBUG_WINDOW);
+  if(DEBUG_LK) {
+    cvDestroyWindow(LK_DEBUG_WINDOW);
+  }
 }
 
 /**
