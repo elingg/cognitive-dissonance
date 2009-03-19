@@ -17,10 +17,10 @@
  */
 CvHistogram* computeFeatureValueIntegral(const IplImage* iImage) {
 
-  IplImage* destination;
-  cvSobel(iImage,destination,1,1,3);
+  IplImage* destination = (IplImage*) iImage;
+ // cvSobel(iImage,destination,0,1,3);
   CvHistogram * hist;
-  int bins = 32;
+  int bins = 64;
   int hist_size[] = {bins};
   hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
   cvCalcHist(&destination,hist);
@@ -48,27 +48,17 @@ void EdgeDetectionFeatures::getFeatureValues(vector<double>& feature_values,
   assert(img->height == 64);
  
   
-//    CvHistogram* feature_value = computeFeatureValueIntegral(iImage);
-     IplImage *destination = cvCreateImage(
-cvGetSize(img),
-     IPL_DEPTH_16S,
-     1);
+   int bins = 64; 
+   CvHistogram* hist = computeFeatureValueIntegral(img);
 
-    cvSobel(img,destination,1,1,3);
-    for(int i=0; i<destination->width; i++)
-    {
-      for(int j=0; j<destination->height; j++)
-      {
-        feature_values.push_back(cvGetReal2D(destination, i, j));
-      }
-    }
+  for(int i =0; i<bins; i++)
+  {
+        feature_values.push_back(cvQueryHistValue_1D(hist,i));
+  }
 
-    //feature_values.push_back(*feature_value);
-    //printFeature(features[i]);
-    //cerr << "Feature value [" << i << "]: " << feature_value << endl;
+
   
 
-  cvReleaseImage(&destination);
 }
 
 

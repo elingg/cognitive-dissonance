@@ -208,9 +208,9 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           haar.getFeatureValues(values,smallImage);
 	  Hough hough;
 	  //hough.getCircles(values,smallImage);
-	  hough.getEdges(values,smallImage);
-          //EdgeDetectionFeatures sobel;
-	  //sobel.getFeatureValues(values,smallImage);
+	  //hough.getEdges(values,smallImage);
+          EdgeDetectionFeatures sobel;
+	  sobel.getFeatureValues(values,smallImage);
 
           //Check for image
           ImagesExample imagesExample(values); 
@@ -261,7 +261,7 @@ bool extractFeatures(TTrainingFileList& fileList,
                      vector<TrainingExample*>& trainingSet, bool verbose) {
   Timer t("extracting features from images",verbose);
   HaarFeatures haar(verbose);
-  //EdgeDetectionFeatures sobel;
+  EdgeDetectionFeatures sobel;
   Hough hough;
   IplImage *image, *smallImage;
   smallImage = cvCreateImage(cvSize(64, 64), IPL_DEPTH_8U, 1);
@@ -287,9 +287,9 @@ bool extractFeatures(TTrainingFileList& fileList,
       // CS221 TO DO: extract features from image here
       vector<double> values;
       haar.getFeatureValues(values,smallImage);
-      //hough.getCircles(values,smallImage);
-      hough.getEdges(values,smallImage);
-      //sobel.getFeatureValues(values,smallImage);
+     // hough.getCircles(values,smallImage);
+      //hough.getEdges(values,smallImage);
+      sobel.getFeatureValues(values,smallImage);
 
       trainingSet.push_back(new ImagesExample(values, 
                                     getLabel(fileList.files[i].label)));
