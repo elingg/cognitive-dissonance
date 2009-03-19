@@ -22,21 +22,22 @@ double H(double p) {
   return -p*(log10(p)/log10(2)) - (1-p)*(log10(1-p)/log10(2));
 }
 
-size_t countPositiveClassLabels(const Label& label,
- const vector<TrainingExample*>& examples) {
-  size_t count = 0;
+double countPositiveClassLabels(const Label& label,
+ const vector<TrainingExample*>& examples, 
+ const vector<double>& weights) {
+  double count = 0;
   for(size_t iex=0; iex<examples.size(); ++iex) {
     if(isLabelEqual(examples[iex]->getLabel(),label)) {
-      count++;
+      count+=weights[iex];
     }
   }
   return count;
 }
 
 void splitExamplesByThreshold(
- vector<TrainingExample*>& above_examples,
- vector<TrainingExample*>& below_examples,
- const vector<TrainingExample*>& examples,
+ vector<TrainingExample*>& above_examples, vector<double>& above_weights, double& above_weights_sum,
+ vector<TrainingExample*>& below_examples, vector<double>& below_weights, double& below_weights_sum,
+ const vector<TrainingExample*>& examples, const vector<double>& weights, double weights_sum,
  size_t feature_index, double threshold) {
   //double new_threshold=0.0;
   //for(size_t iex=0; iex<examples.size(); ++iex) {
@@ -44,22 +45,36 @@ void splitExamplesByThreshold(
   //}
   //new_threshold /= examples.size();
   //threshold = new_threshold;
+  below_weights_sum = above_weights_sum = 0.0; 
   for(size_t iex=0; iex<examples.size(); ++iex) {
     if(examples[iex]->getFeatureDoubleValue(feature_index)>threshold) {
       above_examples.push_back(examples[iex]);
+      above_weights.push_back(weights[iex]);
+      above_weights_sum+=weights[iex];
     } else {
       below_examples.push_back(examples[iex]);
+      below_weights.push_back(weights[iex]);
+      below_weights_sum+=weights[iex];
     }
   }
 }
 
+double sumWeights(const vector<double>& weights) {
+  double sum_weights = 0;
+  for(size_t ie=0; ie<weights.size(); ie++) { 
+    sum_weights+=weights[ie];
+  }
+  return sum_weights;
+}
+
 size_t chooseFeature(const Label& positive_label,
  const vector<TrainingExample*>& examples,
+ const vector<double>& weights, double weights_sum,
  const vector<double>& feature_thresholds,
  const set<size_t>& used_feature_indeces) {
-  size_t positives = countPositiveClassLabels(positive_label, examples);
-  double ptot = (double)(positives)/(double)(examples.size());
-  double mtot = examples.size()*H(ptot);
+  double positives = countPositiveClassLabels(positive_label, examples, weights);
+  double ptot = positives/weights_sum;
+  double mtot = weights_sum*H(ptot);
   // cerr << "Positive: " << positives << ", ptot: " << ptot << ", mtot: " << mtot <<", number of used indeces: " << used_feature_indeces.size() <<  endl;
   double max_gain = -DBL_MAX;
   size_t chosen_feature = -1; 
@@ -74,18 +89,22 @@ size_t chooseFeature(const Label& positive_label,
     }
     vector<TrainingExample*> above_examples;
     vector<TrainingExample*> below_examples;
-    splitExamplesByThreshold(above_examples,
-                             below_examples,
-                             examples,
+    vector<double> above_weights;
+    vector<double> below_weights;
+    double above_weights_sum=0;
+    double below_weights_sum=0;
+    splitExamplesByThreshold(above_examples, above_weights, above_weights_sum,
+                             below_examples, below_weights, below_weights_sum,
+                             examples, weights, weights_sum,
                              ifeat,
                              feature_thresholds[ifeat]);
     // get number of examples with positive class labels...
-    double pplus = countPositiveClassLabels(positive_label, above_examples)/
-                          (double)(above_examples.size());
-    double mplus = above_examples.size()*H(pplus);
-    double pminus = countPositiveClassLabels(positive_label, below_examples)/
-                          (double)(below_examples.size());
-    double mminus = below_examples.size()*H(pminus);
+    double pplus = countPositiveClassLabels(positive_label, 
+                     above_examples, above_weights)/above_weights_sum;
+    double mplus = above_weights_sum*H(pplus);
+    double pminus = countPositiveClassLabels(positive_label, 
+                     below_examples, below_weights)/below_weights_sum;
+    double mminus = below_weights_sum*H(pminus);
     double gain = mtot - (mplus + mminus);
     if(gain>max_gain) {
       max_gain = gain; 
@@ -172,28 +191,30 @@ double DecisionTree::getFeatureThreshold(size_t feature_index) const {
 //    proportion of positive examples in that part of the tree.
 DecisionTree::Node* DecisionTree::recursiveTrainTree
 (const vector<TrainingExample*>& examples, 
+ const vector<double>& weights, double sum_weights,
  const set<size_t>& used_feature_indeces) {
   // split on feature that gives greatest increase in the log likelihood..
   // (the feature that gives greatest reduction in entropy)..
   // if((used_feature_indeces.size()==m_features.size())) {
   assert(examples.size()>0);
+  assert(examples.size()==weights.size());
   size_t num_features = examples[0]->getNumberOfFeatures();
   if((used_feature_indeces.size()==num_features) || 
      (used_feature_indeces.size()==getMaxDepth())) { // all used up
     // stop criteria 3...
-    double pl = (double)(countPositiveClassLabels(m_positive_label, examples))/
-                               (double)(examples.size());
+    double pl = countPositiveClassLabels
+                     (m_positive_label, examples, weights)/sum_weights;
     Node* T = new Node(this, pl); // leaf
     // cerr << "encountered main leaf: features used up.\n";
     return T;
   }
  
   size_t chosen_feature_index = 
-               chooseFeature(m_positive_label, examples, 
+               chooseFeature(m_positive_label, examples, weights, sum_weights,
                              m_feature_thresholds, used_feature_indeces);
   if(chosen_feature_index==(size_t)(-1)) { // all examples are one or the other
-    double pl = (double)(countPositiveClassLabels(m_positive_label, examples))/
-                               (double)(examples.size());
+    double pl = countPositiveClassLabels
+                     (m_positive_label, examples,weights)/sum_weights;
     Node* T = new Node(this, pl); // leaf
     // cerr << "encountered main leaf: invalid chosen_feature_index, all examples one or the other.\n";
     return T;
@@ -206,21 +227,24 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   // instead of for loop over values v of feature, we just have two...
   vector<TrainingExample*> above_examples;
   vector<TrainingExample*> below_examples;
-  splitExamplesByThreshold(above_examples,
-                           below_examples,
-                           examples,
+  vector<double> above_weights;
+  vector<double> below_weights;
+  double sum_above_weights = 0;
+  double sum_below_weights = 0;
+  splitExamplesByThreshold(above_examples, above_weights, sum_above_weights,
+                           below_examples, below_weights, sum_below_weights,
+                           examples, weights, sum_weights,
                            chosen_feature_index,
                            m_feature_thresholds[chosen_feature_index]);
   Node* right_child=0;
-  size_t count_positive_class_labels_for_above_examples = 
-                 countPositiveClassLabels(m_positive_label, above_examples);
+  double count_positive_class_labels_for_above_examples = 
+                 countPositiveClassLabels(m_positive_label, 
+                              above_examples, above_weights);
   if(above_examples.size()==0) { // stop criteria 2... (use parents examples)...
-    double pl = (double)(count_positive_class_labels_for_above_examples)/
-                 (double)(examples.size());
+    double pl = count_positive_class_labels_for_above_examples/sum_weights;
     right_child = new Node(this,pl); // leaf
     // cerr << "encountered right leaf: no above examples\n";
-  } else if(count_positive_class_labels_for_above_examples
-                  ==above_examples.size()) {
+  } else if(count_positive_class_labels_for_above_examples==sum_above_weights) {
     // stop criteria 1... (use probability 1)...
     right_child = new Node(this, 1.0); // leaf
     // cerr << "encountered right leaf: no negative examples in class 'above'\n";
@@ -231,21 +255,20 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   } else {
     // cerr << "Splitting right on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
     // cerr << "\" using " << above_examples.size() << " 'above' examples\n";
-    right_child = recursiveTrainTree(above_examples, 
-                                     now_used_feature_indeces);
+    right_child = recursiveTrainTree(above_examples, above_weights, 
+                                     sum_above_weights, now_used_feature_indeces);
   }
   T->setRightChild(right_child);
  
   Node* left_child=0; 
-  size_t count_positive_class_labels_for_below_examples = 
-                 countPositiveClassLabels(m_positive_label, below_examples);
+  double count_positive_class_labels_for_below_examples = 
+                 countPositiveClassLabels(m_positive_label, 
+                            below_examples, below_weights);
   if(below_examples.size()==0) { // stop criteria 2... (use parents examples)...
-    double pl = (double)(count_positive_class_labels_for_below_examples)/
-                 (double)(examples.size());
+    double pl = count_positive_class_labels_for_below_examples/sum_weights;
     left_child = new Node(this,pl); // leaf
     // cerr << "encountered left leaf: no examples in class 'below'\n";
-  } else if(count_positive_class_labels_for_below_examples
-                  ==below_examples.size()) {
+  } else if(count_positive_class_labels_for_below_examples==sum_below_weights) {
     // stop criteria 1... (use probability 1)...
     left_child = new Node(this, 1.0); // leaf
     // cerr << "encountered left leaf: no positive examples in class 'below'\n";
@@ -256,8 +279,8 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
   } else {
     // cerr << "Splitting left on feature [" << chosen_feature_index << "]: \"" << m_features[chosen_feature_index];
     // cerr << "\" using " << below_examples.size() << " 'below' examples\n";
-    left_child = recursiveTrainTree(below_examples,
-                                    now_used_feature_indeces);
+    left_child = recursiveTrainTree(below_examples, below_weights,
+                                    sum_below_weights, now_used_feature_indeces);
   }
   T->setLeftChild(left_child);
   
@@ -265,7 +288,8 @@ DecisionTree::Node* DecisionTree::recursiveTrainTree
 }
 
 void DecisionTree::train
-(const vector<TrainingExample*>& examples) {
+(const vector<TrainingExample*>& examples,
+ const vector<double>& weights) {
   // cerr << "Training tree with " << examples.size() << " training examples\n";
   // cerr << "Tree max-depth used: " << getMaxDepth() << endl;
   // cerr << "Classification threshold used: " << getClassificationThreshold() << endl;
@@ -276,13 +300,13 @@ void DecisionTree::train
   m_feature_thresholds.clear();
   assert(examples.size()>0); 
   size_t num_features = examples[0]->getNumberOfFeatures();
-  size_t num_examples = examples.size();
+  double sum_weights = sumWeights(weights);
 
   // compute feature averages that we shall use as thresholds...
   vector<double> feature_averages;
   // cerr << "Number of examples: " << num_examples << ", Number of features: " << num_features << endl;
   feature_averages.resize(num_features,0.0);
-  for(size_t ie=0; ie<num_examples; ++ie) {
+  for(size_t ie=0; ie<examples.size(); ++ie) {
     // cerr << "Processing example: " << ie << endl;
     const TrainingExample* ex = examples[ie];
     // cerr << "Number of features: " << examples[ie]->getNumberOfFeatures() << endl;
@@ -290,19 +314,19 @@ void DecisionTree::train
     for(size_t ifeat=0; ifeat<num_features; ifeat++) {
       // cerr << "Feature: " << ifeat << ", value: " << ex->getFeatureDoubleValue(ifeat);
       double fv = ex->getFeatureDoubleValue(ifeat);
-      feature_averages[ifeat]+=fv; 
+      feature_averages[ifeat]+=fv*weights[ie]; 
     }
   }
   // cerr << "Average thresholds:\n";
   for(size_t ifeat=0; ifeat<num_features; ifeat++) {
-    feature_averages[ifeat]/=num_examples;
+    feature_averages[ifeat]/=sum_weights;
     // cerr << ifeat << ": " << feature_averages[ifeat] << "\t";
   }
   m_feature_thresholds = feature_averages;
  
   // cerr << "Recursive train tree:\n";
   set<size_t> empty_used_features;
-  m_root = recursiveTrainTree(examples,empty_used_features);
+  m_root = recursiveTrainTree(examples,weights,sum_weights,empty_used_features);
   // printTree();
 }
 

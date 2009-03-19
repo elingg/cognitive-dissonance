@@ -10,6 +10,8 @@ MulticlassClassifier::MulticlassClassifier(const vector<Label>& classes,
                                            bool homegrown, bool verbose)
 :m_classes(classes), m_numtrees(numtrees), m_depth(depth), 
 m_homegrown(homegrown), m_verbose(verbose) {
+  if(verbose && homegrown ) { cout << "Using homegrown classifier" << endl; }
+  if(verbose && !homegrown ) { cout << "Using CvBoost classifier" << endl; }
   for(size_t ic=0; ic<m_classes.size(); ic++) {
     if(homegrown) {
       m_classifiers.push_back(new BoostedClassifier(m_classes[ic], m_numtrees, m_depth));
