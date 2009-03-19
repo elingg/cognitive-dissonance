@@ -54,6 +54,8 @@ void usage() {
 
 int main(int argc, char *argv[])
 {
+    int origargc = argc;
+
     char *configurationFile;
     char *groundTruthFile;
     char *outputFile;
@@ -111,8 +113,8 @@ int main(int argc, char *argv[])
         } else if (!strcmp(*args, "-x")) {
             bShowVideo = !bShowVideo;
         } else {
-            cerr << "ERROR: unrecognized option " << *args << endl;
-            return -1;
+           // cerr << "ERROR: unrecognized option " << *args << endl;
+           // return -1;
         }
         args++;
     }
@@ -137,8 +139,11 @@ int main(int argc, char *argv[])
           cout << "Showing video" << endl;       
         }
     }
+    CommandOptions opts;
 
-    CClassifier classifier(bVerbose,1000,2,false);
+    CClassifier classifier(bVerbose,1000,2,false,&opts);
+    opts.parseOptions(origargc, argv);
+    
     CObjectReplay replayer;
     CvFont font;
     ofstream *outputStream = NULL;

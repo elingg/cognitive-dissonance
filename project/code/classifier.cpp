@@ -32,9 +32,12 @@ using namespace std;
 // CClassifier class ---------------------------------------------------------
 
 // default constructor
-CClassifier::CClassifier(bool verbose_flag, 
-                         size_t numtrees, size_t depth,
-                         bool homegrown):verbose(verbose_flag)
+CClassifier::CClassifier(bool verbose_flag,
+                         size_t numtrees,
+                         size_t depth,
+                         bool homegrown, 
+                         CommandOptions* opts)
+:verbose(verbose_flag),ourOptions(opts)
 {
     // initalize the random number generator (for sample code)
     rng = cvRNG(-1);
@@ -46,7 +49,10 @@ CClassifier::CClassifier(bool verbose_flag,
     for(size_t il=0;il<labels.size(); il++) {
       classes.push_back(getLabel(labels[il]));
     }
- 
+    if(ourOptions) {
+      ourOptions->needUintOption("framestoskip", "number of frames to skip", 0); 
+    }
+
     classifier = new MulticlassClassifier(classes, numtrees, 
                                           depth, homegrown, verbose);
 }
@@ -172,6 +178,8 @@ void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs)
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
 bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
+    if(ourOptions) {
+      cerr << "Frames to skip: " << ourOptions->getUintOption("framestoskip") << endl;   } 
     
     assert((frame != NULL) && (objects != NULL));
 
