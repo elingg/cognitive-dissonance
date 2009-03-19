@@ -32,57 +32,77 @@ using namespace std;
 // CClassifier class ---------------------------------------------------------
 
 // default constructor
-CClassifier::CClassifier(bool verbose_flag,
-                         size_t numtrees,
-                         size_t depth,
-                         bool homegrown, 
-                         CommandOptions* opts)
-:verbose(verbose_flag),ourOptions(opts)
+CClassifier::CClassifier(CommandOptions& opts, bool video_mode)
+:ourOptions(opts),videoMode(video_mode)
 {
     // initalize the random number generator (for sample code)
     rng = cvRNG(-1);
     parameters = NULL;
     // CS221 TO DO: add initialization for any member variables   
-    vector<Label> classes;
-    vector<string> labels;
-    getAllLabelStrings(labels);
-    for(size_t il=0;il<labels.size(); il++) {
-      classes.push_back(getLabel(labels[il]));
+    if(videoMode) {
+      ourOptions.needUintOption("framestoskip", "number of frames to skip", 0); 
+      ourOptions.needDoubleOption("overlap_ratio", "overlap ratio for coalescing", 0.05); 
     }
-    if(ourOptions) {
-      ourOptions->needUintOption("framestoskip", "number of frames to skip", 0); 
-      ourOptions->needDoubleOption("overlap_ratio", "overlap ratio for coalescing", 0.05); 
-    }
+    ourOptions.needBoolOption("corner_feature", "use corner detection as feature", false); 
+    ourOptions.needBoolOption("circle_feature", "use circles as feature", false); 
+    ourOptions.needBoolOption("edge_feature", "use edges as feature", false); 
+    ourOptions.needBoolOption("sobel_feature", "use sobel as feature", true); 
+    ourOptions.needUintOption("depth", "depth of tree to use", 2); 
+    ourOptions.needUintOption("trees", "number of trees in boosting", 1000); 
+    ourOptions.needBoolOption("homegrownboost", "use homegrown boosting classifier",false); 
 
-    classifier = new MulticlassClassifier(classes, numtrees, 
-                                          depth, homegrown, verbose);
-
+    classifier = 0; 
     frameCount = 0;
-    // See postCommandParseNotify() below...
-    // you can't get the commmand parameters here yet, 
-    // it gets the options only after you exit the ctor!...
-    // size_t frames_to_skip = ourOptions->getUintOption("framestoskip");   
-    // if(verbose) {
-    //   cout << "Classifier used only for every " << frames_to_skip << "th frame" << endl;
-    // }
 }
     
 // destructor
 CClassifier::~CClassifier()
 {
     if (parameters != NULL) {
-	cvReleaseMat(&parameters);
+      cvReleaseMat(&parameters);
     }
-
     // CS221 TO DO: free any memory allocated by the object
+    assert(classifier); // did not call postCommandParseNotify
     delete classifier;
 }
 
-void CClassifier::postCommandParseNotify() {
-   if(ourOptions) {
-     cout << "Classifier used only for every " << ourOptions->getUintOption("framestoskip") <<  " frames" << endl;
-     cout << "Coalescing if rectangle overlap ratio exceeds " << ourOptions->getDoubleOption("overlap_ratio") << endl;
-   }
+void CClassifier::postCommandParseNotify(bool dontprint) {
+  assert(classifier==0);
+  vector<Label> classes;
+  vector<string> labels;
+  getAllLabelStrings(labels);
+  for(size_t il=0;il<labels.size(); il++) {
+    classes.push_back(getLabel(labels[il]));
+  }
+  classifier = new MulticlassClassifier(classes, 
+                                        ourOptions.getUintOption("trees"),
+                                        ourOptions.getUintOption("depth"),
+                                        ourOptions.getBoolOption("homegrownboost"),
+                                        ourOptions.getVerboseFlag());
+  if(dontprint) return;
+  if(videoMode) {
+    cout << "Classifier used only for every " << ourOptions.getUintOption("framestoskip") <<  " frames" << endl;
+    cout << "Coalescing if rectangle overlap ratio exceeds " << ourOptions.getDoubleOption("overlap_ratio") << endl;
+  }
+  if(ourOptions.getBoolOption("circle_feature")) {
+    cout << "Using circle detection features" << endl;
+  }
+  if(ourOptions.getBoolOption("edge_feature")) {
+    cout << "Using edge detection features" << endl;
+  }
+  if(ourOptions.getBoolOption("sobel_feature")) {
+    cout << "Using sobel detection features" << endl;
+  }
+  if(ourOptions.getBoolOption("corner_feature")) {
+    cout << "Using corner detection features" << endl;
+  }
+  if(ourOptions.getBoolOption("homegrownboost")) {
+    cout << "Using *HOMEGROWN* boosting classifier" << endl;
+  } else {
+    cout << "Using CvBoost classifier" << endl;
+  }
+  cout << "Using " << ourOptions.getUintOption("trees") << " trees in boosting" << endl;
+  cout << "Using " << ourOptions.getUintOption("depth") << " depth in boosting" << endl;
 }
   
 // loadState
@@ -108,6 +128,28 @@ bool CClassifier::saveState(const char *filename)
     return true;
 }
 
+void coreExtractFeatures(IplImage* image,
+                         vector<double>& values, 
+                         const CommandOptions& opts) {
+  HaarFeatures haar(opts.getVerboseFlag());
+  haar.getFeatureValues(values,image);
+  if(opts.getBoolOption("circle_feature")) {
+    Hough hough;
+    hough.getCircles(values,image);
+  }
+  if(opts.getBoolOption("edge_feature")) {
+    Hough hough;
+    hough.getEdges(values,image);
+  }
+  if(opts.getBoolOption("corner_feature")) {
+    // FILL IN
+  }
+  if(opts.getBoolOption("sobel_feature")) {
+    EdgeDetectionFeatures sobel;
+    sobel.getFeatureValues(values,image);
+  }
+}
+ 
 void printCObject(const CObject& obj) {
    cout << "[label:"<<obj.label << 
              ", x:" << obj.rect.x <<
@@ -197,10 +239,8 @@ void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs,
 // Runs the classifier over the given frame and returns a list of
 // objects found (and their location).
 bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
-  size_t frames_to_skip = 0;
-  if(ourOptions) {
-    frames_to_skip = ourOptions->getUintOption("framestoskip");   
-  } 
+  assert(videoMode);
+  size_t frames_to_skip = ourOptions.getUintOption("framestoskip");   
   assert((frame != NULL) && (objects != NULL));
   
   //In order to speed up running time, skip a few frames at a time
@@ -235,13 +275,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
 
           //Get Haar feature values
           vector<double> values;
-          HaarFeatures haar(verbose);
-          haar.getFeatureValues(values,smallImage);
-          Hough hough;
-          //hough.getCircles(values,smallImage);
-          //hough.getEdges(values,smallImage);
-          EdgeDetectionFeatures sobel;
-          sobel.getFeatureValues(values,smallImage);
+          coreExtractFeatures(smallImage, values, ourOptions);
 
           //Check for image
           ImagesExample imagesExample(values); 
@@ -262,10 +296,7 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
         }
       }
     }
-    double overlap_ratio = 0.05;
-    if(ourOptions) {
-      overlap_ratio = ourOptions->getDoubleOption("overlap_ratio"); 
-    }
+    double overlap_ratio = ourOptions.getDoubleOption("overlap_ratio"); 
     if(verbose) cerr << "Coalescing " << firstpassobjects.size() << " rectangles"; 
     coalesceOverlappingRectangles(&firstpassobjects,objects,overlap_ratio);
     if(verbose) cerr << " into " << objects->size() << endl;
@@ -278,11 +309,13 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
   frameCount++;
   return true;
 }
-      
+
+     
 bool extractFeatures(TTrainingFileList& fileList, 
-                     vector<TrainingExample*>& trainingSet, bool verbose) {
-  Timer t("extracting features from images",verbose);
-  HaarFeatures haar(verbose);
+                     vector<TrainingExample*>& trainingSet,  
+                     const CommandOptions& opts) {
+  Timer t("extracting features from images",opts.getVerboseFlag());
+  HaarFeatures haar(opts.getVerboseFlag());
   EdgeDetectionFeatures sobel;
   Hough hough;
   IplImage *image, *smallImage;
@@ -308,10 +341,7 @@ bool extractFeatures(TTrainingFileList& fileList,
       assert(smallImage->nChannels==1); // assert its grayscale
       // CS221 TO DO: extract features from image here
       vector<double> values;
-      haar.getFeatureValues(values,smallImage);
-     // hough.getCircles(values,smallImage);
-      //hough.getEdges(values,smallImage);
-      sobel.getFeatureValues(values,smallImage);
+      coreExtractFeatures(smallImage, values, opts);
 
       trainingSet.push_back(new ImagesExample(values, 
                                     getLabel(fileList.files[i].label)));
@@ -330,43 +360,43 @@ bool extractFeatures(TTrainingFileList& fileList,
 bool CClassifier::train(TTrainingFileList& fileList) {
     // CS221 TO DO: replace with your own training code
     // example code to show you number of samples for each object class
-    if(verbose) cout << "Classes:" << endl;
+    if(ourOptions.getVerboseFlag()) cout << "Classes:" << endl;
     for (int i = 0; i < (int)fileList.classes.size(); i++) {
-      if(verbose) cout << fileList.classes[i] << " (";
+      if(ourOptions.getVerboseFlag()) cout << fileList.classes[i] << " (";
       int count = 0;
       for (int j = 0; j < (int)fileList.files.size(); j++) {
         if (fileList.files[j].label == fileList.classes[i]) {
           count += 1;
 	      }
 	    }
-      if(verbose) cout << count << " samples)" << endl;
+      if(ourOptions.getVerboseFlag()) cout << count << " samples)" << endl;
     }
-    if(verbose) cout << endl;
+    if(ourOptions.getVerboseFlag()) cout << endl;
 
     // example code for loading and resizing image files--
     // you may find this useful for the milestone    
     
-    if(verbose) cout << "Processing images..." << endl;
+    if(ourOptions.getVerboseFlag()) cout << "Processing images..." << endl;
     vector<TrainingExample*> trainingSet;
-    if(!extractFeatures(fileList, trainingSet, verbose)) {
+    if(!extractFeatures(fileList, trainingSet, ourOptions)) {
       for(size_t it=0;it<trainingSet.size(); it++) {
         delete trainingSet[it];
       }
       exit(-1);
     }
-    if(verbose) cout << endl;
+    if(ourOptions.getVerboseFlag()) cout << endl;
     // CS221 TO DO: train you classifier here
-    if(verbose) cerr << "Training tree:" << endl;
+    if(ourOptions.getVerboseFlag()) cerr << "Training tree:" << endl;
     classifier->train(trainingSet);
     return true;
 }
 
 double CClassifier::test(TTrainingFileList& fileList, Stats& stat) {
-    if(verbose) cerr << "Testing tree on trained images: " << endl;
-    Timer t("testing on images",verbose);
-    if(verbose) cout << "Processing images..." << endl;
+    if(ourOptions.getVerboseFlag()) cerr << "Testing tree on trained images: " << endl;
+    Timer t("testing on images",ourOptions.getVerboseFlag());
+    if(ourOptions.getVerboseFlag()) cout << "Processing images..." << endl;
     vector<TrainingExample*> testSet;
-    if(!extractFeatures(fileList, testSet, verbose)) {
+    if(!extractFeatures(fileList, testSet, ourOptions)) {
       for(size_t it=0;it<testSet.size(); it++) {
         delete testSet[it];
       }

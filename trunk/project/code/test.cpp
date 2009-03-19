@@ -141,13 +141,11 @@ int main(int argc, char *argv[])
         }
     }
     CommandOptions opts;
-
-    CClassifier classifier(bVerbose,1000,2,false,&opts);
+    CClassifier classifier(opts,true);
     //TODO(alecmgo): Remove this (why?)
     MotionTracker motionTracker;
     opts.needBoolOption("motiontracker", "flag for turning on motion tracking", false);
-    
-    opts.parseOptions(origargc, argv);
+    if(!opts.parseOptions(origargc, argv)) { assert(0); }
     
     classifier.postCommandParseNotify(); // for spitting out parameters if needed
     bool bUseMotionTracker = opts.getBoolOption("motiontracker");

@@ -39,40 +39,29 @@ int main(int argc, char *argv[])
     opts.needStringOption("files","directory where training files are located", "/afs/ir/class/cs221/vision/data/vision_all");
     opts.needUintOption("fold","number of folds",3);
     opts.needBoolOption("trainerror","output training error as well (will slow it down)",false);
-    opts.needUintOption("depth","max tree depth",2);
-    opts.needStringOption("classifier","cv (CvBoost), outs (home grown AdaBoost)","cv");
     opts.needBoolOption("onefold","set if want just want on first fold",false);
     opts.needUintOption("examples","number of examples to use",0);
-    opts.needUintOption("trees","number of trees in boosting",100);
     if(!opts.parseOptions(argc, argv)) {
       opts.usage();
       return -1;
     }
 
     size_t nFolds=opts.getUintOption("fold");
-    string classifier_name=opts.getStringOption("classifier");
-    bool bHomegrown = false; 
-    if(classifier_name.compare("ours")==0) bHomegrown = true;
-    size_t nTrees=opts.getUintOption("trees");
-    size_t nDepth=opts.getUintOption("depth");
 
     size_t nExamples=opts.getUintOption("examples");
     bool bOneFold = opts.getBoolOption("onefold"); 
     // set defaults
-    bool bVerbose = opts.getVerboseFlag();
     bool bTrainError = opts.getBoolOption("trainerror");
     cerr << "=================================================" << endl;
+    CommandOptions copts = opts;
+    CClassifier dummyclassifier(copts,false);
+    if(!copts.parseOptions(argc, argv)) {
+      assert(0);
+    }
+    dummyclassifier.postCommandParseNotify();
     cerr << "Using " << nFolds << " folds for validation." << endl;
-    cerr << "Using " << classifier_name << " for classification." << endl;
-    cerr << "Using " << nTrees << " trees in the boosted tree." << endl;
-    cerr << "Using max depth " << nDepth << " in the tree." << endl;
     if(bOneFold) {
       cerr << "Ending after first fold to save time."<<endl;
-    }
-    if(bHomegrown) {
-      cerr << "Using **homegrown** classifier: fasten your seatbelts" << endl;
-    } else {
-      cerr << "Using CvBoost classifier" << endl;
     }
     // load the training file list
     TTrainingFileList fileList;
@@ -85,20 +74,24 @@ int main(int argc, char *argv[])
     if(nExamples==0)
       nExamples = fileList.files.size();
     cerr << "Using " << nExamples << " examples" << endl;
-    cerr << "=================================================" << endl;
     size_t fold_size = nExamples/nFolds;
-    Timer t("entire experiment",true);
     cout << "Running experiments on total of: " << nExamples << " files\n";
-    Stats stats;
+    cerr << "=================================================" << endl;
     cout << "Average test errors: \n";
     double avg_train_error=0;
     double avg_test_error=0;
     size_t actualFoldsRun=0;
+    Stats stats;
+    Timer t("entire experiment",true);
     for(size_t ifold=0; ifold<nFolds; ++ifold) {
       actualFoldsRun++;
       Timer t("fold ",true);
       CommandOptions optsforthisrun = opts;
-      CClassifier classifier(bVerbose,nTrees,nDepth,bHomegrown,&optsforthisrun);
+      CClassifier classifier(optsforthisrun,false);
+      if(!optsforthisrun.parseOptions(argc, argv)) {
+        assert(0);
+      }
+      classifier.postCommandParseNotify(true);
       TTrainingFileList trainFileList, testFileList;
       trainFileList.classes = fileList.classes;
       testFileList.classes = fileList.classes;
