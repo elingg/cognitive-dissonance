@@ -6,7 +6,7 @@ using namespace std;
 
 // Single place for all things labels...
 
-typedef uint Label;
+typedef size_t Label;
 //typedef string Label;
 
 Label getLabel(const string& str);
