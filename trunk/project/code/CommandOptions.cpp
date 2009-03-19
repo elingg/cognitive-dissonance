@@ -48,6 +48,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
   args = argv + 1;
   while (argc-- > 2) { 
     bool cont_flag = false;
+    // cerr << "Arg: " << *args << endl;
     for(map<string, bool>::const_iterator bit=m_bool_options.begin(); 
         bit!=m_bool_options.end(); ++bit) {
       string tag = string("-")+(bit->first);
@@ -119,6 +120,8 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
       args++;
       continue;
     }
+    argc--; // skip this move on
+    args++;
     // cerr << "ERROR: unrecognized option " << *args << endl;
     // return false;
   }
