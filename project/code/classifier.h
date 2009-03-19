@@ -65,7 +65,10 @@ public:
 
     // test the classifier using given set of files, returns test error...
     virtual double test(TTrainingFileList& fls, Stats& stats); 
-
+    
+    // this function can spit out the values of the input parameters it got
+    // from command line that is relevant to this class...
+    void postCommandParseNotify();
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
     AbstractMulticlassClassifier* classifier;

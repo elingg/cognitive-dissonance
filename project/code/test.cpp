@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
         } else if (!strcmp(*args, "-f")) {
             argc--; args++;
             int fps = atoi(*args);
+            cout << "FPS: " << fps << endl;
             if (fps <= 0) {
                 fpsDelay = 0;
             } else {
@@ -142,8 +143,20 @@ int main(int argc, char *argv[])
     CommandOptions opts;
 
     CClassifier classifier(bVerbose,1000,2,false,&opts);
+    //TODO(alecmgo): Remove this (why?)
+    MotionTracker motionTracker;
+    opts.needBoolOption("motiontracker", "flag for turning on motion tracking", false);
+    
     opts.parseOptions(origargc, argv);
     
+    classifier.postCommandParseNotify(); // for spitting out parameters if needed
+    bool bUseMotionTracker = opts.getBoolOption("motiontracker");
+    if(bUseMotionTracker) { 
+      cout << "Using motion tracking\n";
+    } else {
+      cout << "NOT using motion tracking\n";
+    }
+    cout << "Using fps delay: " << fpsDelay << endl;
     CObjectReplay replayer;
     CvFont font;
     ofstream *outputStream = NULL;
@@ -191,8 +204,7 @@ int main(int argc, char *argv[])
     CObjectList classifierObjects;
     CObjectList groundTruthObjects;
 
-    //TODO(alecmgo): Remove this
-    MotionTracker motionTracker;
+   
 
     CObjectList::iterator iObj;
     int frameCount = 0;
@@ -207,7 +219,9 @@ int main(int argc, char *argv[])
         replayer.run(frame, &groundTruthObjects);
 
         //TODO(alecmgo): Remove this
-        classifierObjects = motionTracker.process(frame, classifierObjects);
+        if(bUseMotionTracker) {
+          classifierObjects = motionTracker.process(frame, classifierObjects);
+        }
 
         if (outputStream) {
             *outputStream << "  <frame id=\"" << (frameCount - 1) << "\">" << endl;
@@ -232,7 +246,7 @@ int main(int argc, char *argv[])
             
 
 	    //TODO(alecmgo): Remove this
-	    char wait = cvWaitKey(100); 
+	    // char wait = cvWaitKey(100); 
 
             // check for user pressing <esc> and delay for fpsDelay milliseconds
             if (cvWaitKey(fpsDelay) == 27) break;

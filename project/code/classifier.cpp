@@ -58,6 +58,7 @@ CClassifier::CClassifier(bool verbose_flag,
                                           depth, homegrown, verbose);
 
     frameCount = 0;
+    // See postCommandParseNotify() below...
     // you can't get the commmand parameters here yet, 
     // it gets the options only after you exit the ctor!...
     // size_t frames_to_skip = ourOptions->getUintOption("framestoskip");   
@@ -77,6 +78,13 @@ CClassifier::~CClassifier()
     delete classifier;
 }
 
+void CClassifier::postCommandParseNotify() {
+   if(ourOptions) {
+     cout << "Classifier used only for every " << ourOptions->getUintOption("framestoskip") <<  " frames" << endl;
+     cout << "Coalescing if rectangle overlap ratio exceeds " << ourOptions->getDoubleOption("overlap_ratio") << endl;
+   }
+}
+  
 // loadState
 // Configure the classifier from the given file.
 bool CClassifier::loadState(const char *filename)
@@ -254,13 +262,13 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
         }
       }
     }
-    if(verbose) cerr << "coalescing " << firstpassobjects.size() << endl;
     double overlap_ratio = 0.05;
     if(ourOptions) {
       overlap_ratio = ourOptions->getDoubleOption("overlap_ratio"); 
     }
+    if(verbose) cerr << "Coalescing " << firstpassobjects.size() << " rectangles"; 
     coalesceOverlappingRectangles(&firstpassobjects,objects,overlap_ratio);
-
+    if(verbose) cerr << " into " << objects->size() << endl;
     cvReleaseImage(&gray);
     lucasKanade.seed(frame, objects);
   } else {
