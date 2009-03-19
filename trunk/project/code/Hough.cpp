@@ -81,6 +81,43 @@ cvReleaseMemStorage(&storage);
 
 
 /**
+ *  * Returns Hough Circles
+ *   * Precondition: image should be 64x64
+ *    */
+void Hough::getCorners(vector<double>& feature_values,
+                                    const IplImage* img) const {
+  assert(img->width == 64);
+  assert(img->height == 64);
+
+  IplImage* image = ((IplImage*)(img));
+
+   int MAX_CORNERS = 500; 
+
+
+   IplImage* eig_image = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 ); 
+  IplImage* tmp_image = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 ); 
+  int           corner_count = MAX_CORNERS; 
+  CvPoint2D32f* cornersA     = new CvPoint2D32f[ MAX_CORNERS ]; 
+  cvGoodFeaturesToTrack( 
+    image, 
+    eig_image, 
+    tmp_image, 
+    cornersA, 
+    &corner_count, 
+    0.01, 
+    5.0, 
+    0, 
+    3, 
+    0, 
+    0.04 
+  ); 
+
+
+    feature_values.push_back(corner_count);
+ }
+
+
+/**
  *  * Returns Hough Lines 
  *   * Precondition: image should be 64x64
  *    */
@@ -146,3 +183,4 @@ cvThreshold(image,image,160,255, CV_THRESH_BINARY_INV);
 }
 
 
+  

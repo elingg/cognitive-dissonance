@@ -17,6 +17,9 @@ public:
   void getEdges(vector<double>& feature_values,
                         const IplImage* img) const;
 
+  void getCorners(vector<double>& feature_values,
+                        const IplImage* img) const;
+
 
 private:
 
