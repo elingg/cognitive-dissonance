@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     opts.needBoolOption("trainerror","output training error as well (will slow it down)",false);
     opts.needUintOption("depth","max tree depth",2);
     opts.needStringOption("classifier","cv (CvBoost), outs (home grown AdaBoost)","cv");
-    opts.needBoolOption("onefold","number of examples to use",false);
+    opts.needBoolOption("onefold","set if want just want on first fold",false);
     opts.needUintOption("examples","number of examples to use",0);
     opts.needUintOption("trees","number of trees in boosting",100);
     if(!opts.parseOptions(argc, argv)) {
@@ -90,7 +90,8 @@ int main(int argc, char *argv[])
     for(size_t ifold=0; ifold<nFolds; ++ifold) {
       actualFoldsRun++;
       Timer t("fold ",true);
-      CClassifier classifier(bVerbose,nTrees,nDepth,false,&opts);
+      CommandOptions optsforthisrun = opts;
+      CClassifier classifier(bVerbose,nTrees,nDepth,false,&optsforthisrun);
       TTrainingFileList trainFileList, testFileList;
       trainFileList.classes = fileList.classes;
       testFileList.classes = fileList.classes;
