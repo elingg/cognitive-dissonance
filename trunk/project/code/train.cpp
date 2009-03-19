@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
         } else if (!strcmp(*args, "-v")) {
             bVerbose = !bVerbose;
         } else {
-            cerr << "ERROR: unrecognized option " << *args << endl;
-            return -1;
+            // cerr << "ERROR: unrecognized option " << *args << endl;
+            // return -1;
         }
         args++;
     }

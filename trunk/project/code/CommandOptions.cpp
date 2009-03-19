@@ -54,7 +54,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         bit!=m_bool_options.end(); ++bit) {
       string tag = string("-")+(bit->first);
       if(!strcmp(*args,tag.c_str())) {
-        //cerr << "Identified: bool " << tag << endl;
+        // cerr << "Identified: bool " << tag << endl;
         addOption(m_bool_options, bit->first, !getBoolOption(bit->first));
         // toggle the default
         cont_flag = true;
@@ -69,8 +69,8 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         iit!=m_int_options.end(); ++iit) {
       string tag = string("-")+(iit->first);
       if(!strcmp(*args,tag.c_str())) {
-        // cerr << "Identified: int option " << tag << endl;
         argc--; args++;
+        // cerr << "Identified: int option " << tag << " " << atoi(*args) << endl;
         addOption(m_int_options, iit->first, atoi(*args));
         cont_flag = true;
         break;
@@ -85,7 +85,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
       string tag = string("-")+(uit->first);
       if(!strcmp(*args,tag.c_str())) {
         argc--; args++;
-        //cerr << "Identified: uint option " << tag << " " << atoi(*args) <<endl;
+        // cerr << "Identified: uint option " << tag << ": " << atoi(*args) <<endl;
         addOption(m_uint_options, uit->first, (size_t)(atoi(*args)));
         cont_flag = true;
         break;
@@ -100,7 +100,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
       string tag = string("-")+(sit->first);
       if(!strcmp(*args,tag.c_str())) {
         argc--; args++;
-        //cerr << "Identified: double option " << tag << atof(*args) << endl;
+        // cerr << "Identified: double option " << tag << ": " << atof(*args) << endl;
         addOption(m_double_options, sit->first, atof(*args));
         cont_flag = true;
         break;
@@ -110,8 +110,8 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         sit!=m_string_options.end(); ++sit) {
       string tag = string("-")+(sit->first);
       if(!strcmp(*args,tag.c_str())) {
-        // cerr << "Identified: string option " << tag << endl;
         argc--; args++;
+        // cerr << "Identified: string option " << tag << ": " << string(*args) << endl;
         addOption(m_string_options, sit->first, string(*args));
         cont_flag = true;
         break;
