@@ -73,7 +73,6 @@ private:
 
     //Motion Tracking items
     int frameCount;
-    int interval;
     LucasKanade lucasKanade;
     CommandOptions* ourOptions;
 };
