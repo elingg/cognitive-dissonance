@@ -47,7 +47,7 @@ void Hough::getCircles(vector<double>& feature_values,
       ((CvArr*)image), 
       pt, 
       cvRound( p[2] ), 
-      CV_RGB(0xff,0xff,0xff));
+      CV_RGB(0,256,0));
  
   } 
 
@@ -63,6 +63,19 @@ void Hough::getCircles(vector<double>& feature_values,
   {
 	feature_values.push_back(0);
   }
+
+/*   CvHistogram * hist;
+  int bins = 64;
+  int hist_size[] = {bins};
+  hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
+  cvCalcHist(&image,hist);
+
+  for(int i =0; i<bins; i++)
+  {
+        feature_values.push_back(cvQueryHistValue_1D(hist,i));
+  }*/
+
+ 
 cvReleaseMemStorage(&storage); 
 }
 
