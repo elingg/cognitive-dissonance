@@ -51,16 +51,19 @@ CClassifier::CClassifier(bool verbose_flag,
     }
     if(ourOptions) {
       ourOptions->needUintOption("framestoskip", "number of frames to skip", 0); 
+      ourOptions->needDoubleOption("overlap_ratio", "overlap ratio for coalescing", 0.05); 
     }
 
     classifier = new MulticlassClassifier(classes, numtrees, 
                                           depth, homegrown, verbose);
 
     frameCount = 0;
-    size_t frames_to_skip = ourOptions->getUintOption("framestoskip");   
-    if(verbose) {
-      cout << "Classifier used only for every " << frames_to_skip << "th frame" << endl;
-    }
+    // you can't get the commmand parameters here yet, 
+    // it gets the options only after you exit the ctor!...
+    // size_t frames_to_skip = ourOptions->getUintOption("framestoskip");   
+    // if(verbose) {
+    //   cout << "Classifier used only for every " << frames_to_skip << "th frame" << endl;
+    // }
 }
     
 // destructor
@@ -107,7 +110,9 @@ void printCObject(const CObject& obj) {
  
 // coalesces objects with the same labels into single rectangles if they
 // overlap
-void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs) {
+void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs,
+                                   double overlap_ratio_cutoff) {
+  // cerr << "Overlap ratio cutoff: " << overlap_ratio_cutoff << endl;
   multimap<string, CObject*> tmp;
   set<string> labels;
   for(size_t iobj=0; iobj<firstobjs->size(); iobj++) {
@@ -144,8 +149,8 @@ void coalesceOverlappingRectangles(CObjectList* firstobjs, CObjectList* resobjs)
           int overlap = buff[iobj1].overlap(buff[iobj2]);
           double overlap_ratio = (double)(2*overlap)/
                                    (buff[iobj1].area()+buff[iobj2].area());
-          if(overlap_ratio < 0.05) continue;
-          //cout << "Overlap ratio: " << overlap_ratio << endl;
+          if(overlap_ratio < overlap_ratio_cutoff) continue;
+          // cout << "Overlap ratio: " << overlap_ratio << endl;
           merged.insert(iobj1); merged.insert(iobj2);
           merge_exists = true; 
           CvRect sup = cvMaxRect(&(buff[iobj1].rect),&(buff[iobj2].rect));
@@ -224,11 +229,11 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
           vector<double> values;
           HaarFeatures haar(verbose);
           haar.getFeatureValues(values,smallImage);
-	  Hough hough;
-	  //hough.getCircles(values,smallImage);
-	  //hough.getEdges(values,smallImage);
+          Hough hough;
+          //hough.getCircles(values,smallImage);
+          //hough.getEdges(values,smallImage);
           EdgeDetectionFeatures sobel;
-	  sobel.getFeatureValues(values,smallImage);
+          sobel.getFeatureValues(values,smallImage);
 
           //Check for image
           ImagesExample imagesExample(values); 
@@ -250,7 +255,11 @@ bool CClassifier::run(const IplImage *frame, CObjectList *objects) {
       }
     }
     if(verbose) cerr << "coalescing " << firstpassobjects.size() << endl;
-    coalesceOverlappingRectangles(&firstpassobjects,objects);
+    double overlap_ratio = 0.05;
+    if(ourOptions) {
+      overlap_ratio = ourOptions->getDoubleOption("overlap_ratio"); 
+    }
+    coalesceOverlappingRectangles(&firstpassobjects,objects,overlap_ratio);
 
     cvReleaseImage(&gray);
     lucasKanade.seed(frame, objects);

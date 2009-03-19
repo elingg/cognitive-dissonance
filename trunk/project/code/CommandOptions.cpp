@@ -93,6 +93,17 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
       args++;
       continue;
     }
+    for(map<string, double>::const_iterator sit=m_double_options.begin(); 
+        sit!=m_double_options.end(); ++sit) {
+      string tag = string("-")+(sit->first);
+      if(!strcmp(*args,tag.c_str())) {
+        argc--; args++;
+        // cerr << "Identified: double option " << tag << atof(*args) << endl;
+        addOption(m_double_options, sit->first, atof(*args));
+        cont_flag = true;
+        break;
+      }
+    }
     for(map<string, string>::const_iterator sit=m_string_options.begin(); 
         sit!=m_string_options.end(); ++sit) {
       string tag = string("-")+(sit->first);
@@ -147,6 +158,11 @@ bool CommandOptions::needStringOption(const string& name, const string& desc, co
   return addOptionAndDesc(m_string_options, m_descs, name, desc, default_value);
 }
 
+bool CommandOptions::needDoubleOption(const string& name, const string& desc, double default_value) {
+  assertNewOption(m_double_options, m_descs, name);
+  return addOptionAndDesc(m_double_options, m_descs, name, desc, default_value);
+}
+
 bool CommandOptions::needUintOption(const string& name, const string& desc, size_t default_value) {
   assertNewOption(m_uint_options, m_descs, name);
   return addOptionAndDesc(m_uint_options, m_descs, name, desc, default_value);
@@ -155,6 +171,10 @@ bool CommandOptions::needUintOption(const string& name, const string& desc, size
 bool CommandOptions::needIntOption(const string& name, const string& desc, int default_value) {
   assertNewOption(m_int_options, m_descs, name);
   return addOptionAndDesc(m_int_options, m_descs, name, desc, default_value);
+}
+
+double CommandOptions::getDoubleOption(const string& name) const {
+  return getOption(m_double_options,name);
 }
 
 bool CommandOptions::getBoolOption(const string& name) const {
