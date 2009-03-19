@@ -58,6 +58,7 @@ void usage() {
 
 int main(int argc, char *argv[])
 {
+    int origargc = argc;
     char *configurationFile;
     bool bVerbose;
     char **args;
@@ -92,8 +93,10 @@ int main(int argc, char *argv[])
       usage();
       exit(-1);
     }
-
-    CClassifier classifier(bVerbose,1000,2,false);
+    CommandOptions ourOptions;
+    CClassifier classifier(ourOptions,false);
+    ourOptions.parseOptions(origargc, argv);
+    classifier.postCommandParseNotify();
 
     // load the training file list
     TTrainingFileList fileList;

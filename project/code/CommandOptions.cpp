@@ -1,6 +1,7 @@
 #include "CommandOptions.h"
 #include <iostream>
 #include "assert.h"
+#include "FinalSettings.h"
 
 CommandOptions::CommandOptions() {
   // default options...
@@ -53,7 +54,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         bit!=m_bool_options.end(); ++bit) {
       string tag = string("-")+(bit->first);
       if(!strcmp(*args,tag.c_str())) {
-        // cerr << "Identified: bool " << tag << endl;
+        //cerr << "Identified: bool " << tag << endl;
         addOption(m_bool_options, bit->first, !getBoolOption(bit->first));
         // toggle the default
         cont_flag = true;
@@ -83,8 +84,8 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         uit!=m_uint_options.end(); ++uit) {
       string tag = string("-")+(uit->first);
       if(!strcmp(*args,tag.c_str())) {
-        // cerr << "Identified: uint option " << tag << endl;
         argc--; args++;
+        //cerr << "Identified: uint option " << tag << " " << atoi(*args) <<endl;
         addOption(m_uint_options, uit->first, (size_t)(atoi(*args)));
         cont_flag = true;
         break;
@@ -99,7 +100,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
       string tag = string("-")+(sit->first);
       if(!strcmp(*args,tag.c_str())) {
         argc--; args++;
-        // cerr << "Identified: double option " << tag << atof(*args) << endl;
+        //cerr << "Identified: double option " << tag << atof(*args) << endl;
         addOption(m_double_options, sit->first, atof(*args));
         cont_flag = true;
         break;
@@ -134,6 +135,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
     usage(); 
     exit(-1);
   }
+  overwriteWithFinalSettingsForSubmission(*this);
   return true;
 }
 
@@ -147,7 +149,8 @@ void assertNewOption(map<string, T>& map,
                      const string& name) {
   if(descs.find(name)!=descs.end() ||
      (map.find(name)!=map.end())) {
-     assert(!"option already taken");
+     cerr << "option already taken: " << name << endl;
+     exit(-1);
   }
 }
 

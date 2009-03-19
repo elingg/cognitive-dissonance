@@ -44,11 +44,7 @@ protected:
     
 public:
     // constructors
-    CClassifier(bool verbose_flag/*=true*/, 
-                size_t numtrees/*=1000*/, 
-                size_t depth/*=2*/, 
-                bool ourclassifier/*=false*/,
-                CommandOptions* opts=0);
+    CClassifier(CommandOptions& opts, bool video_mode);
     
     // destructor
     virtual ~CClassifier();
@@ -68,7 +64,7 @@ public:
     
     // this function can spit out the values of the input parameters it got
     // from command line that is relevant to this class...
-    void postCommandParseNotify();
+    void postCommandParseNotify(bool hack_called_from_tune_dontprint=false);
 private:
     // CS221 TO DO: ADD YOUR MEMBER FUNCTIONS HERE
     AbstractMulticlassClassifier* classifier;
@@ -77,6 +73,7 @@ private:
     //Motion Tracking items
     int frameCount;
     LucasKanade lucasKanade;
-    CommandOptions* ourOptions;
+    CommandOptions& ourOptions;
+    bool videoMode;
 };
 
