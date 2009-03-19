@@ -6,6 +6,8 @@
 #include "highgui.h"
 #include <iostream>
 
+#define LK_DEBUG_WINDOW "LK Debug Window"
+
 using namespace std;
 
 /**
@@ -129,7 +131,7 @@ CObject LKObject::getObject() {
 }
 
 CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, 
-                                 IplImage* frame) {
+                                 IplImage* debugFrame) {
   //TODO:Remove frame from parameter list
   cornersB = new CvPoint2D32f[MAX_CORNERS];
 
@@ -163,7 +165,8 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame,
     if(featuresFound[i] != 0 && featureErrors[i] < CORNER_ERROR_THRESHOLD) {
       CvPoint p0 = cvPoint(cvRound(cornersA[i].x), cvRound(cornersA[i].y));
       CvPoint p1 = cvPoint(cvRound(cornersB[i].x), cvRound(cornersB[i].y));
-      cvLine(frame, p0, p1, CV_RGB(255,0,0), 2);
+      cvLine(debugFrame, p0, p1, CV_RGB(255,0,0), 2);
+      cvShowImage(LK_DEBUG_WINDOW, debugFrame);
 
       goodCorners[numGoodCorners] = cornersB[i];
       numGoodCorners++;
@@ -181,17 +184,84 @@ CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame,
   return cobject;
 }
 
+/****************************************************************************
+ * The LucasKanade class holds a set of classifiers
+ ****************************************************************************/
+
 /**
- * Lucas Kanade - holds a set of blobs
+ * Lucas Kanade Constructor
  */
 LucasKanade::LucasKanade() {
   frameCount = 0;
+  cvNamedWindow(LK_DEBUG_WINDOW, CV_WINDOW_AUTOSIZE);
 }
 
+/**
+ * Lucas Kanade destructor
+ */
 LucasKanade::~LucasKanade() {
-
+  cvDestroyWindow(LK_DEBUG_WINDOW);
 }
 
+/**
+ * This function should be called to "seed" the Lucas Kanade filter with a 
+ * CObjectList of objects returned by the classifier
+ */
+void LucasKanade::seed(const IplImage* frame, CObjectList* classifierObjects) {
+  //Delete any existing blobs
+  blobs.clear();
+  
+  //Housekeeping
+  IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+  cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+  for(size_t i = 0; i < classifierObjects->size(); i++) {
+    LKObject lkObject;
+    lkObject.initialize(grayFrame, classifierObjects->at(i));
+    blobs.push_back(lkObject);
+  }
+
+  if(frameCount == 0) {
+    prevGrayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+  }
+  cvCopyImage(grayFrame, prevGrayFrame);
+  cvReleaseImage(&grayFrame);
+
+  frameCount++;
+}
+
+/**
+ * This function should be used to interpolate between frames.  It will
+ * fill in the CObjectList objects
+ */
+void LucasKanade::interpolate(const IplImage* frame, CObjectList* objects) {
+  objects->clear();
+  if(frameCount > 0) {
+ 
+    //Housekeeping
+    IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+    cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
+    
+    IplImage* debugFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+    cvCopyImage(grayFrame, debugFrame);
+
+    for(size_t i = 0; i < blobs.size(); i++) {
+      //TODO: last parameter is the debug frame.  It should be frame instead
+      //of grayFrame, but frame is const
+      CObject obj = blobs[i].getNewPosition(prevGrayFrame, grayFrame, debugFrame);
+      objects->push_back(obj);
+    }
+
+    cvCopyImage(grayFrame, prevGrayFrame);
+    cvReleaseImage(&grayFrame);
+  }
+  frameCount++;
+}
+
+
+/**
+ * Process a frame.
+ */
 CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects) {
   CObjectList objectList;
 
@@ -214,7 +284,8 @@ CObjectList LucasKanade::process(IplImage* frame, CObjectList* classifierObjects
         int overlap = obj.overlap(classifierObjects->at(i));
         double overlapRatio = (double) (2*overlap) /
                               (obj.area() + classifierObjects->at(i).area()); 
-        if(overlapRatio >= 0.8) {
+        //if(overlapRatio >= 0.8) {
+        if(overlapRatio >= 0.2) {
           foundMatchingBlob = true;
 	  blobs[j].incrementCount();
 	  shouldPenalize[j] = false;

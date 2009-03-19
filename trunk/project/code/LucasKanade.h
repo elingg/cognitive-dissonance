@@ -40,9 +40,13 @@ class LucasKanade {
     LucasKanade();
     ~LucasKanade();
     CObjectList process(IplImage* frame, CObjectList* classifierObjects);
+
+    void seed(const IplImage* frame, CObjectList* classifierObjects);
+    void interpolate(const IplImage* frame, CObjectList* classifierObjects);
   private:
     int frameCount;
     IplImage* prevGrayFrame;
     std::vector<LKObject> blobs;
+
 };
 
