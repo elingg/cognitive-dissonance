@@ -19,8 +19,9 @@ CvHistogram* computeFeatureValueIntegral(const IplImage* iImage) {
 
   IplImage* destination = (IplImage*) iImage;
  // cvSobel(iImage,destination,0,1,3);
+
   CvHistogram * hist;
-  int bins = 64;
+  int bins = 80;
   int hist_size[] = {bins};
   hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
   cvCalcHist(&destination,hist);
@@ -48,7 +49,7 @@ void EdgeDetectionFeatures::getFeatureValues(vector<double>& feature_values,
   assert(img->height == 64);
  
   
-   int bins = 64; 
+   int bins = 80; 
    CvHistogram* hist = computeFeatureValueIntegral(img);
 
   for(int i =0; i<bins; i++)
