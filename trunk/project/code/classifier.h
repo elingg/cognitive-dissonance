@@ -29,6 +29,7 @@
 
 #include "ImagesExample.h"
 #include "Stats.h"
+#include "CommandOptions.h"
 
 class AbstractMulticlassClassifier;
 
@@ -46,7 +47,8 @@ public:
     CClassifier(bool verbose_flag/*=true*/, 
                 size_t numtrees/*=1000*/, 
                 size_t depth/*=2*/, 
-                bool ourclassifier/*=false*/);
+                bool ourclassifier/*=false*/,
+                CommandOptions* opts=0);
     
     // destructor
     virtual ~CClassifier();
@@ -69,5 +71,6 @@ private:
     AbstractMulticlassClassifier* classifier;
     MotionTracker motionTracker;
     bool verbose;
+    CommandOptions* ourOptions;
 };
 

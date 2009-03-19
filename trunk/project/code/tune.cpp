@@ -27,95 +27,38 @@
 #include "objects.h"
 #include "classifier.h"
 #include "Timer.h"
+#include "CommandOptions.h"
 
 using namespace std;
 
 /* Main *********************************************************************/
 
-void usage() {
-    cerr << "./tune [<options>] <directory>" << endl << endl;
-    cerr << "OPTIONS:" << endl;
-    cerr << "    -h             :: show this message" << endl;
-    cerr << "    -fold          :: number of folds " << endl;
-    cerr << "    -depth         :: max tree depth " << endl;
-    cerr << "    -trees         :: number of trees in boosted" << endl;
-    cerr << "    -classifier    :: cv (OpenCV boost), ours (home grown adaboost)\n";
-    cerr << "    -examples      :: number of examples to use\n";
-    cerr << "    -trainerror    :: output training error as well (will slow it down)\n";
-    cerr << "    -onefold       :: just perform one fold of the 'n' folds" <<endl;
-    cerr << "    -v             :: verbose" << endl;
-    cerr << endl;
-}
-
 int main(int argc, char *argv[])
 {
-    char *configurationFile = 0;
-    bool bVerbose;
-    char **args;
-    size_t nFolds=3;
-    string classifier_name("cv");
-    size_t nTrees=100;
-    size_t nDepth=2;
-    size_t nExamples=0;
-    bool bOneFold = false; 
+    CommandOptions opts;
+    opts.needStringOption("files","directory where training files are located", "/afs/ir/class/cs221/vision/data/vision_all");
+    opts.needUintOption("fold","number of folds",3);
+    opts.needBoolOption("trainerror","output training error as well (will slow it down)",false);
+    opts.needUintOption("depth","max tree depth",2);
+    opts.needStringOption("classifier","cv (CvBoost), outs (home grown AdaBoost)","cv");
+    opts.needBoolOption("onefold","number of examples to use",false);
+    opts.needUintOption("examples","number of examples to use",0);
+    opts.needUintOption("trees","number of trees in boosting",100);
+    if(!opts.parseOptions(argc, argv)) {
+      opts.usage();
+      return -1;
+    }
+
+    size_t nFolds=opts.getUintOption("fold");
+    string classifier_name=opts.getStringOption("classifier");
+    size_t nTrees=opts.getUintOption("trees");
+    size_t nDepth=opts.getUintOption("depth");
+
+    size_t nExamples=opts.getUintOption("examples");
+    bool bOneFold = opts.getBoolOption("onefold"); 
     // set defaults
-    configurationFile = NULL;   // set using -c <filename>
-    bVerbose = false;           // turn on with -v
-    bool bTrainError = false;
-    // check arguments
-    args = argv + 1;
-    while (argc-- > 2) {
-        if (!strcmp(*args, "-fold")) {
-            argc--; args++;
-            nFolds = atoi(*args);
-            if(nFolds<=1) { 
-              cerr << "Specify atleast two folds" << endl;
-              usage(); 
-              return -1;
-            }
-        } else if (!strcmp(*args, "-examples")) {
-            argc--; args++;
-            nExamples = atoi(*args);
-        } else if (!strcmp(*args, "-depth")) {
-            argc--; args++;
-            nDepth = atoi(*args);
-        } else if (!strcmp(*args, "-trees")) {
-            argc--; args++;
-            nTrees= atoi(*args);
-        } else if (!strcmp(*args, "-classifier")) {
-            argc--; args++;
-            classifier_name = *args;
-            if(strcmp(classifier_name.c_str(),"cv")&&
-               strcmp(classifier_name.c_str(),"ours")) {
-              usage();
-              return -1;
-            } 
-        } else if (!strcmp(*args, "-c")) {
-            argc--; args++;
-            if (configurationFile != NULL) {
-                usage();
-                return -1;
-            }
-            configurationFile = *args;
-        } else if (!strcmp(*args, "-h")) {
-            usage();
-            return 0;
-        } else if (!strcmp(*args, "-onefold")) {
-            bOneFold = true;
-        } else if (!strcmp(*args, "-trainerror")) {
-            bTrainError = true;
-        } else if (!strcmp(*args, "-v")) {
-            bVerbose = !bVerbose;
-        } else {
-            cerr << "ERROR: unrecognized option " << *args << endl;
-            return -1;
-        }
-        args++;
-    }
-    if (argc != 1) {
-      usage();
-      exit(-1);
-    }
+    bool bVerbose = opts.getVerboseFlag();
+    bool bTrainError = opts.getBoolOption("trainerror");
     cerr << "=================================================" << endl;
     cerr << "Using " << nFolds << " folds for validation." << endl;
     cerr << "Using " << classifier_name << " for classification." << endl;
@@ -126,7 +69,10 @@ int main(int argc, char *argv[])
     }
     // load the training file list
     TTrainingFileList fileList;
-    fileList = getTrainingFiles(*args, ".jpg");
+    string training_dir = opts.getStringOption("files");
+    cerr << "Using files in " << training_dir << endl;
+    fileList = getTrainingFiles(training_dir.c_str(), ".jpg");
+    // fileList = getTrainingFiles(*args, ".jpg");
     // mix it up
     random_shuffle(fileList.files.begin(),fileList.files.end());
     if(nExamples==0)
@@ -144,7 +90,7 @@ int main(int argc, char *argv[])
     for(size_t ifold=0; ifold<nFolds; ++ifold) {
       actualFoldsRun++;
       Timer t("fold ",true);
-      CClassifier classifier(bVerbose,nTrees,nDepth,false);
+      CClassifier classifier(bVerbose,nTrees,nDepth,false,&opts);
       TTrainingFileList trainFileList, testFileList;
       trainFileList.classes = fileList.classes;
       testFileList.classes = fileList.classes;
