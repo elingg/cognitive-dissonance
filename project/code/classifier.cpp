@@ -143,7 +143,7 @@ void coreExtractFeatures(IplImage* image,
   }
   if(opts.getBoolOption("corner_feature")) {
     Hough hough;
-    hough.getEdges(values,image); 
+    hough.getCorners(values,image); 
   }
   if(opts.getBoolOption("sobel_feature")) {
     EdgeDetectionFeatures sobel;
