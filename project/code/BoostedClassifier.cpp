@@ -90,11 +90,58 @@ double BoostedClassifier::predict(const Example& example) const {
 }
 
 bool BoostedClassifier::loadState(const char* file) {
-  cerr <<"TODO BoostedClassifier::loadState";
+  cerr <<"BoostedClassifier::loadState" << endl;
+  ifstream ifs(file);
+  if(ifs.fail()) {
+    cerr << "Failed loading file: " << file << endl; 
+    exit(-1);
+  }
+  ifs >> m_depth;
+  ifs >> m_label;
+  ifs >> m_num_max_trees;
+
+  size_t num_alphas;
+  ifs >> num_alphas;
+  m_tree_alpha.resize(num_alphas);
+  double debug_sum_alphas = 0;
+  for(size_t ia=0; ia<num_alphas; ia++) {
+    ifs >> m_tree_alpha[ia];
+    debug_sum_alphas+=m_tree_alpha[ia];
+  }
+  ifs >> m_sum_alphas;
+  assert(fabs(m_sum_alphas-debug_sum_alphas)<1e-8);
+  
+  size_t num_trees;
+  ifs >> num_trees;
+  m_trees.resize(num_trees,0);
+  for(size_t it=0; it<num_trees; it++) {
+    if(m_trees[it]!=0) delete m_trees[it];
+    m_trees[it] = new DecisionTree(m_label);
+    m_trees[it]->loadState(ifs);
+  }
   return true;
 }
 
 bool BoostedClassifier::saveState(const char* file) const {
-  cerr <<"TODO BoostedClassifier::saveState";
+  cerr <<"BoostedClassifier::saveState" << endl;
+  ofstream ofs(file);
+  if(ofs.fail()) {
+    cerr << "Failed loading file: " << file << endl; 
+    exit(-1);
+  }
+  ofs << m_depth << " ";
+  ofs << m_label << " ";
+  ofs << m_num_max_trees << " ";
+
+  ofs << m_tree_alpha.size();
+  for(size_t ia=0; ia<m_tree_alpha.size(); ia++) {
+    ofs << m_tree_alpha[ia] << " ";
+  }
+  ofs << m_sum_alphas << " ";
+  
+  ofs << m_trees.size() << " ";
+  for(size_t it=0; it<m_trees.size(); it++) {
+    m_trees[it]->saveState(ofs);
+  }
   return true;
 }
