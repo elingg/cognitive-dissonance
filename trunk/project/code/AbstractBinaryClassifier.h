@@ -8,6 +8,10 @@ using namespace std;
 class TrainingExample;
 class Example;
 
+/* Class (Interface): AbstractBinaryClassifier
+ *   Uniform interface that a MulticlassClassifier can use. Under the hood
+ *   the implementation can be anything.
+ */
 class AbstractBinaryClassifier {
 public:
   virtual ~AbstractBinaryClassifier() {}
