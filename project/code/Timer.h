@@ -5,6 +5,11 @@
 
 using namespace std;
 
+/* Class: Timer
+ *     Simple utility for printing timing messages to profile our code.
+ *     Use by instantiating on the stack within the scope of the function
+ *     trying to profile.
+ */
 class Timer {
 public:
   Timer(string tag=string(""), bool print=true):m_tag(tag), m_print(print) { 

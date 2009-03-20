@@ -3,7 +3,8 @@
 #include "Label.h"
 using namespace std;
 
-// Class for collecting statistics on various runs....
+/* Class: Stats
+ *    Object for collecting statistics on various runs.
 class Stats {
 public: 
   Stats();
