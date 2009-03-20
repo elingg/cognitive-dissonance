@@ -4,10 +4,10 @@
 #include <map>
 using namespace std;
 
-/* Single class that various apps (tune/test/train) can use to get command line
-   options
-*/
-
+/* Class: CommandOptions
+ *   Single class that various apps (tune/test/train) can use to get command line
+ *   options. Works with existing command line parsing options code.
+ */
 class CommandOptions {
 public:
   CommandOptions();
