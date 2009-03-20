@@ -1,0 +1,581 @@
+#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
+\begin_document
+\begin_header
+\textclass article
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\spacing single
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 3.5cm
+\topmargin 2cm
+\rightmargin 2.5cm
+\bottommargin 3cm
+\headheight 2cm
+\headsep 2cm
+\footskip 1cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+CS221 Vision Project Report
+\end_layout
+
+\begin_layout Author
+Team: Cognitive Dissonance - Alec Go, Elizabeth Lingg, Anand Madhavan
+\end_layout
+
+\begin_layout Section
+Description of the data structures and code
+\end_layout
+
+\begin_layout Standard
+Description of the important data structures and procedures of the code
+ you wrote.
+ This needs to be a brief, general description.
+ You should also mention any special tricks you used to get speedups.
+ 
+\end_layout
+
+\begin_layout Subsection
+Classifier
+\end_layout
+
+\begin_layout Standard
+TODO (Anand to fill in)
+\end_layout
+
+\begin_layout Subsection
+Feature Extraction
+\end_layout
+
+\begin_layout Standard
+TODO (Liz to fill in)
+\end_layout
+
+\begin_layout Subsection
+Motion tracking
+\end_layout
+
+\begin_layout Standard
+TODO (Alec to fill in)
+\end_layout
+
+\begin_layout Subsection
+Cross validation tool
+\end_layout
+
+\begin_layout Standard
+TODO (Anand to fill in)
+\end_layout
+
+\begin_layout Section
+Implemented Extensions
+\end_layout
+
+\begin_layout Standard
+TODO We describe and justify the extensions we implemented here.
+\end_layout
+
+\begin_layout Subsection
+k-Fold cross validation tool
+\end_layout
+
+\begin_layout Standard
+We implement a utility to perform k-fold cross validation of our features
+ and classifier.
+ The utility (called 'tune') takes various command line options (such as
+ size of the tree to be used and depth of tree to be used) and performs
+ a k-fold cross validation (where k is specifyable through the command line)
+ using examples randomly chosen (the number of examples can be controlled
+ from the command line as well).
+\end_layout
+
+\begin_layout Standard
+We go through all the examples and shuffle them up.
+ We then use the first `n' examples (specified by the user) and perform
+ k-fold cross validation on it.
+ The first `fold' is chosen as test set and trained on the rest of the folds.
+ This is repeated for each of the folds.
+ We report the average test as well as training error.
+ We report the precision and recall for each category.
+ Finally we also report the confusion matrix.
+ These together provide us with a valuable tool to diagnose problems before
+ running our classifier on the more time consuming movies.
+\end_layout
+
+\begin_layout Subsection
+AdaBoost decision tree implementation 
+\end_layout
+
+\begin_layout Standard
+TODO (Anand to fill in)
+\end_layout
+
+\begin_layout Standard
+Based on 
+\begin_inset LatexCommand cite
+key "AdaBoost"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Hough based features
+\end_layout
+
+\begin_layout Standard
+(Liz to fill in)
+\end_layout
+
+\begin_layout Subsection
+Histogram of gradients based features
+\end_layout
+
+\begin_layout Standard
+TODO (Liz to fill in)
+\end_layout
+
+\begin_layout Subsection
+Kalman Filter 
+\end_layout
+
+\begin_layout Standard
+TODO (Alec to fill in)
+\end_layout
+
+\begin_layout Standard
+We chose to implement the Kalman Filter to help reduce the noise of our
+ image recognition algorithm.
+ The algorithm has two primary steps: - Update - Predict
+\end_layout
+
+\begin_layout Standard
+The major limitation with the Kalman Filter is that it assumes: 
+\end_layout
+
+\begin_layout Enumerate
+linear dynamics 
+\end_layout
+
+\begin_layout Enumerate
+the current state depends on the immediate past state (and not all past
+ states).
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, it was very important to choose the correct blob to track.
+\end_layout
+
+\begin_layout Subsection
+Lucas Kanade
+\end_layout
+
+\begin_layout Standard
+TODO (Alec to fill in)
+\end_layout
+
+\begin_layout Standard
+We chose to implement the Lucas Kanade algorithm.
+ The test videos met the three assumptions required by this algorithm 
+\begin_inset LatexCommand cite
+key "OpenCVBook"
+
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Enumerate
+Brightness Constancy.
+ We assume that in the test videos, lighting will be consistent.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Temporal persistence.
+ The test videos had steady movement.
+ Only the camera moved.
+ The objects in the scene never moved.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Spatial coherence
+\end_layout
+
+\begin_layout Standard
+Because the test video fulfilled these three assumptions, we thought the
+ algorithm would perform well.
+\end_layout
+
+\begin_layout Standard
+Talk about how you need to consider objects entering frame.
+ Kalman filter doesn't have this problem.
+ Discuss using the mean of the points - wasn't a good idea because it would
+ skew towards many points.
+ Talk about bounding box.
+ False positives kill optical flow algorithm.
+\end_layout
+
+\begin_layout Subsection
+Lucas Kanade based interpolation
+\end_layout
+
+\begin_layout Standard
+TODO (Alec to fill in)
+\end_layout
+
+\begin_layout Section
+Assumptions
+\end_layout
+
+\begin_layout Standard
+TODO Not sure what we assumed here: listing hypotheticals: We assumed that
+ the video does not change too rapidly.
+ We assume that input trained images were all in grayscale.
+ This was however also verified to be true.
+ 
+\end_layout
+
+\begin_layout Section
+Experimental results
+\end_layout
+
+\begin_layout Standard
+TODO Present experimental results.
+ 
+\end_layout
+
+\begin_layout Subsection
+Baseline classifier
+\end_layout
+
+\begin_layout Standard
+We perform a basic analysis of the CvBoost decision tree.
+ We use our tool to tweak the size of the trees used as well as the depth
+ of the trees used.
+ We also use our tool to arrive at a 'bang for the buck' set of parameters,
+ so as to minimize development time while still giving good enough accuracies.
+ We use a 4-fold cross validation for all the below experiments.
+\end_layout
+
+\begin_layout Subsubsection
+Effect of depth
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/DepthErrors.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/DepthTime.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:-(Left)"
+
+\end_inset
+
+Baseline classifier: (Left) Effect of depth on errors.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:-(Right)"
+
+\end_inset
+
+Baseline classifier: (Right) Time taken for classification.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using 10000 examples, we notice that varying depths of the tree, we get
+ better accuracies with increasing depths.
+ However we also note that the time taken increases almost disproportionately
+ for the improvements in accuracies obtained (see Figures 
+\begin_inset LatexCommand ref
+reference "fig:Baseline-classifier:-(Left)"
+
+\end_inset
+
+ and 
+\begin_inset LatexCommand ref
+reference "fig:Baseline-classifier:-(Right)"
+
+\end_inset
+
+).
+ For example for depth 1, we see an accuracy of 1.85% accuracy, while for
+ depth 8, this improves to about 1.81%.
+ However given the time it takes (81 seconds vs 419 seconds), we can judge
+ that increasing the depth a practical way of running our development cycle.
+ Thus we arrive at an optimal depth of 1 or 2.
+\end_layout
+
+\begin_layout Subsubsection
+Effect of number of trees
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/TreesErrors.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/TreesTime.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:TreesErrors"
+
+\end_inset
+
+Baseline classifier: (Left) Effect of depth on errors.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:TreesTime"
+
+\end_inset
+
+Baseline classifier: (Right) Time taken for classification.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We next perform experiments with the number of trees used in the CvBoost
+ forest.
+ With increasing number of trees we see that we get lower and lower training
+ errors, but also lower and lower test errors upto a point, after which
+ the results seem to plateau.
+ Doing a time analysis, we notice depths of 1 perform much better on large
+ number of trees.
+ This makes us pick depth of 1 and use 400 trees for our development and
+ use larger number of trees for the final submission.
+\end_layout
+
+\begin_layout Subsubsection
+Effect of number of examples
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/ExamplesErrors.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/ExamplesTime.PNG
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:EgsErrors"
+
+\end_inset
+
+Baseline classifier: (Left) Effect of depth on errors.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "fig:Baseline-classifier:EgsTime"
+
+\end_inset
+
+Baseline classifier: (Right) Time taken for classification.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We perform a basic analysis of the effect of the number of examples on the
+ test error.
+ We hope that this gives us insights into how many examples we should use
+ for our development.
+ Here we notice that our curves follow the typical training and testing
+ error curves, with gradually increasing training errors an decreasing test
+ error.
+ Test errors are typically around 1.5% compared to training errors which
+ vary from 0 to 0.3%.
+ At the least this validates our model as not having high bias.
+ Also while there is still lot of benefit from using more data, we also
+ notice that for 16000 examples, we get test errors of around 1.44% and takes
+ around 210 seconds, while using all the 46359 examples gives us a test
+ error of 1.33% but takes 699 seconds (an increase of 3 times).
+ From the graph we also notice that the 'knee' of the curve maybe occuring
+ with 16000 examples.
+ We thus use this for development.
+ Of course we use all the data for training our classifier for final submission.
+\end_layout
+
+\begin_layout Subsection
+`Homegrown' Adaboost classifier
+\end_layout
+
+\begin_layout Standard
+– Design a baseline classiﬁer that uses basically the code you submitted
+ for the milestone (extended to handle multiple object types).
+ How good is this baseline? 
+\end_layout
+
+\begin_layout Standard
+– How much beneﬁt do you get from diﬀerent components of your submission?
+ Or, put another way, if you remove one of the components from the ﬁnal
+ submission, how is the ﬁnal performance aﬀected? (Such studies are typically
+ called ablation studies.) 
+\end_layout
+
+\begin_layout Standard
+– What are the strengths and weaknesses of your submission? For example:
+ is your classiﬁer very good at ﬁnding mugs, but poor at ﬁnding staplers?
+ A standard way to devise better learning algorithms is to analyze such
+ errors systematically.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset LatexCommand bibtex
+options "plain"
+bibfiles "report"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
