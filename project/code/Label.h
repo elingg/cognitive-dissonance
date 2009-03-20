@@ -4,9 +4,9 @@
 #include <vector>
 using namespace std;
 
-// Single place for all things labels...
+/* Label:  Single place for all things labels */
 
-typedef size_t Label;
+typedef size_t Label; // using unsigned int (size_t) for efficiency of compares
 //typedef string Label;
 
 Label getLabel(const string& str);
