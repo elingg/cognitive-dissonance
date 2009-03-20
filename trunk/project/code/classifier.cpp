@@ -46,7 +46,7 @@ CClassifier::CClassifier(CommandOptions& opts, bool video_mode)
     ourOptions.needBoolOption("corner_feature", "use corner detection as feature", false); 
     ourOptions.needBoolOption("circle_feature", "use circles as feature", false); 
     ourOptions.needBoolOption("edge_feature", "use edges as feature", false); 
-    ourOptions.needBoolOption("sobel_feature", "use sobel as feature", false); 
+    ourOptions.needBoolOption("sobel_feature", "use sobel as feature", true); 
     ourOptions.needUintOption("depth", "depth of tree to use", 2); 
     ourOptions.needUintOption("trees", "number of trees in boosting", 1000); 
     ourOptions.needBoolOption("homegrownboost", "use homegrown boosting classifier",false); 
