@@ -9,34 +9,25 @@
 #include "cxcore.h"
 #include "highgui.h"
 
-//TODO: Use C++ classes properly
-
 
 /**
- * Compute feature values based on Integral Image
+ * Compute feature values based on Histogram
  */
 CvHistogram* computeFeatureValueIntegral(const IplImage* iImage) {
-
-  IplImage * destination;
-
+ IplImage * destination;
  destination = (IplImage*) iImage;
-//  cvSobel(iImage,destination,1,0,3);
+ //cvSobel(iImage,destination,1,0,3);
 
-  CvHistogram * hist;
-  int bins = 80;
-  int hist_size[] = {bins};
-  hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
-  cvCalcHist(&destination,hist);
-
-  return hist;
-
+ CvHistogram * hist;
+ int bins = 80;
+ int hist_size[] = {bins};
+ hist = cvCreateHist(1,hist_size, CV_HIST_ARRAY, NULL, 1);
+ cvCalcHist(&destination,hist);
+ return hist;
 }
 
-/**
- * Reads in the feature list and saves it
- */
-EdgeDetectionFeatures::EdgeDetectionFeatures() {
-}
+EdgeDetectionFeatures::EdgeDetectionFeatures() {}
+
 
 EdgeDetectionFeatures::~EdgeDetectionFeatures() {}
 
@@ -50,18 +41,15 @@ void EdgeDetectionFeatures::getFeatureValues(vector<double>& feature_values,
   assert(img->width == 64);
   assert(img->height == 64);
  
-  
-   int bins = 80; 
-   CvHistogram* hist = computeFeatureValueIntegral(img);
+  int bins = 80; 
+  CvHistogram* hist = computeFeatureValueIntegral(img);
 
   for(int i =0; i<bins; i++)
   {
-        feature_values.push_back(cvQueryHistValue_1D(hist,i));
+    feature_values.push_back(cvQueryHistValue_1D(hist,i));
   }
 
   cvReleaseHist(&hist);
-  
-
 }
 
 
