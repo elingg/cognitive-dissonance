@@ -4,6 +4,11 @@
 
 using namespace std;
 
+/* Class: CvBoostedClassifier
+ *   Wrapper class with CvBoost implementation under the hood. Conforms
+ *   to the AbstractBinaryClassifier interface so we can try out our 
+ *   other code changing the implementation under the hood.
+ */
 class TrainingExample;
 class DecisionTree;
 class Example;
