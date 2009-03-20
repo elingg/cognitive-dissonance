@@ -113,6 +113,8 @@ void Hough::getCorners(vector<double>& feature_values,
   ); 
 
 
+   cvReleaseImage(&eig_image);
+   cvReleaseImage(&tmp_image);
     feature_values.push_back(corner_count);
  }
 
@@ -180,6 +182,7 @@ cvThreshold(image,image,160,255, CV_THRESH_BINARY_INV);
   }
  
   cvReleaseMemStorage(&storage);
+  cvReleaseHist(&hist);
 }
 
 
