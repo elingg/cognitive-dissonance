@@ -43,27 +43,28 @@ T getOption(const map<string, T>& vals, const string& name) {
 }
 
 bool CommandOptions::parseOptions(int argc, char* argv[]) {
+  // cerr << "Start parsing options: " << endl;
   // check arguments
   char** args = argv;
   m_tag = *argv; // process executable name as well
   args = argv + 1;
-  while (argc-- > 2) { 
-    bool cont_flag = false;
+  argc--;
+  while (true) { 
     // cerr << "Arg: " << *args << endl;
+    bool processed = false;
     for(map<string, bool>::const_iterator bit=m_bool_options.begin(); 
         bit!=m_bool_options.end(); ++bit) {
       string tag = string("-")+(bit->first);
       if(!strcmp(*args,tag.c_str())) {
         // cerr << "Identified: bool " << tag << endl;
         addOption(m_bool_options, bit->first, !getBoolOption(bit->first));
-        // toggle the default
-        cont_flag = true;
+        argc--; args++; 
+        processed = true;
         break;
       }
     }
-    if(cont_flag) {
-      args++;
-      continue;
+    if(argc==0) {
+      break;
     }
     for(map<string, int>::const_iterator iit=m_int_options.begin(); 
         iit!=m_int_options.end(); ++iit) {
@@ -72,13 +73,13 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         argc--; args++;
         // cerr << "Identified: int option " << tag << " " << atoi(*args) << endl;
         addOption(m_int_options, iit->first, atoi(*args));
-        cont_flag = true;
+        argc--; args++;
+        processed = true;
         break;
       }
     }
-    if(cont_flag) {
-      args++;
-      continue;
+    if(argc==0) {
+      break;
     }
     for(map<string, size_t>::const_iterator uit=m_uint_options.begin(); 
         uit!=m_uint_options.end(); ++uit) {
@@ -87,13 +88,13 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         argc--; args++;
         // cerr << "Identified: uint option " << tag << ": " << atoi(*args) <<endl;
         addOption(m_uint_options, uit->first, (size_t)(atoi(*args)));
-        cont_flag = true;
+        argc--; args++;
+        processed = true;
         break;
       }
     }
-    if(cont_flag) {
-      args++;
-      continue;
+    if(argc==0) {
+      break;
     }
     for(map<string, double>::const_iterator sit=m_double_options.begin(); 
         sit!=m_double_options.end(); ++sit) {
@@ -102,9 +103,13 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         argc--; args++;
         // cerr << "Identified: double option " << tag << ": " << atof(*args) << endl;
         addOption(m_double_options, sit->first, atof(*args));
-        cont_flag = true;
+        argc--; args++;
+        processed = true;
         break;
       }
+    }
+    if(argc==0) {
+      break;
     }
     for(map<string, string>::const_iterator sit=m_string_options.begin(); 
         sit!=m_string_options.end(); ++sit) {
@@ -113,16 +118,19 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         argc--; args++;
         // cerr << "Identified: string option " << tag << ": " << string(*args) << endl;
         addOption(m_string_options, sit->first, string(*args));
-        cont_flag = true;
+        argc--; args++;
+        processed = true;
         break;
       }
     }
-    if(cont_flag) {
-      args++;
-      continue;
+    if(!processed) { // move on..
+      // cerr << "unrecognized, moving on: " << argc << ", " << *args << endl;
+      argc--; args++;
     }
-    argc--; // skip this move on
-    args++;
+    if(argc==0) {
+      // cerr << "argc 1, breaking while loop\n";
+      break;
+    }
     // cerr << "ERROR: unrecognized option " << *args << endl;
     // return false;
   }
@@ -136,6 +144,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
     exit(-1);
   }
   overwriteWithFinalSettingsForSubmission(*this);
+  cerr << "End parsing options" << endl;
   return true;
 }
 
