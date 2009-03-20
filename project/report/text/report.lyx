@@ -1,8 +1,12 @@
-#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{algorithmic}
+\end_preamble
+\use_default_options false
 \language english
 \inputencoding auto
 \font_roman default
@@ -13,9 +17,11 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize default
 \spacing single
+\use_hyperref false
 \papersize default
 \use_geometry true
 \use_amsmath 1
@@ -66,12 +72,220 @@ Description of the important data structures and procedures of the code
  
 \end_layout
 
+\begin_layout Standard
+For the most part, our code is organized such that if there is a class,
+ there is usually a header (.h) and source file (.cpp) associated with it
+ by that name.
+ In cases where it is not, the class maybe have been combined into a single
+ file and in such cases, we explicitly mention the file locations below.
+ 
+\end_layout
+
 \begin_layout Subsection
 Classifier
 \end_layout
 
 \begin_layout Standard
-TODO (Anand to fill in)
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/misc/ClassifierClassDiagram.png
+	lyxscale 40
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Class-diagram-for-Classifier"
+
+\end_inset
+
+Class diagram for our multi-class classifier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our classifier code uses a bit of object oriented mechanisms to enable quick
+ testing with different implementations.
+ This is described below:
+\end_layout
+
+\begin_layout Description
+classifier.h/.cpp
+\emph on
+: 
+\emph default
+Modified code from initial template.
+ Contains the class 
+\emph on
+AbstractMulticlassClassifier
+\emph default
+, which currently has only one implementation in 
+\emph on
+MulticlassClassifier
+\emph default
+ described below.
+ The idea behind the 
+\emph on
+AbstractMulticlassClassifier
+\emph default
+ interface was to be able to extend this to SVMs and other classifiers at
+ a later stage if required.
+\end_layout
+
+\begin_layout Description
+MulticlassClassifier.h: This is our main multiclass classifier.
+ This class contains one 
+\emph on
+AbstractBinaryClassifier
+\emph default
+ per class (eg: one for mug, one for keyboard etc).
+ The underlying implementation of the 
+\emph on
+AbstractBinaryClassifier
+\emph default
+ interface can be one of either 
+\emph on
+BoostedClassifier
+\emph default
+ or 
+\emph on
+CvBoostedClassifier
+\emph default
+ (which uses 
+\emph on
+CvBoost
+\emph default
+ under the hood).
+ This is represented as a class diagram in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Class-diagram-for-Classifier"
+
+\end_inset
+
+.
+ The depth of a tree and the number of trees are specifyable through constructor
+ arguments to 
+\emph on
+MulticlassClassifier
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Description
+BoostedClassifier.h
+\emph on
+: 
+\emph default
+This is our own `homegrown' implementation based on AdaBoost.
+ It implements the 
+\emph on
+AbstractBinaryClassifier
+\emph default
+ interface and further uses class called 
+\emph on
+DecisionTree
+\emph default
+ which is our implementation of a simple decision tree that performs binary
+ classification.
+ 
+\end_layout
+
+\begin_layout Description
+CvBoostedClassifier.h: This class also implements the 
+\emph on
+AbstractBinaryClassifier
+\emph default
+ interface and uses instead the 
+\emph on
+CvBoost
+\emph default
+ implementation of OpenCV.
+\end_layout
+
+\begin_layout Description
+DecisionTree.h: Our implementation of a simple decision tree that performs
+ binary classification.
+ It uses a n-ary recursive tree structure to store information.
+ It also uses weights for examples, so the sampling distribution can be
+ changed efficiently.
+\end_layout
+
+\begin_layout Description
+Label.h: Labels for the classifier are specified here.
+
+\emph on
+ Label
+\emph default
+ is currently a typedef to unsigned int.
+ This file also contains functions that map the unsigned int to string and
+ vice versa for efficient usage elsewhere.
+\end_layout
+
+\begin_layout Standard
+
+\noun on
+Note
+\noun default
+: The performance of our 
+\emph on
+BoostedClassifier
+\emph default
+ is comparable to 
+\emph on
+CvBoost
+\emph default
+ in precision, recall and other measures (more details in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:`Homegrown'-Adaboost-classifier"
+
+\end_inset
+
+) .
+ However, our final submission version uses 
+\emph on
+CvBoost
+\emph default
+ by default, since it is considerably faster than our 
+\emph on
+BoostedClassifier 
+\emph default
+implementation.
 \end_layout
 
 \begin_layout Subsection
@@ -95,7 +309,75 @@ Cross validation tool
 \end_layout
 
 \begin_layout Standard
-TODO (Anand to fill in)
+We introduce a cross validation tool as described in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:k-Fold-cross-validation"
+
+\end_inset
+
+.
+ This can be built using `make tune'.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+tune.cpp
+\emph default
+: Main code for doing k-fold cross validation (described in more detail
+ in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:k-Fold-cross-validation"
+
+\end_inset
+
+).
+ Reuses the 
+\emph on
+CClassifier
+\emph default
+ code.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Stats.h
+\emph default
+: Utility class for storing and computing statistics of precision, recall
+ and F1 scores.
+\end_layout
+
+\begin_layout Subsection
+Infrastructure code
+\end_layout
+
+\begin_layout Standard
+Other files contain infrastructure utilities for rapid development:
+\end_layout
+
+\begin_layout Description
+Timer.h: A utility class for printing out timing information for functions.
+\end_layout
+
+\begin_layout Description
+CommandOptions.h: A utility for processing command line arguments.
+\end_layout
+
+\begin_layout Description
+FinalSettings.h: This is a one stop to override all the command line options
+ since we want 
+\emph on
+test
+\emph default
+ and 
+\emph on
+train
+\emph default
+ executables to work with the final fixed values of these settings for final
+ submission (and not rely on command line inputs).
 \end_layout
 
 \begin_layout Section
@@ -103,34 +385,378 @@ Implemented Extensions
 \end_layout
 
 \begin_layout Standard
-TODO We describe and justify the extensions we implemented here.
+We implemented a number of useful extensions.
+ Some of these were just diagnosis tools and classifiers, others were features
+ for specific objects and some others were for motion detection.
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:k-Fold-cross-validation"
+
+\end_inset
+
 k-Fold cross validation tool
 \end_layout
 
 \begin_layout Standard
 We implement a utility to perform k-fold cross validation of our features
  and classifier.
- The utility (called 'tune') takes various command line options (such as
- size of the tree to be used and depth of tree to be used) and performs
- a k-fold cross validation (where k is specifyable through the command line)
- using examples randomly chosen (the number of examples can be controlled
- from the command line as well).
+ The utility (called 'tune') takes various command line options, such as
+ size of the tree to be used and depth of tree to be used and performs a
+ k-fold cross validation using examples chosen at random.
+ 
 \end_layout
 
 \begin_layout Standard
-We go through all the examples and shuffle them up.
- We then use the first `n' examples (specified by the user) and perform
- k-fold cross validation on it.
+We go through all the training examples and shuffle them up.
+ This gives us a uniform distribution of samples.
+ We then use the first `n' examples (specified by a command line argument)
+ and perform k-fold cross validation on it.
  The first `fold' is chosen as test set and trained on the rest of the folds.
- This is repeated for each of the folds.
- We report the average test as well as training error.
+ Then the second fold is chosen as the test set and trained on the rest
+ of the folds and so on for all folds.
+ We report the average test as well as the average training error.
  We report the precision and recall for each category.
  Finally we also report the confusion matrix.
- These together provide us with a valuable tool to diagnose problems before
+ Many other parameters can be specified as command line options as well,
+ some are documented here:
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing other 0.2
+
+\size footnotesize
+-examples <integer>: number of examples to use
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-fold <integer> : number of folds to use
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-onefold : boolean that specifies only to do cross-validation on the first
+ of `k' folds (for efficiency)
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-depth <integer>: max depth to use
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-trees <integer>: number of trees to use for boosting
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-homegrownboost: specifies which version of the classifier is to be used
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-trainerror: option to spit out training error
+\end_layout
+
+\begin_layout Itemize
+\paragraph_spacing single
+
+\size footnotesize
+-circle_feature, -corner_feature, -edge_feature, -sobel_feature etc: include
+ the various features
+\end_layout
+
+\begin_layout Standard
+Together, these provide us with a valuable tool to diagnose problems before
  running our classifier on the more time consuming movies.
+ An example of the output of the code is given below:
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing double
+
+\size footnotesize
+$ make tune
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+$ ./tune -homegrownboost -trainerror -fold 4 -examples 16000 -depth 1 
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-trees 400 -files /afs/ir/class/cs221/vision/data/vision_all
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+=================================================
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using *HOMEGROWN* boosting classifier
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using 400 trees in boosting
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using 1 depth in boosting
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using 4 folds for validation.
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using files in /afs/ir/class/cs221/vision/data/vision_all
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Using 16000 examples
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Running experiments on total of: 16000 files
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+=================================================
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Average test errors: 
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Fold 0: Test error: 0.0185 Training error: 0
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Time taken in fold : 166.64 seconds
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Fold 1: Test error: 0.0155 Training error: 0
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Time taken in fold : 176.69 seconds
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Fold 2: Test error: 0.02125 Training error: 0
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Time taken in fold : 177.07 seconds
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Fold 3: Test error: 0.0175 Training error: 0
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Time taken in fold : 175.28 seconds
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Avg Training error Avg Test error
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+0 0.0181875
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-------------------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Confusion Matrix: Predicted labels ->
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-------------------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+mug stapl keybo clock sciss other 
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-------------------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+mug 60 0 2 0 0 32
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+stapl 3 85 3 0 1 42
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+keybo 1 0 63 1 2 25
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+clock 0 0 0 11 0 4
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+sciss 0 0 3 0 77 25
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+other 27 32 27 13 48 15413
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-------------------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Prec Recall F-1
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+-------------------------------------------------------------
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+mug 0.659 0.638 0.649
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+stapl 0.726 0.634 0.677
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+keybo 0.643 0.685 0.663
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+clock 0.440 0.733 0.550
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+sciss 0.602 0.733 0.661
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+other 0.992 0.991 0.991
+\end_layout
+
+\begin_layout Standard
+
+\size footnotesize
+Time taken in entire experiment: 695.68 seconds
 \end_layout
 
 \begin_layout Subsection
@@ -138,17 +764,33 @@ AdaBoost decision tree implementation
 \end_layout
 
 \begin_layout Standard
-TODO (Anand to fill in)
-\end_layout
-
-\begin_layout Standard
-Based on 
-\begin_inset LatexCommand cite
+We implement a AdaBoost
+\begin_inset CommandInset citation
+LatexCommand cite
 key "AdaBoost"
 
 \end_inset
 
+ based boosted decision tree (as class 
+\emph on
+BoostedClassifier
+\emph default
+), complete with load, save, predict, train and test implementation.
+ This class uses exponential weighting of examples and the weights are passed
+ along to the nodes in a simple decision tree classifier.
+ The tolerance is picked based on the average feature values encountered.
+ We present results of using our classifier in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:`Homegrown'-Adaboost-classifier"
 
+\end_inset
+
+.
+ We note that although this classifier performs quite well, it is quite
+ slow in comparison to the CvBoost implementation.
+ For the final submission we choose instead to use the CvBoost implementation
+ for its superior speed.
 \end_layout
 
 \begin_layout Subsection
@@ -210,7 +852,8 @@ TODO (Alec to fill in)
 \begin_layout Standard
 We chose to implement the Lucas Kanade algorithm.
  The test videos met the three assumptions required by this algorithm 
-\begin_inset LatexCommand cite
+\begin_inset CommandInset citation
+LatexCommand cite
 key "OpenCVBook"
 
 \end_inset
@@ -275,8 +918,8 @@ Experimental results
 \end_layout
 
 \begin_layout Standard
-TODO Present experimental results.
- 
+We ran a number of experiments on each of our extensions.
+ We present the results of our various experiments below.
 \end_layout
 
 \begin_layout Subsection
@@ -284,16 +927,17 @@ Baseline classifier
 \end_layout
 
 \begin_layout Standard
-We perform a basic analysis of the CvBoost decision tree.
- We use our tool to tweak the size of the trees used as well as the depth
- of the trees used.
+We perform basic analysis of the CvBoost decision tree.
+ We use CvBoost::GENTLE type with a fixed split criteria of 0.5.
+ We use our k-fold cross validation tool to tweak the size of the trees
+ used, as well as the depth of the trees used.
  We also use our tool to arrive at a 'bang for the buck' set of parameters,
  so as to minimize development time while still giving good enough accuracies.
  We use a 4-fold cross validation for all the below experiments.
 \end_layout
 
 \begin_layout Subsubsection
-Effect of depth
+Effect of maximum depth of tree
 \end_layout
 
 \begin_layout Standard
@@ -303,7 +947,20 @@ wide false
 sideways false
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
 \begin_inset Graphics
 	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/DepthErrors.PNG
 	lyxscale 30
@@ -320,29 +977,70 @@ status collapsed
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:-(Left)"
 
 \end_inset
 
-Baseline classifier: (Left) Effect of depth on errors.
+Baseline classifier: Effect of increasing depths on error.
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 6em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:-(Right)"
 
 \end_inset
 
-Baseline classifier: (Right) Time taken for classification.
+Baseline classifier: Time taken with increasing depth of trees.
 \end_layout
 
 \end_inset
@@ -350,7 +1048,12 @@ Baseline classifier: (Right) Time taken for classification.
 
 \end_layout
 
-\begin_layout Standard
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 
 \end_layout
 
@@ -364,13 +1067,15 @@ Using 10000 examples, we notice that varying depths of the tree, we get
  better accuracies with increasing depths.
  However we also note that the time taken increases almost disproportionately
  for the improvements in accuracies obtained (see Figures 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "fig:Baseline-classifier:-(Left)"
 
 \end_inset
 
  and 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "fig:Baseline-classifier:-(Right)"
 
 \end_inset
@@ -384,7 +1089,7 @@ reference "fig:Baseline-classifier:-(Right)"
 \end_layout
 
 \begin_layout Subsubsection
-Effect of number of trees
+Effect of number of trees used in boosting
 \end_layout
 
 \begin_layout Standard
@@ -394,7 +1099,20 @@ wide false
 sideways false
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
 \begin_inset Graphics
 	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/TreesErrors.PNG
 	lyxscale 30
@@ -411,29 +1129,75 @@ status collapsed
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status collapsed
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:TreesErrors"
 
 \end_inset
 
-Baseline classifier: (Left) Effect of depth on errors.
+Baseline classifier: Effect of number of trees on errors.
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 6em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status collapsed
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:TreesTime"
 
 \end_inset
 
-Baseline classifier: (Right) Time taken for classification.
+Baseline classifier: Time taken with increasing number of trees.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -447,19 +1211,34 @@ Baseline classifier: (Right) Time taken for classification.
 \end_layout
 
 \begin_layout Standard
-We next perform experiments with the number of trees used in the CvBoost
- forest.
+We next perform experiments by varying the number of trees used during boosting
+ in CvBoost.
  With increasing number of trees we see that we get lower and lower training
  errors, but also lower and lower test errors upto a point, after which
- the results seem to plateau.
+ the results seem to plateau (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Baseline-classifier:TreesErrors"
+
+\end_inset
+
+).
  Doing a time analysis, we notice depths of 1 perform much better on large
- number of trees.
- This makes us pick depth of 1 and use 400 trees for our development and
- use larger number of trees for the final submission.
+ number of trees (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Baseline-classifier:TreesTime"
+
+\end_inset
+
+).
+ This makes us pick depth of 1 and use 400 trees for our development.
+ However, note that we use larger number of trees (1000), and depth 2 for
+ our final submission.
 \end_layout
 
 \begin_layout Subsubsection
-Effect of number of examples
+Effect of number of training examples
 \end_layout
 
 \begin_layout Standard
@@ -469,7 +1248,20 @@ wide false
 sideways false
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
 \begin_inset Graphics
 	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/classifier/ExamplesErrors.PNG
 	lyxscale 30
@@ -486,29 +1278,75 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status collapsed
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:EgsErrors"
 
 \end_inset
 
-Baseline classifier: (Left) Effect of depth on errors.
+Baseline classifier: Effect of number of examples on error
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 6em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
-\begin_layout Standard
-\begin_inset LatexCommand label
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
 name "fig:Baseline-classifier:EgsTime"
 
 \end_inset
 
-Baseline classifier: (Right) Time taken for classification.
+Baseline classifier: Time taken with increasing number of training examples
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -532,18 +1370,1276 @@ We perform a basic analysis of the effect of the number of examples on the
  Test errors are typically around 1.5% compared to training errors which
  vary from 0 to 0.3%.
  At the least this validates our model as not having high bias.
- Also while there is still lot of benefit from using more data, we also
- notice that for 16000 examples, we get test errors of around 1.44% and takes
- around 210 seconds, while using all the 46359 examples gives us a test
- error of 1.33% but takes 699 seconds (an increase of 3 times).
- From the graph we also notice that the 'knee' of the curve maybe occuring
- with 16000 examples.
+ Also while there is an obvious benefit from using more data, we also notice
+ that for 16000 examples, we get test errors of around 1.44%.
+ This just takes around 210 seconds, while using all the 46359 examples
+ gives us a test error of 1.33% but takes 699 seconds (an increase of 3 times).
+ From Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Baseline-classifier:EgsErrors"
+
+\end_inset
+
+, we also notice that the 'knee' of the curve maybe occuring with 16000
+ examples.
  We thus use this for development.
  Of course we use all the data for training our classifier for final submission.
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:`Homegrown'-Adaboost-classifier"
+
+\end_inset
+
 `Homegrown' Adaboost classifier
+\end_layout
+
+\begin_layout Standard
+Extending our work from the milestone, we also designed a multiclass classifier
+ that implements the AdaBoost algortihm for boosting (in class called 
+\emph on
+BoostedClassifier
+\emph default
+).
+ 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+`Homegrown' version
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CvBoost version
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average training error
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.00102101 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.00386118 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average test error
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0169115
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0133954
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Comparison-of-errors"
+
+\end_inset
+
+Comparison of average test and training errors using the two implementations.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ The errors compared to the 
+\emph on
+CvBoost
+\emph default
+ classifier are shown in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Comparison-of-errors"
+
+\end_inset
+
+.
+ 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="4">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+`Homegrown' version
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Precision
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Recall
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F1 score
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+mug
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.705 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ 0.617 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ 0.658
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+stapler
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.786 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.672 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.724
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+keyboard
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.633
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.638
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.636
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+clock 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.313
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.939 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.469
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+scissors
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.693 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.779 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.733
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+other 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.992
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.991 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ 0.992
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+ 
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="4">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CvBoost version
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Precision
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Recall
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F1 score
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+mug
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.819 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.597 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.690
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+stapler
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.828 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.578 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.681
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+keyboard
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.830 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.519 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.639
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+clock 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.885 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.469 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.613
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+scissors
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.900 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.648 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.754
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+other 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.989 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.989 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ 0.994
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Comparison-of-precision"
+
+\end_inset
+
+Comparison of precision, recall and F1 scores for the two implementations.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+The precision and recall numbers for the two classifiers are shown side-by-side
+ in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Comparison-of-precision"
+
+\end_inset
+
+.
+ Of course, the two methods use different variations of boosting, so the
+ numbers are only used primarily as a validation of our classifier's performance.
+\end_layout
+
+\begin_layout Subsection
+Ablative studies on various object detection features
 \end_layout
 
 \begin_layout Standard
@@ -567,10 +2663,15 @@ We perform a basic analysis of the effect of the number of examples on the
  
 \end_layout
 
+\begin_layout Subsection
+Ablative studies on various motion detection parameters
+\end_layout
+
 \begin_layout Standard
-\begin_inset LatexCommand bibtex
-options "plain"
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
 bibfiles "report"
+options "plain"
 
 \end_inset
 
