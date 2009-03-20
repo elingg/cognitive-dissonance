@@ -10,6 +10,7 @@
 
 using namespace std;
 bool DEBUG_LK = false;
+
 /***************************************************************************
  * LucasKanade - this is for a single blob
  ***************************************************************************/
@@ -21,7 +22,6 @@ LKObject::LKObject():pyramidA(0), pyramidB(0) {
 }
 
 LKObject::~LKObject() {
-  //TODO: Release images appropriately
   if(pyramidA) cvReleaseImage(&pyramidA);
   if(pyramidB) cvReleaseImage(&pyramidB);
 }
@@ -117,10 +117,12 @@ void LKObject::initialize(IplImage* grayFrame, CObject object) {
     delete cornersA;
     cornersA = validCorners;
     cornerCount = validCornersCount;
-
     initialCount = validCornersCount;
 }
 
+/**
+ * Return the percent of corners still remaining since initialization
+ */
 double LKObject::getPercentRemaining() {
   return (double) cornerCount / (double) initialCount;
 }
@@ -129,9 +131,14 @@ CObject LKObject::getObject() {
   return cobject;
 }
 
+/**
+ * Returns new position of the blob stored as an instance variable.
+ * This function needs both the previous gray frame and current frame
+ * to calculate the optical flow.  This code is based on the OpenCV
+ * book's sample code.
+ */
 CObject LKObject::getNewPosition(IplImage* prevGrayFrame, IplImage* grayFrame, 
                                  IplImage* debugFrame) {
-  //TODO:Remove frame from parameter list
   cornersB = new CvPoint2D32f[MAX_CORNERS];
 
   char featuresFound[MAX_CORNERS];
