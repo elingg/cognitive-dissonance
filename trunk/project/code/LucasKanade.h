@@ -47,6 +47,5 @@ class LucasKanade {
     int frameCount;
     IplImage* prevGrayFrame;
     std::vector<LKObject> blobs;
-
 };
 
