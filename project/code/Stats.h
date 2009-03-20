@@ -5,6 +5,7 @@ using namespace std;
 
 /* Class: Stats
  *    Object for collecting statistics on various runs.
+ */
 class Stats {
 public: 
   Stats();
