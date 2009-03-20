@@ -56,6 +56,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
         bit!=m_bool_options.end(); ++bit) {
       string tag = string("-")+(bit->first);
       if(!strcmp(*args,tag.c_str())) {
+        // cerr << "Identified: bool " << tag << ", existing: " << getBoolOption(bit->first) << ", changed to : " << !getBoolOption(bit->first) << endl;
         // cerr << "Identified: bool " << tag << endl;
         addOption(m_bool_options, bit->first, !getBoolOption(bit->first));
         argc--; args++; 
@@ -144,7 +145,7 @@ bool CommandOptions::parseOptions(int argc, char* argv[]) {
     exit(-1);
   }
   overwriteWithFinalSettingsForSubmission(*this);
-  cerr << "End parsing options" << endl;
+  // cerr << "End parsing options" << endl;
   return true;
 }
 
