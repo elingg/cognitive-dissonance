@@ -13,6 +13,12 @@ public:
   CommandOptions();
   ~CommandOptions();
   bool parseOptions(int argc, char* argv[]); 
+  void addBoolOption(const string& name, bool value);
+  void addUintOption(const string& name, size_t value);
+  void addIntOption(const string& name, int value);
+  void addStringOption(const string& name, const string& value);
+  void addDoubleOption(const string& name, double value);
+
   bool needBoolOption(const string& name, const string& desc, bool default_value);
   bool needUintOption(const string& name, const string& desc, size_t default_value);
   bool needIntOption(const string& name, const string& desc, int default_value);
