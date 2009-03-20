@@ -115,6 +115,7 @@ void Hough::getCorners(vector<double>& feature_values,
 
    cvReleaseImage(&eig_image);
    cvReleaseImage(&tmp_image);
+   delete(cornersA);   
     feature_values.push_back(corner_count);
  }
 
