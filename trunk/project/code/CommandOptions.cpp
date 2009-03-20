@@ -24,6 +24,26 @@ bool addOption(map<string, T>& map,
   return true;
 }
 
+void CommandOptions::addBoolOption(const string& name, bool value) {
+  addOption(m_bool_options, name, value);
+}
+
+void CommandOptions::addUintOption(const string& name, size_t value) {
+  addOption(m_uint_options, name, value);
+}
+
+void CommandOptions::addIntOption(const string& name, int value) {
+  addOption(m_int_options, name, value);
+}
+
+void CommandOptions::addStringOption(const string& name, const string& value) {
+  addOption(m_string_options, name, value);
+}
+
+void CommandOptions::addDoubleOption(const string& name, double value) {
+  addOption(m_double_options, name, value);
+}
+
 template <typename T>
 bool addOptionAndDesc(map<string, T>& map, map<string, string>& descs, 
                const string& name, const string& desc, const T& value) {
