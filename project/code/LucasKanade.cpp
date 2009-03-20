@@ -16,16 +16,14 @@ bool DEBUG_LK = false;
 const int MAX_CORNERS = 500;
 const int WIN_SIZE = 10;
 
-LKObject::LKObject() {
+LKObject::LKObject():pyramidA(0), pyramidB(0) {
   count = 0;
 }
 
 LKObject::~LKObject() {
   //TODO: Release images appropriately
-  /*
-  cvReleaseImage(&pyramidA);
-  cvReleaseImage(&pyramidB);
-  */
+  if(pyramidA) cvReleaseImage(&pyramidA);
+  if(pyramidB) cvReleaseImage(&pyramidB);
 }
 
 int LKObject::getCount() {
@@ -220,11 +218,9 @@ void LucasKanade::seed(const IplImage* frame, CObjectList* classifierObjects) {
   //Housekeeping
   IplImage* grayFrame = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
   cvCvtColor(frame, grayFrame, CV_BGR2GRAY);
-
+  blobs.resize(classifierObjects->size());
   for(size_t i = 0; i < classifierObjects->size(); i++) {
-    LKObject lkObject;
-    lkObject.initialize(grayFrame, classifierObjects->at(i));
-    blobs.push_back(lkObject);
+    blobs[i].initialize(grayFrame, classifierObjects->at(i));
   }
 
   if(frameCount == 0) {
