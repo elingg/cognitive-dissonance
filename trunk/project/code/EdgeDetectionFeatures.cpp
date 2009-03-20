@@ -59,7 +59,7 @@ void EdgeDetectionFeatures::getFeatureValues(vector<double>& feature_values,
         feature_values.push_back(cvQueryHistValue_1D(hist,i));
   }
 
-
+  cvReleaseHist(&hist);
   
 
 }
