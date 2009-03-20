@@ -114,6 +114,7 @@ void LKObject::initialize(IplImage* grayFrame, CObject object) {
          //cout << "Did not pass: " << cornersA[i].x << " " << cornersA[i].y << endl;
       }
     }
+    delete cornersA;
     cornersA = validCorners;
     cornerCount = validCornersCount;
 
