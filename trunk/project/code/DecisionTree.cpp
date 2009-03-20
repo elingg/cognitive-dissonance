@@ -39,12 +39,6 @@ void splitExamplesByThreshold(
  vector<TrainingExample*>& below_examples, vector<double>& below_weights, double& below_weights_sum,
  const vector<TrainingExample*>& examples, const vector<double>& weights, double weights_sum,
  size_t feature_index, double threshold) {
-  //double new_threshold=0.0;
-  //for(size_t iex=0; iex<examples.size(); ++iex) {
-  //  new_threshold+=examples[iex]->getFeatureDoubleValue(feature_index);
-  //}
-  //new_threshold /= examples.size();
-  //threshold = new_threshold;
   below_weights_sum = above_weights_sum = 0.0; 
   for(size_t iex=0; iex<examples.size(); ++iex) {
     if(examples[iex]->getFeatureDoubleValue(feature_index)>threshold) {

@@ -38,7 +38,6 @@ CClassifier::CClassifier(CommandOptions& opts, bool video_mode)
     // initalize the random number generator (for sample code)
     rng = cvRNG(-1);
     parameters = NULL;
-    // CS221 TO DO: add initialization for any member variables   
     if(videoMode) {
       ourOptions.needUintOption("framestoskip", "number of frames to skip", 0); 
       ourOptions.needDoubleOption("overlap_ratio", "overlap ratio for coalescing", 0.05); 
@@ -111,8 +110,6 @@ bool CClassifier::loadState(const char *filename)
 {
     assert(filename != NULL);
     classifier->loadState(filename);
-    // CS221 TO DO: replace this with your own configuration code
-    
     return true;
 }
 
@@ -121,8 +118,6 @@ bool CClassifier::loadState(const char *filename)
 bool CClassifier::saveState(const char *filename)
 {
     assert(filename != NULL);
-    
-    // CS221 TO DO: replace this with your own configuration code
     classifier->saveState(filename); 
     if(verbose) cerr << "Finished saving state" << endl;
     return true;
@@ -359,7 +354,6 @@ bool extractFeatures(TTrainingFileList& fileList,
 // Trains the classifier to recognize the objects given in the
 // training file list.
 bool CClassifier::train(TTrainingFileList& fileList) {
-    // CS221 TO DO: replace with your own training code
     // example code to show you number of samples for each object class
     if(ourOptions.getVerboseFlag()) cout << "Classes:" << endl;
     for (int i = 0; i < (int)fileList.classes.size(); i++) {

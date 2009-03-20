@@ -3,6 +3,11 @@
 #include "AbstractBinaryClassifier.h"
 #include "Label.h"
 
+/* Class: MulticlassClassifier
+ *    This is the decision tree classifier. It predicts for multiple labels.
+ *    Underneath it could use either our homegrown classifier or a 
+ *    CvBoost classifier depending on the 'homegrown' bool.
+ */
 class MulticlassClassifier : public AbstractMulticlassClassifier {
 public:
   MulticlassClassifier(const vector<Label>& classes, 
