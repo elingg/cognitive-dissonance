@@ -1,11 +1,7 @@
 /*****************************************************************************
-**  Usage 
-**      % ./tune -c parameters.txt -v
-**                     -folds nfolds -trees num_forest_trees
-**                     -classifier <cv | ours>
-**                     -tol leaf_tolerance 
-**                      data 
-**
+**  Utility for tuning our classifier/features.
+**  Usage: To see usage type in: 
+**      % ./tune -h
 *****************************************************************************/
 
 #include <cstdio>
