@@ -1,4 +1,5 @@
 #pragma once
+#include "CommandOptions.h"
 
 // Add final overriding settings here!!!!
 // Keep writing it in here, we will check with these uncommented....
