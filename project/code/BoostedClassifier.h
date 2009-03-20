@@ -11,6 +11,10 @@ class TrainingExample;
 class DecisionTree;
 class Example;
 
+/* Class: BoostedClassifier
+ *     This is our homegrown classifier. Based on AdaBoost.
+ *     Performs better than CvBoost, but trains slower.
+ */ 
 class BoostedClassifier : public AbstractBinaryClassifier {
   public: 
     BoostedClassifier(const Label& label, size_t numtrees, size_t depth); 

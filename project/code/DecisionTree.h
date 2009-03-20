@@ -1,8 +1,9 @@
-// Author: Anand Madhavan
-// THIS IS OUR DECISION TREE BASED ON THE ADABOOST ALGORITHM
-// DESPITE SHARING THE SAME NAME WITH PA2 CODE, IT IS NOT IN ANYWAY RELATED
-
-// COMPLETELY ORIGINAL IMPLEMENTATION
+/* Class DecisionTree
+ *  This is our decision tree with weights. Despite sharing the same
+ *  name as the class in PA2, the code is NOT IN ANYWAY RELATED
+ *  and is completely freshly written.
+ */ 
+// Statuatory Warning: COMPLETELY ORIGINAL IMPLEMENTATION :)
 #pragma once
 #include <vector>
 #include <string>
