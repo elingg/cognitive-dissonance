@@ -62,17 +62,19 @@ This graph shows the number of times that the decision tree was skipped, with th
 
 [numberofpyramids.png]
 
-The number of pyramids does not impact performance significantly.  This is because the motion in easy.avi is relatively stable.
+The number of pyramids does not impact performance significantly.  This is because the motion in easy.avi is relatively stable.  Our Lucas kanade uses 5 pyramids.
 
 3. Altering the search window size for the optical flow algorithm.  This is the size of the window to search for a point from one frame to the next.  The results were as follows:
 
 [opticalflowwindowsize.png]
 
-For easy.avi, the optimal parameter for the window size was 6.  Anything higher would require could potentially waste CPU cycles.
+For easy.avi, the optimal parameter for the window size was 6.  Anything higher would require could potentially waste CPU cycles.  Our Lucas Kanade motion tracker uses a window size of 10.
 
 4. In the optical flow algorithm, we discard corners whose "track error" is too large.  The track error is the difference between a patch around a tracked point between two frames. If there is a track error above a certain threshold, Lucas Kanade discards the point.
 
 [trackerror.png]
+
+This diagram shows how track error affects F1 performance.  Our Lucas Kanade motion tracker uses a track error threshold of 300.
 
 **Kalman Filter
 When visualizing the output from the classifier, the CObjects jump around erratically when the classifier processed an image independently of any other image.  The Kalman filter can smooth out this erratic movement.  Our Kalman Filter uses blobtrackpostprockalman.cpp in cvaux.  In this model, the state vector is (x,y,w,h,dx,dy,dw,dh) and the measurement vector is (x,y,w,h).  
