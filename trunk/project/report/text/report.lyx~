@@ -449,7 +449,7 @@ MotionTracker.cpp: This class is a master class that controls which motion
 LucasKanade.cpp: This class contains code for Lucas Kanade interpolation
  and post processing step.
  The core Lucas Kanade implementation is in LucasKanade.cpp.
- The data structure has two main data structures: 
+ This file has two main data structures: 
 \end_layout
 
 \begin_layout Itemize
@@ -508,12 +508,12 @@ KFObjects
 \emph on
 KalmanFilter
 \emph default
- object has a update and predict function, which would trigger all the update
- and predict processes for the 
+ object has an update and predict function, which would trigger all the
+ update and predict processes for the 
 \emph on
 KFObjects
 \emph default
- it held.
+ it holds.
  
 \end_layout
 
@@ -522,9 +522,9 @@ KFObjects
 \emph on
 KFObject
 \emph default
-: This tracked an individual blob.
- This held the actual Kalman Filter implementation of (update) and (predict).
- This relationship to is shown in Figure 
+: This tracks an individual blob.
+ This holds the actual Kalman Filter implementation of (update) and (predict).
+ This relationship is shown in Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:KalmanKFObjectRelation"
@@ -697,7 +697,14 @@ reference "sub:`Homegrown'-Adaboost-classifier"
 \end_layout
 
 \begin_layout Subsection
-Hough based features
+Shape based features
+\end_layout
+
+\begin_layout Standard
+Based on the type of objects we are given to classify (eg: clocks, keyboards
+ etc), we extract relevant shape features using circle, line, edge and corner
+ detection algorithms.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -791,8 +798,8 @@ We have heuristics for interpolating object results, in the case that the
 
 \begin_layout Standard
 In the most trivial case, object interpolation was used as a mechanism for
- speeding u p video processing (running test.cpp).
- In this case, the decision tree is occassiona lly skipped and the motion
+ speeding up video processing (running test.cpp).
+ In this case, the decision tree is occassionally skipped and the motion
  tracker is used to guess the locations of objects.
  This h ad a very significant impact on speed because our decision tree
  was several orders of magnitude slower than the motion tracker.
@@ -933,7 +940,7 @@ Baseline classifier
 
 \begin_layout Standard
 We perform basic analysis of the CvBoost decision tree.
- We use CvBoost::GENTLE type with a fixed split criteria of 0.5.
+ We use CvBoost::GENTLE type with a fixed split criteria of 0.95.
  We use our k-fold cross validation tool to tweak the size of the trees
  used, as well as the depth of the trees used.
  We also use our tool to arrive at a 'bang for the buck' set of parameters,
@@ -1541,7 +1548,8 @@ Comparison of average test and training errors using the two implementations.
 \emph on
 CvBoost
 \emph default
- classifier are shown in Table 
+ classifier on all the image examples using 4-fold cross validation are
+ shown in Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:Comparison-of-errors"
@@ -3649,7 +3657,7 @@ status collapsed
 \begin_inset Text
 
 \begin_layout Plain Layout
-Without line detection
+Without edge detection
 \end_layout
 
 \end_inset
@@ -4181,7 +4189,7 @@ other
 \begin_inset Text
 
 \begin_layout Plain Layout
-With line detection
+With edge detection
 \end_layout
 
 \end_inset
@@ -6801,7 +6809,7 @@ Effect of coalescing of rectangles during motion tracking
 placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -6957,6 +6965,12 @@ Motion tracking experiments
 \end_layout
 
 \begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Effect-of-Lucas"
+
+\end_inset
+
 Effect of Lucas Kanade parameters
 \end_layout
 
@@ -7094,7 +7108,7 @@ Effect of number of frames skipped:
 \end_layout
 
 \begin_layout Standard
-Varying the number of frames the decision tree is skipped and the Lucas
+After a certain number of frames, the decision tree is skipped and the Lucas
  Kanade interpolation is used instead.
  Figure 
 \begin_inset CommandInset ref
@@ -7103,8 +7117,8 @@ reference "fig:LKDecTreeSkipped"
 
 \end_inset
 
- shows the number of times that the decision tree was skipped, with the
- Lucas Kanade motion tracker used instead to predict movements.
+ shows the number of frames in which the decision tree is skipped, with
+ the Lucas Kanade motion tracker used instead to predict movements.
  This shows that Lucas Kanade is a reasonable sustitute for the decision
  tree.
  
@@ -7115,7 +7129,7 @@ Effect of number of pyramid size:
 \end_layout
 
 \begin_layout Standard
-Varying the number of image pyramids used in Lucas Kanade.
+We vary the number of image pyramids used in Lucas Kanade.
  A large number of pyramids is useful when there is large global movement
  (Figure 
 \begin_inset CommandInset ref
@@ -7136,7 +7150,7 @@ Effect of optimal search window size:
 \end_layout
 
 \begin_layout Standard
-Altering the search window size for the optical flow algorithm.
+We alter the search window size for the optical flow algorithm.
  This is the size of the window to search for a point from one frame to
  the next.
  The results are shown in Figure 
@@ -7147,9 +7161,10 @@ reference "fig:LKOptiSearchWin"
 \end_inset
 
 .
- For easy.avi, the optimal parameter for the window size was 6.
- Anything higher would require could potentially waste CPU cycles.
- Our Lucas Kanade motion tracker uses a window size of 10.
+ For easy.avi, the optimal parameter for the window size is 6.
+ Requiring anything higher could potentially waste CPU cycles.
+ Our Lucas Kanade motion tracker in the final submission uses a window size
+ of 10.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -7242,7 +7257,7 @@ name "fig:LKOptiSearchWin"
 
 \end_inset
 
-Effect of the optical search window size
+Effect of the optical flow search window size
 \end_layout
 
 \end_inset
@@ -7307,7 +7322,7 @@ When visualizing the output from the classifier, the CObjects jump around
  erratically when the classifier processed an image independently of any
  other image.
  The Kalman filter can smooth out this erratic movement.
- Our Kalman Filter uses blobtrackpostpr ockalman.cpp in cvaux.
+ Our Kalman Filter uses blobtrackpostprockalman.cpp in cvaux.
  In this model, the state vector is (x,y,w,h,dx,dy,dw,dh) and the measurement
  vector is (x,y,w,h).
  
@@ -7316,10 +7331,10 @@ When visualizing the output from the classifier, the CObjects jump around
 \begin_layout Standard
 The major limitation with the Kalman Filter is that it assumes linear dynamics.
  This assumption held only for the parts of the video where the camera was
- moving at a con stant velocity (the model we chose only had a parameter
+ moving at a constant velocity (the model we chose only had a parameter
  for velocity).
- The Kalman Fi lter improved the F1 results on easy.avi.
- In one test (with all variables held const ant), the Kalman Filter improved
+ The Kalman Filter improved the F1 results on easy.avi.
+ In one test (with all variables held constant), the Kalman Filter improved
  the mug F1 score from to 0.414073 to 0.440678.
  However, when using the Kalman Filter with Lucas Kanade, the results are
  erratic - sometimes F1 scores increase and sometimes F1 scores decrease.
@@ -7342,13 +7357,28 @@ We use integers as labels, instead of strings to save time on map indexing
 \end_layout
 
 \begin_layout Itemize
-We use our 'tune' utility to whet our features on the static images using
- 4-fold cross validation before using it on the movies.
+We use our 'tune' utility (described in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:k-Fold-cross-validation"
+
+\end_inset
+
+) to whet our features on the static images using 4-fold cross validation
+ before using it on the movies.
 \end_layout
 
 \begin_layout Itemize
-We use Lucas Kanade based interpolation techniques to predict the rectangles
- in skipped frames to speeden up the testing on movies.
+We use Lucas Kanade based interpolation techniques (as described in Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Effect-of-Lucas"
+
+\end_inset
+
+) to predict the rectangles in skipped frames to speeden up the testing
+ on movies.
 \end_layout
 
 \begin_layout Standard
