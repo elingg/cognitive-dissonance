@@ -8,53 +8,55 @@ KalmanFilter.cpp: This class contains code for the Kalman Filter post processing
 
 **Motion Tracking
 
-We recognized that using information between frames could also improve our accuracy. We tried using a Kalman Filter and a Lucas Kanade filter.  The motion tracker can track several "blobs" at a time.  Each blob is a unique object, like a mug.  Both these implementations shared common problems and solutions.
-False Positives
+We recognize that using information between frames could also improve our accuracy. We have a Kalman Filter and a Lucas Kanade filter.  The motion tracker can track several "blobs" at a time.  Each blob is a unique object, like a mug.  
 
-The motion tracker can decrease precision if there are many false positives returned by the classifier.  This is because the motion tracker might continue to track a false positive, even if the classifier stopped returning that specific false positive.  Coalescing (mentioned earlier) helped clear false positives, which in turn helped the motion tracker.  Another simple heuristic we used was to "count" the number of times the classifier returns a specific blob between frames.  If the motion tracker stops seeing a blob returned by a classifier over a series of frames, then it discards it.
+*False Positives
 
-*Correspondence Problem
+The motion tracker can decrease precision if there are many false positives returned by the classifier.  This is because the motion tracker might continue to track a false positive, even if the classifier stopped returning that specific false positive.  Coalescing (mentioned earlier) helped clear false positives, which in turn helped the motion tracker.  Another simple heuristic we use is to "count" the number of times the classifier returns a specific blob between frames.  If the motion tracker stops seeing a blob returned by a classifier over a series of frames, then it discards it.
 
-We had to resolve the correspondence problem when doing motion tracking.  For example, the classifier may detect 3 objects in frame 1, and 4 objects in frame 2.  We developed a simple heuristic for mapping objects from frame 1 to objects in frame 2.  If there is an overlap above a threshold, then we assume they are the same object.  For example, if a mug in frame 1 occupies the 50% (the threshold) of the same space as a mug in frame 2, then we can assume they are the same object.
+*A Correspondence Problem Between Frames
+
+We have a method to resolve the correspondence problem when doing motion tracking.  For example, the classifier may detect 3 objects in frame 1, and 4 objects in frame 2.  We developed a simple heuristic for mapping objects from frame 1 to objects in frame 2.  If there is an overlap above a threshold, then we assume they are the same object.  For example, if a mug in frame 1 occupies the 50% (the threshold) of the same space as a mug in frame 2, then we can assume they are the same object.
 
 *Object Interpolation
 
-We developed heuristics for interpolating object results, in the case that the classifier returned an object in frame 1 and frame 3, but didn't find it in frame 2.  
+We have heuristics for interpolating object results, in the case that the classifier returned an object in frame 1 and frame 3, but didn't find it in frame 2.  
 
 In the most trivial case, object interpolation was used as a mechanism for speeding up video processing (running test.cpp).  In this case, the decision tree is occassionally skipped and the motion tracker is used to guess the locations of objects.  This had a very significant impact on speed because our decision tree was several orders of magnitude slower than the motion tracker.
 
 **Optical Flow - Lucas Kanade
-We chose to implement the Lucas Kanade algorithm via the cvCalcOpticalFlowPyrLK method.  The test videos met the three assumptions required by this algorithm[Bradski08]:
+We chose to implement the Lucas Kanade algorithm via the cvCalcOpticalFlowPyrLK method.  The test videos meet the three assumptions required by this algorithm[Bradski08]:
 1. Brightness Constancy.  We assume that in the test videos, lighting will be consistent.
-2. Temporal persistence.  The test videos had steady movement.  Only the camera moved.  The objects in the scene never moved.
+2. Temporal persistence.  The test videos have steady movement.  Only the camera moved.  The objects in the scene never moved.
 3. Spatial coherence
 
-Because the test video fulfilled these three assumptions, we thought the algorithm would perform well.  
+With these three assumptions, the Lucas Kanade algorithm should perform reasonable with the test videos.
 
 *Implementation Details
 
-The core Lucas Kanade was kept in LucasKanade.cpp.  The data structure had two main data structures:
-- LucasKanade: 
-- LKObject: Each LKObject corresponds to a separate "blob" (held in a CObject) being tracked. 
+The core Lucas Kanade is in LucasKanade.cpp.  The data structure has two main data structures:
+- LucasKanade: Holds a group of LKObjects.
+- LKObject: Each LKObject corresponds to a separate "blob" (held in a CObject) being tracked.  This actually contains calls to OpenCV optical flow methods.
 
 Figure X: Relationship between LucasKanade and LKObject
 
-Lucas Kanade was used for simple interpolation in frame skipping.  The following procedure was used for this:
-1. Every time the decision tree was used, it would call LucasKanade.seed().  This would allow the LucasKanade object to "remember" which 
-2. Every time the decision tree was skipped, it would call LucasKanade.interpolate(), which would return a list of CObjects.
+Lucas Kanade is used for simple interpolation in frame skipping.  The classifier.cpp file uses the following procedure:
+1. Every time the decision tree was used, it calls LucasKanade.seed().  This allows the LucasKanade object to "remember" which objects it should track.
+2. Every time the decision tree was skipped, it calls LucasKanade.interpolate(), which returns a list of CObjects.
+
 Converting between CObjects and LucasKanade
 
-LucasKanade is for tracking a set of points, but the output of the classifier was for tracking.  A conversion from a CObject bounding box and a set of points was necessary.  The conversion process was as follows: LucasKanade used the cvFindGoodFeaturesToTrack method to find the good corners to track in a pixel.  Any corners found outside of the CObject's area were discarded.  A new bounding box was then wrapped around the remaining corners, and this became the new CObject.
+LucasKanade is for tracking a set of points, but the decision classifier outputs a set of CObjects.  A conversion from a CObject bounding box and a set of points was necessary.  The conversion process was as follows: LucasKanade uses the cvFindGoodFeaturesToTrack method to find the good corners to track in a pixel.  Any corners found outside of the CObject's area are discarded.  A new bounding box is then wrapped around the remaining corners, and this became the new CObject.
 
-The advantage of this approach is that as objects leave the scene, the corners being tracked naturally disappear (because they pass the border of the image).  The bounding box shrinks naturally as objects leave the scene.
+One advantage of this approach is that as objects leave the scene, the bounding box shrinks naturally because the corners being tracked disappear (because they pass the border of the image). 
 
 We ran a few tests to find optimal Lucas Kanade parameters.  Because of the dependence on the time dimension, we tested these against easy.avi.
 
-1. Varying the number of frames in which Lucas Kanade was used for simple interpolation
+1. Varying the number of frames the decision tree is skipped and the Lucas Kanade interpolation is used instead
 
 [framestoskip.png]
 
-This graph shows the number of times that the decision tree was skipped, with the Lucas Kanade motion tracker used instead to predict movements.  This shows that Lucas Kanade is a reasonable sustitute for the decision tree.  
+This graph shows the number of times that the decision tree was skipped, with the Lucas Kanade motion tracker used instead to predict movements.  This shows that Lucas Kanade is a reasonable sustitute for the decision tree.
 
 2. Varying the number of image pyramids used in Lucas Kanade.  A large number of pyramids is useful when there is large global movement.  
 
@@ -62,7 +64,7 @@ This graph shows the number of times that the decision tree was skipped, with th
 
 The number of pyramids does not impact performance significantly.  This is because the motion in easy.avi is relatively stable.
 
-3. We changed altering the search window size for the optical flow algorithm.  This is the size of the window to search for a point from one frame to the next.  The results were as follows:
+3. Altering the search window size for the optical flow algorithm.  This is the size of the window to search for a point from one frame to the next.  The results were as follows:
 
 [opticalflowwindowsize.png]
 
@@ -73,14 +75,14 @@ For easy.avi, the optimal parameter for the window size was 6.  Anything higher 
 [trackerror.png]
 
 **Kalman Filter
-When visualizing the output from the classifier, we noticed the boxes would jump around erratically when the classifier processed an image independently of any other image.  We attempted to use a Kalman filter to smooth out this erratic movement by using blobtrackpostprockalman.cpp in cvaux.  In this model, the state vector is (x,y,w,h,dx,dy,dw,dh) and the measurement vector is (x,y,w,h).  
+When visualizing the output from the classifier, the CObjects jump around erratically when the classifier processed an image independently of any other image.  The Kalman filter can smooth out this erratic movement.  Our Kalman Filter uses blobtrackpostprockalman.cpp in cvaux.  In this model, the state vector is (x,y,w,h,dx,dy,dw,dh) and the measurement vector is (x,y,w,h).  
 
-The major limitation with the Kalman Filter is that it assumes linear dynamics.  This assumption held only for the parts of the video where the camera was moving at a constant velocity (the model we chose only had a parameter for velocity).  The Kalman Filter improved the F1 results on easy.avi.  In one test (with all variables held constant), the Kalman Filter improved the mug F1 score from to 0.414073 to 0.440678.
+The major limitation with the Kalman Filter is that it assumes linear dynamics.  This assumption held only for the parts of the video where the camera was moving at a constant velocity (the model we chose only had a parameter for velocity).  The Kalman Filter improved the F1 results on easy.avi.  In one test (with all variables held constant), the Kalman Filter improved the mug F1 score from to 0.414073 to 0.440678.  However, when using the Kalman Filter with Lucas Kanade, the results are erratic - sometimes F1 scores increase and sometimes F1 scores decrease.  This is because our Kalman Filter's heuristics to remove false postives (mentioned above) are not compatible with Lucas Kanade interpolation.
 
 *Implementation Details
 
 The Kalman Filter was used in a similar fashion to the Lucas Kanade motion tracker.  The basic data structures were:
-- KalmanFilter.h: This held a set of KFObjects.  The KalmanFilter object had a update and predict function, which would trigger all the update and predict processes for the KFObjects it held.
-- KFObject.h: This tracked an individual blob.  This held the actual Kalman Filter implementation of (update) and (predict)
+- KalmanFilter: This held a set of KFObjects.  The KalmanFilter object had a update and predict function, which would trigger all the update and predict processes for the KFObjects it held.
+- KFObject: This tracked an individual blob.  This held the actual Kalman Filter implementation of (update) and (predict)
 
 Figure X: Relationship between KalmanFilter and KFObject
