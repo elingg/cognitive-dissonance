@@ -772,7 +772,7 @@ We implement a method to resolve the correspondence problem when doing motion
  We developed a simple heuristic for mapping objects from frame 1 to objects
  in frame 2.
  If there is an overlap above a threshold, then we assume they are the same
- obje ct.
+ object.
  For example, if a mug in frame 1 occupies the 50% (the threshold) of the
  same sp ace as a mug in frame 2, then we can assume they are the same object.
  
