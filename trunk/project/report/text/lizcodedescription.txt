@@ -1,0 +1,10 @@
+There are three feature classes in our code base:
+
+HaarFeatures.cpp 
+This class allows us to extract haar features for a given frame.
+
+EdgeDetectionFeatures.cpp
+This class allows us to extract sobel (edge detection) features for a given frame.
+
+Hough.cpp
+This class allows us to extract  hough, canary, and harris (circle, line, edge, and corner) features for a given frame.

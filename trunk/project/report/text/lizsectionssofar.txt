@@ -1,0 +1,227 @@
+Baseline:
+
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             52      1       1       0       0       40
+stapl           0       70      2       0       0       62
+keybo           0       3       45      0       0       44
+clock           0       0       0       6       0       9
+sciss           0       1       2       0       60      42
+other           4       12      4       0       4       15536
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.929   0.553   0.693
+stapl   0.805   0.522   0.633
+keybo   0.833   0.489   0.616
+clock   1.000   0.400   0.571
+sciss   0.938   0.571   0.710
+other   0.987   0.998   0.993
+
+
+
+
+
+We implemented object specific features.
+
+*********Hough Transforms (Circle and Line Detection)	
+
+Hough transforms are features that are used for shape detection in order to do object recognition.  In this case, we focused on circles and lines within images.   Circles were used for detecting clocks and lines were used for detecting all five objects.  Before performing the Hough circle transform, we smoothed the image with a Gaussian.   
+
+We found that circles were a useful feature, allowing us to avoid misclassification and false negatives, most notably in keyboards.  We tried several circle features such as highlighting circles in the image and performing a histogram on the image based on pixel intensity.  We also used the number of circles in the image as a feature, which turned out to be our best feature.  The performance increase using 4 fold cross validation is shown below.
+
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             54      0       2       0       0       38
+stapl           0       69      1       0       0       64
+keybo           0       2       65      0       0       25
+clock           0       0       0       6       0       9
+sciss           0       0       1       0       61      43
+other           3       16      1       0       3       15537
+
+-------------------------------------------------------------
+                Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.947   0.574   0.715
+stapl   0.793   0.515   0.624
+keybo   0.929   0.707   0.802
+clock   1.000   0.400   0.571
+sciss   0.953   0.581   0.722
+other   0.989   0.999   0.994
+
+
+We found that the Hough line features did not increase performance.  This was partially due to background noise in the images as well as the imprecision in the line detection algorithm and the fact that the algorithm produces lines of infinite length (instead of line segments).  Some of the features we considered were the number of lines in the image, as well as highlighting the lines in the image and performing a histogram based on pixel intensity.  Future work would be analyze different line features.
+
+***********Edge Detection
+
+After running Hough transforms, we considered that instead of analyzing the frames for specific shapes, we could use a rough outline of the objects in the image as a feature.  Using the Canny edge detector, we were able to create an outline of the object.  We then converted the outline from grayscale into a black and white image.  The edges of the objects were highlighted in black, with the background in white.  We created a histogram feature with two bins, one containing the white pixels, the other containing black pixels.
+
+We found that this was an effective feature overall, increasing performance for staplers and keyboards.
+
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             52      0       1       0       0       41
+stapl           1       72      0       0       0       61
+keybo           0       3       54      0       1       34
+clock           0       0       0       6       0       9
+sciss           0       0       1       0       60      44
+other           3       10      1       0       5       15541
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.929   0.553   0.693
+stapl   0.847   0.537   0.658
+keybo   0.947   0.587   0.725
+clock   1.000   0.400   0.571
+sciss   0.909   0.571   0.702
+other   0.988   0.999   0.993
+
+
+*************Corner features *********
+
+We used the Harris Corner Detection algorithm in the cvFindGoodFeatures function to detect the number of corners on an object.  This was used as a feature, and increased performance for staplers, scissors, and keyboards, most significantly for keyboards.  
+
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             53      1       0       0       0       40
+stapl           1       74      0       0       0       59
+keybo           0       0       69      0       0       23
+clock           0       0       0       6       0       9
+sciss           0       1       5       0       63      36
+other           5       17      2       0       2       15534
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.898   0.564   0.693
+stapl   0.796   0.552   0.652
+keybo   0.908   0.750   0.821
+clock   1.000   0.400   0.571
+sciss   0.969   0.600   0.741
+other   0.989   0.998   0.994
+
+
+
+*************Histogram of Oriented Gradients Approach *********
+
+We used a histogram feature on the gray scale image, using a histogram of oriented gradients as the theoretical foundation.    HOG involves three stages, gradient computation, orientation binning, and block normalization.
+
+First, we implemented stage one, by computing the gradient of the image, using a sobel operator.  Then we implemented stage two, orientation binding, by creating the histogram of the object based on the image intensity values.  Finally, we implemented stage three, by normalizing the histogram.
+
+After some experimentation, we found that the feature worked best on the original gray scale image, without using the sobel operatior.  With the sobel operator, we did not achieve a significant performance increase.   Further work would include using different operators to compute the gradient of the image.
+
+Here are the results with histogram normalization and 80 bins (without the sobel operator).  We found that we got the same results with or without histogram normalization.
+
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             60      1       1       0       1       31
+stapl           2       89      3       0       1       39
+keybo           0       4       65      0       1       22
+clock           0       2       0       6       0       7
+sciss           1       3       2       0       75      24
+other           0       2       1       0       0       15557
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.952   0.638   0.764
+stapl   0.881   0.664   0.757
+keybo   0.903   0.707   0.793
+clock   1.000   0.400   0.571
+sciss   0.962   0.714   0.820
+other   0.992   1.000   0.996
+
+
+
+with 32 bins:
+
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             58      0       2       0       2       32
+stapl           2       85      2       0       2       43
+keybo           0       5       63      0       0       24
+clock           1       1       0       6       0       7
+sciss           0       1       2       0       74      28
+other           0       3       0       0       0       15557
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.951   0.617   0.748
+stapl   0.895   0.634   0.742
+keybo   0.913   0.685   0.783
+clock   1.000   0.400   0.571
+sciss   0.949   0.705   0.809
+other   0.991   1.000   0.996
+
+
+with 64 bins:
+
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             62      0       2       0       1       29
+stapl           2       84      2       0       1       45
+keybo           0       5       62      0       1       24
+clock           1       2       0       5       0       7
+sciss           0       2       2       0       74      27
+other           0       2       0       0       0       15558
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.954   0.660   0.780
+stapl   0.884   0.627   0.734
+keybo   0.912   0.674   0.775
+clock   1.000   0.333   0.500
+sciss   0.961   0.705   0.813
+other   0.992   1.000   0.996
+
+
+with 100 bins:
+
+-------------------------------------------------------------
+Confusion Matrix: Predicted labels ->
+-------------------------------------------------------------
+                mug     stapl   keybo   clock   sciss   other   
+-------------------------------------------------------------
+mug             60      0       1       0       0       33
+stapl           1       89      3       0       1       40
+keybo           1       1       64      0       2       24
+clock           1       1       0       7       0       6
+sciss           0       1       3       0       77      24
+other           1       3       0       0       1       15555
+
+-------------------------------------------------------------
+        Prec    Recall  F-1
+-------------------------------------------------------------
+mug     0.938   0.638   0.759
+stapl   0.937   0.664   0.777
+keybo   0.901   0.696   0.785
+clock   1.000   0.467   0.636
+sciss   0.951   0.733   0.828
+other   0.992   1.000   0.996
+
+
+
+
+
