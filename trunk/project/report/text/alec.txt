@@ -1,3 +1,11 @@
+**Description of code
+MotionTracker.cpp: This class is a master class that controls which motion tracker will be used (Lucas Kanade or Kalman Filter)
+
+LucasKanade.cpp: This class contains code for Lucas Kanade interpolation and post processing step
+
+KalmanFilter.cpp: This class contains code for the Kalman Filter post processing step
+
+
 **Motion Tracking
 
 We recognized that using information between frames could also improve our accuracy. We tried using a Kalman Filter and a Lucas Kanade filter.  The motion tracker can track several "blobs" at a time.  Each blob is a unique object, like a mug.  Both these implementations shared common problems and solutions.
