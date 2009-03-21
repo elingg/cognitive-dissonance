@@ -3838,7 +3838,7 @@ other
 
 \end_inset
 
-
+ 
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
 <features>
@@ -4424,7 +4424,7 @@ Corner Detection features
 placement H
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -4959,7 +4959,7 @@ other
 
 \end_inset
 
-
+ 
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
 <features>
