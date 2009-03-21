@@ -77,8 +77,6 @@ When visualizing the output from the classifier, we noticed the boxes would jump
 
 The major limitation with the Kalman Filter is that it assumes linear dynamics.  This assumption held only for the parts of the video where the camera was moving at a constant velocity (the model we chose only had a parameter for velocity).  The Kalman Filter improved the F1 results on easy.avi.  In one test (with all variables held constant), the Kalman Filter improved the mug F1 score from to 0.414073 to 0.440678.
 
-With the Lucas Kanade interpolation turned on, there was no difference with the Kalman Filter turned on or off.  In one test with Lucas Kanade interpolation turned on, the overall F1 score between having the Kalman Filter turned off and the Kalman Filter turned on was exactly the same (0.270478).  This is because the optical flow algorithm is already relatively smooth, so the Kalman Filter offers no improvement (especially since evaluate.cpp is based on a 60% overlap measure).
-
 *Implementation Details
 
 The Kalman Filter was used in a similar fashion to the Lucas Kanade motion tracker.  The basic data structures were:
