@@ -70,7 +70,7 @@ For the most part, our code is organized such that if there is a class,
  by that name.
  In cases where it is not, the class may have been combined into a single
  file and in such cases, we explicitly mention the file locations.
- We organize the descriptions based on various functionalities.
+ The descriptions were organized based on various functionalities.
  
 \end_layout
 
@@ -130,8 +130,8 @@ Class diagram for our multi-class classifier
 \end_layout
 
 \begin_layout Standard
-Our classifier code uses a bit of object oriented mechanisms to enable quick
- testing with different implementations.
+Our classifier code uses a bit of object hierarchy and interface mechanisms
+ to enable quick testing with different implementations.
  This is described below:
 \end_layout
 
@@ -306,7 +306,232 @@ Motion tracking
 \end_layout
 
 \begin_layout Standard
-TODO (Alec to fill in)
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/lkdiagram.png
+	lyxscale 30
+	scale 55
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 13em
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/kfobject.png
+	lyxscale 30
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LKObjectRelation"
+
+\end_inset
+
+Relationship between 
+\emph on
+LucasKanade
+\emph default
+ and 
+\emph on
+LKObject
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 5em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:KalmanKFObjectRelation"
+
+\end_inset
+
+Relationship between 
+\emph on
+KalmanFilter
+\emph default
+ and 
+\emph on
+KFObject
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+MotionTracker.cpp: This class is a master class that controls which motion
+ tracker will be used (Lucas Kanade or Kalman Filter)
+\end_layout
+
+\begin_layout Description
+LucasKanade.cpp: This class contains code for Lucas Kanade interpolation
+ and post processing step.
+ The core Lucas Kanade implementation is in LucasKanade.cpp.
+ The data structure has two main data structures: 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+LucasKanade
+\emph default
+: Holds a group of 
+\emph on
+LKObjects
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+LKObject
+\emph default
+: Each 
+\emph on
+LKObject
+\emph default
+ corresponds to a separate "blob" (held in a CObject) being tracked.
+ This actually contains calls to OpenCV optical flow methods.
+ This relationship is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LKObjectRelation"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+KalmanFilter.cpp: This class contains code for the Kalman Filter post processing
+ step.
+ The Kalman Filter is used in a similar fashion to the Lucas Kanade motion
+ tracker.
+ The basic data structures are 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+KalmanFilter
+\emph default
+: This holds a set of 
+\emph on
+KFObjects
+\emph default
+.
+ The 
+\emph on
+KalmanFilter
+\emph default
+ object has a update and predict function, which would trigger all the update
+ and predict processes for the 
+\emph on
+KFObjects
+\emph default
+ it held.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+KFObject
+\emph default
+: This tracked an individual blob.
+ This held the actual Kalman Filter implementation of (update) and (predict).
+ This relationship to is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:KalmanKFObjectRelation"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -325,13 +550,13 @@ reference "sub:k-Fold-cross-validation"
  This can be built using `make tune'.
 \end_layout
 
-\begin_layout Standard
-
-\emph on
+\begin_layout Description
 tune.cpp
+\emph on
+:
 \emph default
-: Main code for doing k-fold cross validation (described in more detail
- in Section 
+ Main code for doing k-fold cross validation (described in more detail in
+ Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:k-Fold-cross-validation"
@@ -346,12 +571,12 @@ CClassifier
  code.
 \end_layout
 
-\begin_layout Standard
-
-\emph on
+\begin_layout Description
 Stats.h
+\emph on
+:
 \emph default
-: Utility class for storing and computing statistics of precision, recall
+ Utility class for storing and computing statistics of precision, recall
  and F1 scores.
 \end_layout
 
@@ -456,7 +681,7 @@ BoostedClassifier
 ).
  This class uses exponential weighting of falsely predicted examples and
  the weights are passed along to the nodes in a simple decision tree classifier.
- The tolerance is picked based on the average feature values encountered.
+ The tolerance is determined based on the average feature values encountered.
  We present results of using our classifier in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -480,52 +705,114 @@ Histogram of gradients based features
 \end_layout
 
 \begin_layout Standard
-TODO (Liz to fill in)
+We implement a histogram feature on each patch, with HOG as the theoretical
+ foundation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "citeulike:335784"
+
+\end_inset
+
+.
+ We describe this in more detail in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Histogram-of-Oriented"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
-Kalman Filter 
+Motion Tracking 
 \end_layout
 
 \begin_layout Standard
-TODO (Alec to fill in)
+We recognize that using information between frames could also improve our
+ accuracy.
+ We have a Kalman Filter and a Lucas Kanade filter.
+ The motion tracker can track several "blobs" at a time.
+ Each blob is a unique object, like a mug.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+False Positives
 \end_layout
 
 \begin_layout Standard
-We chose to implement the Kalman Filter to help reduce the noise of our
- image recognition algorithm.
- The algorithm has two primary steps: - Update - Predict
+The motion tracker can decrease precision if there are many false positives
+ returned by the classifier.
+ This is because the motion tracker might continue to track a false positive,
+ even if the classifier stopped returning that specific false positive.
+ Coalescing (mentioned in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Coalescing-overlaping-rectangles"
+
+\end_inset
+
+) helps clear false positives, which in turn helps the motion tracker.
+ Another simple heuristic we use is to "count" the number of times the classifie
+r returns a specific blob between frames.
+ If the motion tracker stops seeing a blob returned by a classifier over
+ a series of frames, then it discards it.
+\end_layout
+
+\begin_layout Subsubsection
+A Correspondence Problem Between Frames
 \end_layout
 
 \begin_layout Standard
-The major limitation with the Kalman Filter is that it assumes: 
+We implement a method to resolve the correspondence problem when doing motion
+ tracking.
+ For example, the classifier may detect 3 objects in frame 1, and 4 objects
+ in frame 2.
+ We developed a simple heuristic for mapping objects from frame 1 to objects
+ in frame 2.
+ If there is an overlap above a threshold, then we assume they are the same
+ obje ct.
+ For example, if a mug in frame 1 occupies the 50% (the threshold) of the
+ same sp ace as a mug in frame 2, then we can assume they are the same object.
+ 
 \end_layout
 
-\begin_layout Enumerate
-linear dynamics 
+\begin_layout Subsubsection
+Object Interpolation
 \end_layout
 
-\begin_layout Enumerate
-the current state depends on the immediate past state (and not all past
- states).
+\begin_layout Standard
+We have heuristics for interpolating object results, in the case that the
+ classifier returned an object in frame 1 and frame 3, but didn't find it
+ in frame 2.
  
 \end_layout
 
 \begin_layout Standard
-Thus, it was very important to choose the correct blob to track.
+In the most trivial case, object interpolation was used as a mechanism for
+ speeding u p video processing (running test.cpp).
+ In this case, the decision tree is occassiona lly skipped and the motion
+ tracker is used to guess the locations of objects.
+ This h ad a very significant impact on speed because our decision tree
+ was several orders of magnitude slower than the motion tracker.
+ 
 \end_layout
 
 \begin_layout Subsection
-Lucas Kanade
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Optical-Flow--"
+
+\end_inset
+
+Optical Flow - Lucas Kanade 
 \end_layout
 
 \begin_layout Standard
-TODO (Alec to fill in)
-\end_layout
-
-\begin_layout Standard
-We chose to implement the Lucas Kanade algorithm.
- The test videos met the three assumptions required by this algorithm 
+We chose to implement the Lucas Kanade algorithm via the cvCalcOpticalFlowPyrLK
+ method.
+ The test videos meet the three assumptions required by this algorithm 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "OpenCVBook"
@@ -543,36 +830,76 @@ Brightness Constancy.
 
 \begin_layout Enumerate
 Temporal persistence.
- The test videos had steady movement.
+ The test videos have steady movement.
  Only the camera moved.
  The objects in the scene never moved.
  
 \end_layout
 
 \begin_layout Enumerate
-Spatial coherence
+Spatial coherence 
 \end_layout
 
 \begin_layout Standard
-Because the test video fulfilled these three assumptions, we thought the
- algorithm would perform well.
+With these three assumptions, the Lucas Kanade algorithm should perform
+ reasonably well with the test videos.
+\end_layout
+
+\begin_layout Subsubsection
+Implementation Details
 \end_layout
 
 \begin_layout Standard
-Talk about how you need to consider objects entering frame.
- Kalman filter doesn't have this problem.
- Discuss using the mean of the points - wasn't a good idea because it would
- skew towards many points.
- Talk about bounding box.
- False positives kill optical flow algorithm.
+Lucas Kanade is used for simple interpolation in frame skipping.
+ The classifier.cpp file uses the following procedure: 
 \end_layout
 
-\begin_layout Subsection
-Lucas Kanade based interpolation
+\begin_layout Enumerate
+Every time the decision tree is used, it calls LucasKanade.seed().
+ This allows the LucasKanade object to "remember" which objects it should
+ track.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Every time the decision tree is skipped, it calls LucasKanade.interpolate(),
+ which returns a list of CObjects.
 \end_layout
 
 \begin_layout Standard
-TODO (Alec to fill in)
+LucasKanade is for tracking a set of points, but the decision classifier
+ outputs a set of CObjects.
+ A conversion from a CObject bounding box and a set of points is thus necessary.
+ The conversion process works as follows: LucasKanade uses the cvFindGoodFeature
+sToTrack method to find the good corners to track in a pixel.
+ Any corners found outside of the CObject's area are discarded.
+ A new bounding box is then wrapped around the remaining corners, and this
+ becomes the new CObject.
+\end_layout
+
+\begin_layout Standard
+One advantage of this approach is that as objects leave the scene, the bounding
+ box shrinks naturally because the corners being tracked disappear (because
+ they pass the border of the image).
+ 
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Coalescing-overlaping-rectangles"
+
+\end_inset
+
+Coalescing overlaping rectangles
+\end_layout
+
+\begin_layout Standard
+We implement coalescing of overlapping rectangles that have the same labels.
+ This is done by looking at the overlap and permitting two rectangles with
+ a certain threshold of overlap to be merged.
+ The rectangles are successively merged until no rectangles can be merged
+ any more.
 \end_layout
 
 \begin_layout Section
@@ -580,11 +907,15 @@ Assumptions
 \end_layout
 
 \begin_layout Standard
-TODO Not sure what we assumed here: listing hypotheticals: We assumed that
- the video does not change too rapidly.
- We assume that input trained images were all in grayscale.
- This was however also verified to be true.
- 
+As mentioned in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Optical-Flow--"
+
+\end_inset
+
+, we assume the videos have brightness constancy, temporal persistence and
+ spatial coherence for optical flow to work.
 \end_layout
 
 \begin_layout Section
@@ -592,7 +923,7 @@ Experimental results
 \end_layout
 
 \begin_layout Standard
-We ran a number of experiments on each of our extensions.
+We perform a number of experiments on each of our extensions.
  We present the results of our various experiments below.
 \end_layout
 
@@ -1037,10 +1368,9 @@ Baseline classifier: Time taken with increasing number of training examples
 \end_layout
 
 \begin_layout Standard
-We perform a basic analysis of the effect of the number of examples on the
+We perform a basic analysis on the effect of the number of examples on the
  test error.
- We hope that this gives us insights into how many examples we should use
- for our development.
+ This gives us insights into how many examples we should use for our development.
  Here we notice that our curves follow the typical training and testing
  error curves, with gradually increasing training errors an decreasing test
  error.
@@ -3256,22 +3586,22 @@ Comparison of precision, recall and F1 scores with and without hough circle
 
 Hough transforms are features that are used for shape detection in order
  to do object recognition.
- In this case, we focused on circles and lines within images.
- Circles were used for detecting clocks and lines were used for detecting
+ In this case, we focus on circles and lines within images.
+ Circles are used for detecting clocks and lines are used for detecting
  all five objects.
- Before performing the Hough circle transform, we smoothed the image with
+ Before performing the Hough circle transform, we smooth the image with
  a Gaussian.
  
 \end_layout
 
 \begin_layout Standard
-We found that circles were a useful feature, allowing us to avoid misclassificat
-ion and false negatives, most notably in keyboards.
- We tried several circle features such as highlighting circles in the image
- and performing a histogram on the image based on pixel intensity.
- We also used the number of circles in the image as a feature, which turned
- out to be our best feature.
- The performance increase using 4 fold cross validation is shown in Table
+We find that circles are a useful feature, allowing us to avoid misclassificatio
+n and false negatives, most notably for keyboards.
+ We try several circle features such as highlighting circles in the image
+ and perform a histogram on the image based on pixel intensity.
+ We also use the number of circles in the image as a feature.
+ This turns out to be our best feature.
+ The performance improvement using 4 fold cross validation is shown in Table
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -3283,13 +3613,13 @@ reference "tab:EffectofHough"
 \end_layout
 
 \begin_layout Standard
-We found that the Hough line features did not increase performance.
- This was partially due to background noise in the images as well as the
+We find that the Hough line features do not improve performance.
+ This is partially due to background noise in the images as well as the
  imprecision in the line detection algorithm and the fact that the algorithm
  produces lines of infinite length (instead of line segments).
- Some of the features we considered were the number of lines in the image,
- as well as highlighting the lines in the image and performing a histogram
- based on pixel intensity.
+ Some of the features we have considered are the number of lines in the
+ image, as well as highlighting the lines in the image and performing a
+ histogram based on pixel intensity.
  Future work would be to analyze different line features.
  
 \end_layout
@@ -4390,20 +4720,20 @@ Comparison of precision, recall and F1 scores with and without edge detection.
 
 \end_inset
 
-After running Hough transforms, we considered that instead of analyzing
- the frames for specific shapes, we could use a rough outline of the objects
- in the image as a feature.
- Using the Canny edge detector, we were able to create an outline of the
+After running Hough transforms, we consider that instead of analyzing the
+ frames for specific shapes, we can use a rough outline of the objects in
+ the image as a feature.
+ Using the Canny edge detector, we are able to create an outline of the
  object.
- We then converted the outline from grayscale into a black and white image.
- The edges of the objects were highlighted in black, with the background
+ We then convert the outline from grayscale into a black and white image.
+ The edges of the objects are highlighted in black, with the background
  in white.
- We created a histogram feature with two bins, one containing the white
- pixels, the other containing black pixels.
+ We create a histogram feature with two bins, one containing the white pixels,
+ the other containing black pixels.
 \end_layout
 
 \begin_layout Standard
-We found that this was an effective feature overall, increasing performance
+We find that this was an effective feature overall, improving performance
  for staplers and keyboards (see Table 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -4411,8 +4741,7 @@ reference "tab:EffectofEdge"
 
 \end_inset
 
-.
- 
+).
 \end_layout
 
 \begin_layout Subsubsection
@@ -4424,7 +4753,7 @@ Corner Detection features
 placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -5378,12 +5707,16 @@ Comparison of precision, recall and F1 scores with and without corner detection.
 
 We guess that our classification of keyboards could benefit from using corner
  detection algorithms, since there are many corners on the keyboard.
- We used the Harris Corner Detection algorithm in the cvFindGoodFeatures
+ We use the Harris Corner Detection algorithm in the cvFindGoodFeatures
  function to detect the number of corners on an object.
- The number of corners as such, were used as a feature, and increased performanc
-e for staplers and scissors.
- Most notably however, we found a large performance improvement for keyboards,
- confirming our initial hypothesis.
+ The number of corners as such, are used as a feature, and improve the performan
+ce for staplers and scissors.
+ Most notably we find a large performance improvement for keyboards, confirming
+ our initial hypothesis.
+ In addition, it is interesting to note that mugs and clocks do not see
+ improvements.
+ This is due to the fact that these objects are curved and do not in have
+ corners.
  The results are shown in Table 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -5395,6 +5728,12 @@ reference "tab:EffectofCorner"
 \end_layout
 
 \begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Histogram-of-Oriented"
+
+\end_inset
+
 Histogram of Oriented Gradients (HOG)
 \end_layout
 
@@ -5938,7 +6277,7 @@ other
 
 \end_inset
 
-
+ 
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
 <features>
@@ -6355,24 +6694,24 @@ Comparison of precision, recall and F1 scores with and without HOG.
 
 \end_inset
 
-We used a histogram feature on the gray scale image, using a histogram of
- oriented gradients as the theoretical foundation.
+We use a histogram feature on the gray scale image, with HOG as the theoretical
+ foundation.
  HOG involves three stages, gradient computation, orientation binning, and
  block normalization.
 \end_layout
 
 \begin_layout Standard
-First, we implemented stage one, by computing the gradient of the image,
- using a sobel operator.
- Then we implemented stage two, orientation binding, by creating the histogram
+First, we implement stage one, by computing the gradient of the image, using
+ a sobel operator.
+ Then we implement stage two, orientation binding, by creating the histogram
  of the object based on the image intensity values.
- Finally, we implemented stage three, by normalizing the histogram.
+ Finally, we implement stage three, by normalizing the histogram.
 \end_layout
 
 \begin_layout Standard
-After some experimentation, we found that the feature worked best on the
- original gray scale image, without using the sobel operatior.
- With the sobel operator, we did not achieve a significant performance increase.
+After some experimentation, we find that the feature works best on the original
+ gray scale image, without using the sobel operatior.
+ With the sobel operator, we do not achieve a significant performance increase.
  Further work would include using different operators to compute the gradient
  of the image.
 \end_layout
@@ -6385,8 +6724,8 @@ reference "tab:EffectofHOG"
 
 \end_inset
 
- is with histogram normalization and 80 bins (without the sobel operator).
- We found that we got the same results with or without histogram normalization.
+ are with histogram normalization and 80 bins (without the sobel operator).
+ We find that we got the same results with or without histogram normalization.
  Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -6394,9 +6733,9 @@ reference "fig:BinsOnF1Scores"
 
 \end_inset
 
- shows the effect of number of bins on the F1 scores and we notice that
- scores improve progressively for clocks with higher bin sizes, while not
- playing a role in the others.
+ shows the effect of number of bins on the F1 scores.
+ We notice that scores improve progressively for clocks with higher bin
+ sizes, while not playing a significant role in the others.
 \end_layout
 
 \begin_layout Standard
@@ -6526,7 +6865,7 @@ Ovlerap ratio 0.8
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.27673
+0.0438409
 \end_layout
 
 \end_inset
@@ -6614,7 +6953,378 @@ reference "tab:EffectofCoalescing"
 \end_layout
 
 \begin_layout Subsection
-Ablative studies on various motion tracking parameters
+Motion tracking experiments
+\end_layout
+
+\begin_layout Subsubsection
+Effect of Lucas Kanade parameters
+\end_layout
+
+\begin_layout Standard
+We perform a few tests to find optimal Lucas Kanade parameters.
+ Because of the dependence on the time dimension, we test these against
+ easy.avi.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/framestoskip.png
+	lyxscale 30
+	scale 49
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 4em
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/numberofpyramids.png
+	lyxscale 30
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LKDecTreeSkipped"
+
+\end_inset
+
+Effect of number of frames skipped
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 6em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LKPyramids"
+
+\end_inset
+
+Effect of pyramid size
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Effect of number of frames skipped: 
+\end_layout
+
+\begin_layout Standard
+Varying the number of frames the decision tree is skipped and the Lucas
+ Kanade interpolation is used instead.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LKDecTreeSkipped"
+
+\end_inset
+
+ shows the number of times that the decision tree was skipped, with the
+ Lucas Kanade motion tracker used instead to predict movements.
+ This shows that Lucas Kanade is a reasonable sustitute for the decision
+ tree.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Effect of number of pyramid size:
+\end_layout
+
+\begin_layout Standard
+Varying the number of image pyramids used in Lucas Kanade.
+ A large number of pyramids is useful when there is large global movement
+ (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LKPyramids"
+
+\end_inset
+
+).
+ The number of pyramids does not impact performance significantly.
+ This is because the motion in easy.avi is relatively stable.
+ Our Lucas Kanade in the final submission uses 5 pyramids.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Effect of optimal search window size:
+\end_layout
+
+\begin_layout Standard
+Altering the search window size for the optical flow algorithm.
+ This is the size of the window to search for a point from one frame to
+ the next.
+ The results are shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LKOptiSearchWin"
+
+\end_inset
+
+.
+ For easy.avi, the optimal parameter for the window size was 6.
+ Anything higher would require could potentially waste CPU cycles.
+ Our Lucas Kanade motion tracker uses a window size of 10.
+\end_layout
+
+\begin_layout Subsubsection*
+Effect of the track error thresholding:
+\end_layout
+
+\begin_layout Standard
+In the optical flow algorithm, we discard corners whose "track error" is
+ too large.
+ The track error is the difference between a patch around a tracked point
+ between two frames.
+ If there is a track error above a certain threshold, Lucas Kanade discards
+ the point.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LKTrackErrorThresholding"
+
+\end_inset
+
+ shows how track error affects F1 performance.
+ Our Lucas Kanade motion tracker uses a track error threshold of 300.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/opticalflowwindowsize.png
+	lyxscale 30
+	scale 50
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 4em
+\end_inset
+
+
+\begin_inset Graphics
+	filename /Users/anand/Desktop/School/Courses/CS221/cognitive-dissonance/project/report/motion/trackerror.png
+	lyxscale 30
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LKOptiSearchWin"
+
+\end_inset
+
+Effect of the optical search window size
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 6em
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "40col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LKTrackErrorThresholding"
+
+\end_inset
+
+Effect of the track error thresholding
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Kalman Filter 
+\end_layout
+
+\begin_layout Standard
+When visualizing the output from the classifier, the CObjects jump around
+ erratically when the classifier processed an image independently of any
+ other image.
+ The Kalman filter can smooth out this erratic movement.
+ Our Kalman Filter uses blobtrackpostpr ockalman.cpp in cvaux.
+ In this model, the state vector is (x,y,w,h,dx,dy,dw,dh) and the measurement
+ vector is (x,y,w,h).
+ 
+\end_layout
+
+\begin_layout Standard
+The major limitation with the Kalman Filter is that it assumes linear dynamics.
+ This assumption held only for the parts of the video where the camera was
+ moving at a con stant velocity (the model we chose only had a parameter
+ for velocity).
+ The Kalman Fi lter improved the F1 results on easy.avi.
+ In one test (with all variables held const ant), the Kalman Filter improved
+ the mug F1 score from to 0.414073 to 0.440678.
+ However, when using the Kalman Filter with Lucas Kanade, the results are
+ erratic - sometimes F1 scores increase and sometimes F1 scores decrease.
+ This is because our Kalman Filter's heuristics to remove false postives
+ (mentioned above) are not compatible with Lucas Kanade interpolation.
 \end_layout
 
 \begin_layout Section
@@ -6622,22 +7332,22 @@ Note on efficiencies and speedups
 \end_layout
 
 \begin_layout Standard
-We used the following to obtain efficiencies during our development process,
+We use the following to obtain efficiencies during our development process,
  as well as to obtain efficiencies during the final classification:
 \end_layout
 
 \begin_layout Itemize
-We used integers as labels, instead of strings to save time on map indexing
+We use integers as labels, instead of strings to save time on map indexing
  using the labels in many places in the code.
 \end_layout
 
 \begin_layout Itemize
-We used our 'tune' utility to whet our features on the static images using
+We use our 'tune' utility to whet our features on the static images using
  4-fold cross validation before using it on the movies.
 \end_layout
 
 \begin_layout Itemize
-We used Lucas Kanade based interpolation techniques to predict the rectangles
+We use Lucas Kanade based interpolation techniques to predict the rectangles
  in skipped frames to speeden up the testing on movies.
 \end_layout
 
