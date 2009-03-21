@@ -933,7 +933,7 @@ Baseline classifier
 
 \begin_layout Standard
 We perform basic analysis of the CvBoost decision tree.
- We use CvBoost::GENTLE type with a fixed split criteria of 0.5.
+ We use CvBoost::GENTLE type with a fixed split criteria of 0.95.
  We use our k-fold cross validation tool to tweak the size of the trees
  used, as well as the depth of the trees used.
  We also use our tool to arrive at a 'bang for the buck' set of parameters,
